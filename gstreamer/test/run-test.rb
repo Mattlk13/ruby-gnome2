@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (C) 2014-2015  Ruby-GNOME2 Project Team
+# Copyright (C) 2014-2021  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -16,44 +16,23 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-ruby_gnome2_base = File.join(File.dirname(__FILE__), "..", "..")
-ruby_gnome2_base = File.expand_path(ruby_gnome2_base)
+require_relative "../../glib2/test/run-test"
 
-glib_base = File.join(ruby_gnome2_base, "glib2")
-gobject_introspection_base = File.join(ruby_gnome2_base, "gobject-introspection")
-gstreamer_base = File.join(ruby_gnome2_base, "gstreamer")
+run_test(__dir__,
+         [
+           "glib2",
+           "gobject-introspection",
+           "gstreamer",
+         ]) do
+  require_relative "gstreamer-test-utils"
 
-modules = [
-  [glib_base, "glib2"],
-  [gobject_introspection_base, "gobject-introspection"],
-  [gstreamer_base, "gstreamer"],
-]
-
-modules.each do |target, module_name|
-  makefile = File.join(target, "Makefile")
-  if File.exist?(makefile) and system("which make > /dev/null")
-    `make -C #{target.dump} > /dev/null` or exit(false)
+  repository = GObjectIntrospection::Repository.default
+  begin
+    repository.require(Gst::Loader::NAMESPACE)
+  rescue GObjectIntrospection::RepositoryError
+    puts("Omit because typelib file doesn't exist: #{$!.message}")
+    exit(true)
   end
-  $LOAD_PATH.unshift(File.join(target, "ext", module_name))
-  $LOAD_PATH.unshift(File.join(target, "lib"))
+
+  Gst.init
 end
-
-$LOAD_PATH.unshift(File.join(glib_base, "test"))
-require "glib-test-init"
-
-$LOAD_PATH.unshift(File.join(gstreamer_base, "test"))
-require "gstreamer-test-utils"
-
-require "gst"
-
-repository = GObjectIntrospection::Repository.default
-begin
-  repository.require(Gst::Loader::NAMESPACE)
-rescue GObjectIntrospection::RepositoryError
-  puts("Omit because typelib file doesn't exist: #{$!.message}")
-  exit(true)
-end
-
-Gst.init
-
-exit Test::Unit::AutoRunner.run(true, File.join(gstreamer_base, "test"))

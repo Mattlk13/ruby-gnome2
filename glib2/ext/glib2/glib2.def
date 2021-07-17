@@ -45,6 +45,7 @@ EXPORTS
 	rbgobj_lookup_class
 	rbgobj_lookup_class_by_gtype
 	rbgobj_gtype_to_ruby_class
+	rbgobj_gtype_from_ruby
 	rbgobj_ptr2cptr
 	rbgobj_ptr_new
 	rbgobj_make_enum
@@ -106,6 +107,8 @@ EXPORTS
         rbg_rval2strv_accept_nil
         rbg_rval2strv_dup
         rbg_rval2strv_dup_accept_nil
+        rbg_rval2filenamev
+        rbg_rval2filenamev_accept_nil
         rbg_strv2rval
         rbg_strv2rval_free
         rbg_rval2gbooleans
@@ -155,6 +158,7 @@ EXPORTS
 	rbgutil_stop_callback_dispatch_thread
 	rbgutil_string_set_utf8_encoding
 	rbgutil_key_equal
+	rbgerr_ruby_error_quark
 	rbgerr_define_gerror
 	rbgerr_gerror2exception
 	rbgobj_convert_define
@@ -171,7 +175,9 @@ EXPORTS
 	rbg_gc_guard
 	rbg_gc_unguard
 
-	g_source_get_type
+	rbg_is_bytes
+	rbg_is_object
+	rbg_is_value
+
 	g_connect_flags_get_type
-	g_poll_fd_get_type
 	g_signal_flags_get_type

@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2011-2021  Ruby-GNOME Project Team
  *  Copyright (C) 2002,2003  Masahiro Sakai
  *
  *  This library is free software; you can redistribute it and/or
@@ -22,12 +22,20 @@
 #include "rbgprivate.h"
 
 /**********************************************************************/
-#define RG_TARGET_NAMESPACE rbgobj_cValue
+static VALUE rb_cGLibValue;
+
+#define RG_TARGET_NAMESPACE rb_cGLibValue
 #define _SELF(self) RVAL2GVALUE(self)
 
 static ID id_to_s;
 static GQuark qRValueToGValueFunc;
 static GQuark qGValueToRValueFunc;
+
+gboolean
+rbg_is_value(VALUE object)
+{
+    return RVAL2CBOOL(rb_obj_is_kind_of(object, RG_TARGET_NAMESPACE));
+}
 
 void
 rbgobj_register_r2g_func(GType gtype, RValueToGValueFunc func)
@@ -61,7 +69,7 @@ rbgobj_gvalue_to_rvalue(const GValue* value)
       case G_TYPE_NONE:
         return Qnil;
       case G_TYPE_CHAR:
-        return CHR2FIX(g_value_get_char(value));
+        return CHR2FIX(g_value_get_schar(value));
       case G_TYPE_UCHAR:
         return INT2FIX(g_value_get_uchar(value));
       case G_TYPE_BOOLEAN:
@@ -122,14 +130,12 @@ rbgobj_gvalue_to_rvalue(const GValue* value)
                 return func(value);
             }
         }
-#if GLIB_CHECK_VERSION(2, 26, 0)
       case G_TYPE_VARIANT:
         {
             GVariant *variant = g_value_peek_pointer(value);
             rvalue = rbg_variant_to_ruby(variant);
             return rvalue;
         }
-#endif
       default:
         if (!rbgobj_convert_gvalue2rvalue(fundamental_type, value, &rvalue)) {
             GValueToRValueFunc func;
@@ -240,7 +246,7 @@ rbgobj_rvalue_to_gvalue(VALUE val, GValue* result)
       case G_TYPE_NONE:
         return;
       case G_TYPE_CHAR:
-        g_value_set_char(result, NUM2INT(val));
+        g_value_set_schar(result, NUM2INT(val));
         return;
       case G_TYPE_UCHAR:
         g_value_set_uchar(result, NUM2UINT(val));
@@ -310,11 +316,9 @@ rbgobj_rvalue_to_gvalue(VALUE val, GValue* result)
                 return;
             }
         }
-#if GLIB_CHECK_VERSION(2, 26, 0)
       case G_TYPE_VARIANT:
         g_value_set_variant(result, rbg_variant_from_ruby(val));
         break;
-#endif
       default:
         if (!rbgobj_convert_rvalue2gvalue(fundamental_type, val, result)) {
             RValueToGValueFunc func =
@@ -395,8 +399,6 @@ rg_to_s(VALUE self)
 void
 Init_gobject_gvalue(void)
 {
-    VALUE RG_TARGET_NAMESPACE;
-
     id_to_s = rb_intern("to_s");
     qRValueToGValueFunc = g_quark_from_static_string("__ruby_r2g_func__");
     qGValueToRValueFunc = g_quark_from_static_string("__ruby_g2r_func__");

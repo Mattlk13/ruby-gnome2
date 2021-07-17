@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2011-2021  Ruby-GNOME Project Team
  *  Copyright (C) 2006  Masao Mutoh
  *
  *  This library is free software; you can redistribute it and/or
@@ -20,34 +20,6 @@
  */
 
 #include "rbgprivate.h"
-
-#if !GLIB_CHECK_VERSION(2,31,2)
-/************************************************/
-static GKeyFile*
-keyfile_copy(const GKeyFile* keyfile)
-{
-//  GKeyFile* new_keyfile;
-  g_return_val_if_fail (keyfile != NULL, NULL);
-/*
-  new_keyfile = g_key_file_new();
-  *new_keyfile = (GKeyFile*)*keyfile;
-  return new_keyfile;
-*/
-  return (GKeyFile*)keyfile;
-}
-
-GType
-g_key_file_get_type(void)
-{
-  static GType our_type = 0;
-  if (our_type == 0)
-    our_type = g_boxed_type_register_static("GKeyFile",
-                                            (GBoxedCopyFunc)keyfile_copy,
-                                            (GBoxedFreeFunc)g_key_file_free);
-  return our_type;
-}
-/************************************************/
-#endif
 
 #define RG_TARGET_NAMESPACE cKeyFile
 #define _SELF(self) ((GKeyFile*)(RVAL2BOXED(self, G_TYPE_KEY_FILE)))
@@ -140,7 +112,6 @@ rg_load_from_data_dirs(int argc, VALUE *argv, VALUE self)
     return full_path ? CSTR2RVAL(full_path) : Qnil;
 }
 
-#if GLIB_CHECK_VERSION(2, 14, 0)
 static VALUE
 rg_load_from_dirs(int argc, VALUE *argv, VALUE self)
 {
@@ -148,7 +119,7 @@ rg_load_from_dirs(int argc, VALUE *argv, VALUE self)
     GError* error = NULL;
     gboolean success;
     const gchar *file;
-    const gchar **search_dirs;
+    gchar **search_dirs;
     gchar* full_path;
     GKeyFileFlags flags;
 
@@ -162,7 +133,7 @@ rg_load_from_dirs(int argc, VALUE *argv, VALUE self)
 
     if (search_dirs != NULL)
         success = g_key_file_load_from_dirs(_SELF(self), file,
-                                            search_dirs,
+                                            (const gchar **)search_dirs,
                                             &full_path, flags, &error);
     else
         success = g_key_file_load_from_data_dirs(_SELF(self), file,
@@ -175,7 +146,6 @@ rg_load_from_dirs(int argc, VALUE *argv, VALUE self)
 
     return CSTR2RVAL(full_path);
 }
-#endif
 
 static VALUE
 rg_to_data(VALUE self)
@@ -516,9 +486,13 @@ rg_set_string_list(VALUE self, VALUE rbgroup_name, VALUE rbkey, VALUE rblist)
     const gchar *group_name = RVAL2CSTR(rbgroup_name);
     const gchar *key = RVAL2CSTR(rbkey);
     long n;
-    const gchar **list = RVAL2STRS(rblist, n);
+    gchar **list = RVAL2STRS(rblist, n);
 
-    g_key_file_set_string_list(key_file, group_name, key, list, n);
+    g_key_file_set_string_list(key_file,
+                               group_name,
+                               key,
+                               (const gchar * const *)list,
+                               n);
 
     g_free(list);
 
@@ -533,9 +507,14 @@ rg_set_locale_string_list(VALUE self, VALUE rbgroup_name, VALUE rbkey, VALUE rbl
     const gchar *key = RVAL2CSTR(rbkey);
     const gchar *locale = RVAL2CSTR(rblocale);
     long n;
-    const gchar **list = RVAL2STRS(rblist, n);
+    gchar **list = RVAL2STRS(rblist, n);
 
-    g_key_file_set_locale_string_list(key_file, group_name, key, locale, list, n);
+    g_key_file_set_locale_string_list(key_file,
+                                      group_name,
+                                      key,
+                                      locale,
+                                      (const gchar * const *)list,
+                                      n);
 
     g_free(list);
 
@@ -661,9 +640,7 @@ Init_glib_keyfile(void)
     RG_DEF_METHOD(load_from_file, -1);
     RG_DEF_METHOD(load_from_data, -1);
     RG_DEF_METHOD(load_from_data_dirs, -1);
-#if GLIB_CHECK_VERSION(2, 14, 0)
     RG_DEF_METHOD(load_from_dirs, -1);
-#endif
     RG_DEF_METHOD(to_data, 0);
     RG_DEF_METHOD(start_group, 0);
     RG_DEF_METHOD(groups, 0);
@@ -702,7 +679,6 @@ Init_glib_keyfile(void)
     G_DEF_CLASS(G_TYPE_KEY_FILE_FLAGS, "Flags", RG_TARGET_NAMESPACE);
     G_DEF_CONSTANTS(RG_TARGET_NAMESPACE, G_TYPE_KEY_FILE_FLAGS, "G_KEY_FILE_");
 
-#if GLIB_CHECK_VERSION(2, 14, 0)
     /* Defines for handling freedesktop.org Desktop files */
     rb_define_const(RG_TARGET_NAMESPACE, "DESKTOP_GROUP", CSTR2RVAL(G_KEY_FILE_DESKTOP_GROUP));
 
@@ -751,5 +727,4 @@ Init_glib_keyfile(void)
                     CSTR2RVAL(G_KEY_FILE_DESKTOP_TYPE_LINK));
     rb_define_const(RG_TARGET_NAMESPACE, "DESKTOP_TYPE_DIRECTORY",
                     CSTR2RVAL(G_KEY_FILE_DESKTOP_TYPE_DIRECTORY));
-#endif
 }

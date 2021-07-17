@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011-2018  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2011-2021  Ruby-GNOME Project Team
  *  Copyright (C) 2005  Masao Mutoh
  *
  *  This library is free software; you can redistribute it and/or
@@ -25,7 +25,7 @@
 #  include <ruby/thread.h>
 #endif
 
-GStaticPrivate rg_polling_key = G_STATIC_PRIVATE_INIT;
+GPrivate rg_polling_key = G_PRIVATE_INIT(NULL);
 
 /*
 static ID id_poll_func;
@@ -87,7 +87,7 @@ rg_poll(GPollFD *ufds, guint nfsd, gint timeout)
     info.timeout = timeout;
     info.result = 0;
 
-    g_static_private_set(&rg_polling_key, GINT_TO_POINTER(TRUE), NULL);
+    g_private_set(&rg_polling_key, GINT_TO_POINTER(TRUE));
     if (g_thread_self() == main_thread) {
 #ifdef HAVE_RB_THREAD_CALL_WITHOUT_GVL
         rb_thread_call_without_gvl(rg_poll_in_blocking, &info,
@@ -99,7 +99,7 @@ rg_poll(GPollFD *ufds, guint nfsd, gint timeout)
     } else {
         rg_poll_in_blocking_raw(&info);
     }
-    g_static_private_set(&rg_polling_key, GINT_TO_POINTER(FALSE), NULL);
+    g_private_set(&rg_polling_key, GINT_TO_POINTER(FALSE));
 
     return info.result;
 }
@@ -147,21 +147,6 @@ source_destroy_notify(gpointer data)
 
     xfree(info);
 }
-
-/*****************************************/
-#if !GLIB_CHECK_VERSION(2,30,0)
-GType
-g_main_context_get_type(void)
-{
-  static GType our_type = 0;
-  if (our_type == 0)
-    our_type = g_boxed_type_register_static ("GMainContext",
-                    (GBoxedCopyFunc)g_main_context_ref,
-                    (GBoxedFreeFunc)g_main_context_unref);
-  return our_type;
-}
-#endif
-/*****************************************/
 
 #define RG_TARGET_NAMESPACE cMainContext
 #define _SELF(s) ((GMainContext*)RVAL2BOXED(s, G_TYPE_MAIN_CONTEXT))
@@ -269,7 +254,7 @@ mc_query_body(VALUE value)
     VALUE ary = rb_ary_new();
 
     for (i = 0; i < args->n_fds; i++)
-        rb_ary_push(ary, BOXED2RVAL(&args->fds[i], G_TYPE_POLL_FD));
+        rb_ary_push(ary, GPOLLFD2RVAL(&args->fds[i]));
 
     return rb_assoc_new(INT2NUM(args->timeout_), ary);
 }
@@ -332,7 +317,7 @@ rg_check(VALUE self, VALUE max_priority)
     printf("ret = %d\n", ret);
     ary = rb_ary_new();
     for (i = 0; i < ret; i++)
-        rb_ary_push(ary, BOXED2RVAL(&fds[i], G_TYPE_POLL_FD));
+        rb_ary_push(ary, GPOLLFD2RVAL(&fds[i]));
 
     g_free(fds);    
     return ary;
@@ -353,7 +338,7 @@ poll_func(GPollFD *ufds, guint nfsd, gint timeout_)
     VALUE func = rb_ivar_get(self, id_poll_func);
     if (NIL_P(func)) return -1;
 
-    return INT2NUM(rb_funcall(func, 3, BOXED2RVAL(ufds, G_TYPE_POLL_FD),
+    return INT2NUM(rb_funcall(func, 3, GPOLLFD2RVAL(ufds),
                               UINT2NUM(nfsd), INT2NUM(timeout_)));
 }
 
@@ -374,7 +359,7 @@ GPollFunc   g_main_context_get_poll_func    (GMainContext *context);
 static VALUE
 rg_add_poll(VALUE self, VALUE fd, VALUE priority)
 {
-    g_main_context_add_poll(_SELF(self), RVAL2BOXED(fd, G_TYPE_POLL_FD),
+    g_main_context_add_poll(_SELF(self), RVAL2GPOLLFD(fd),
                             NUM2INT(priority));
     return self;
 }
@@ -382,30 +367,27 @@ rg_add_poll(VALUE self, VALUE fd, VALUE priority)
 static VALUE
 rg_remove_poll(VALUE self, VALUE fd)
 {
-    g_main_context_remove_poll(_SELF(self), RVAL2BOXED(fd, G_TYPE_POLL_FD));
+    g_main_context_remove_poll(_SELF(self), RVAL2GPOLLFD(fd));
     return self;
 }
 
-#ifdef HAVE_G_MAIN_DEPTH
 static VALUE
 rg_s_depth(G_GNUC_UNUSED VALUE self)
 {
     return INT2NUM(g_main_depth());
 }
-#endif
 
 static VALUE
 timeout_source_new(G_GNUC_UNUSED VALUE self, VALUE interval)
 {
     return BOXED2RVAL(g_timeout_source_new(NUM2UINT(interval)), G_TYPE_SOURCE);
 }
-#if GLIB_CHECK_VERSION(2,14,0)
+
 static VALUE
 timeout_source_new_seconds(G_GNUC_UNUSED VALUE self, VALUE interval)
 {
     return BOXED2RVAL(g_timeout_source_new_seconds(NUM2UINT(interval)), G_TYPE_SOURCE);
 }
-#endif
 
 static VALUE
 timeout_add(int argc, VALUE *argv, G_GNUC_UNUSED VALUE self)
@@ -431,7 +413,6 @@ timeout_add(int argc, VALUE *argv, G_GNUC_UNUSED VALUE self)
     return rb_id;
 }
 
-#if GLIB_CHECK_VERSION(2,14,0)
 static VALUE
 timeout_add_seconds(int argc, VALUE *argv, G_GNUC_UNUSED VALUE self)
 {
@@ -455,7 +436,6 @@ timeout_add_seconds(int argc, VALUE *argv, G_GNUC_UNUSED VALUE self)
     rbgobj_add_relative(mGLibSource, func);
     return rb_id;
 }
-#endif
 
 static VALUE
 idle_source_new(G_GNUC_UNUSED VALUE self)
@@ -526,7 +506,7 @@ Init_glib_main_context(void)
 
     id_call = rb_intern("call");
 
-    g_static_private_set(&rg_polling_key, GINT_TO_POINTER(FALSE), NULL);
+    g_private_set(&rg_polling_key, GINT_TO_POINTER(FALSE));
 
     main_thread = g_thread_self();
 
@@ -559,17 +539,11 @@ Init_glib_main_context(void)
 */
     RG_DEF_METHOD(add_poll, 2);
     RG_DEF_METHOD(remove_poll, 1);
-#ifdef HAVE_G_MAIN_DEPTH
     RG_DEF_SMETHOD(depth, 0);
-#endif
     rbg_define_singleton_method(timeout, "source_new", timeout_source_new, 1);
-#if GLIB_CHECK_VERSION(2,14,0)
     rbg_define_singleton_method(timeout, "source_new_seconds", timeout_source_new_seconds, 1);
-#endif
     rbg_define_singleton_method(timeout, "add", timeout_add, -1);
-#if GLIB_CHECK_VERSION(2,14,0)
     rbg_define_singleton_method(timeout, "add_seconds", timeout_add_seconds, -1);
-#endif
     rbg_define_singleton_method(idle, "source_new", idle_source_new, 0);
     rbg_define_singleton_method(idle, "add", idle_add, -1);
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2018  Ruby-GNOME2 Project Team
+# Copyright (C) 2015-2020  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -82,6 +82,24 @@ module Gtk
     alias_method :events_raw=, :events=
     alias_method :events=, :set_events
 
+    alias_method :set_size_request_raw, :set_size_request
+    def set_size_request(*args)
+      case args.size
+      when 1
+        options = args[0]
+        raise ArgumentError, ":width is missing" unless options.key?(:width)
+        width = options[:width]
+        raise ArgumentError, ":height is missing" unless options.key?(:height)
+        height = options[:height]
+      when 2
+        width, height = args
+      else
+        message = "wrong number of arguments (given #{args.size}, expected 1..2)"
+        raise ArgumentError, message
+      end
+      set_size_request_raw(width, height)
+    end
+
     alias_method :drag_source_set_raw, :drag_source_set
     def drag_source_set(flags, targets, actions)
       targets = ensure_drag_targets(targets)
@@ -97,6 +115,9 @@ module Gtk
     alias_method :style_get_property_raw, :style_get_property
     def style_get_property(name)
       property = self.class.find_style_property(name)
+      if property.nil?
+        raise ArgumentError, "unknown style: #{name.inspect}"
+      end
       value = GLib::Value.new(property.value_type)
       style_get_property_raw(name, value)
       value.value

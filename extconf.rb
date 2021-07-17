@@ -19,7 +19,6 @@ priorlibs = [
   "gdk_pixbuf2",
   "pango",
   "atk",
-  "gtk2",
   "gdk3",
   "gtk3",
 ]
@@ -50,7 +49,7 @@ $topdir = File.expand_path($topdir)
 
 subdirs = ARGV.select{|v|  /^--/ !~ v}
 
-if subdirs.size == 0
+if subdirs.empty?
   subdirs = Dir.glob($topsrcdir+"/*/extconf.rb")
   subdirs.collect! do |subdir|
     subdir[0..$topsrcdir.size] = ""

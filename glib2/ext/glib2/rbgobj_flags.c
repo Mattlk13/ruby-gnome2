@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2004-2019  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2004-2019  Ruby-GNOME Project Team
  *  Copyright (C) 2002,2003  Masahiro Sakai
  *
  *  This library is free software; you can redistribute it and/or
@@ -80,8 +80,6 @@ static const rb_data_type_t rg_glib_flags_type = {
     {
         NULL,
         flags_free,
-        NULL,
-        {0},
     },
     NULL,
     NULL,
@@ -371,7 +369,8 @@ flags_compare_get_flags_body(VALUE user_data)
 }
 
 static VALUE
-flags_compare_get_flags_rescue(VALUE user_data)
+flags_compare_get_flags_rescue(VALUE user_data,
+                               G_GNUC_UNUSED VALUE error)
 {
     compare_data *data = (compare_data *)user_data;
 
@@ -467,7 +466,7 @@ rg_operator_flags_lt(VALUE self, VALUE rhs)
 }
 
 static VALUE
-rg_operator_flags_not(VALUE self, G_GNUC_UNUSED VALUE rhs)
+rg_operator_flags_not(VALUE self)
 {
     flags_holder* p = flags_get_holder(self);
     return rbgobj_make_flags((~ p->value) & p->gclass->mask,

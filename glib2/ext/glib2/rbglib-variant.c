@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2015-2016  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2015-2021  Ruby-GNOME Project Team
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 
 #define RG_TARGET_NAMESPACE cVariant
 
-#define _SELF(s) (DATA_PTR(s))
+#define _SELF(s) (RTYPEDDATA_DATA(s))
 
 static VALUE RG_TARGET_NAMESPACE;
 
@@ -191,7 +191,6 @@ rg_ruby_to_variant(VALUE rb_value, VALUE rb_variant_type)
             }
         }
         return g_variant_new_strv(strings, length);
-#if GLIB_CHECK_VERSION(2, 30, 0)
     } else if (g_variant_type_equal(variant_type,
                                     G_VARIANT_TYPE_OBJECT_PATH_ARRAY)) {
         const gchar **paths;
@@ -210,7 +209,6 @@ rg_ruby_to_variant(VALUE rb_value, VALUE rb_variant_type)
             }
         }
         return g_variant_new_objv(paths, length);
-#endif
     } else if (g_variant_type_equal(variant_type, G_VARIANT_TYPE_ARRAY)) {
         int i;
         GVariantBuilder builder;
@@ -259,7 +257,7 @@ rg_initialize(int argc, VALUE *argv, VALUE self)
     rb_scan_args(argc, argv, "11", &rb_value, &rb_variant_type);
     variant = rg_ruby_to_variant(rb_value, rb_variant_type);
     g_variant_ref_sink(variant);
-    DATA_PTR(self) = variant;
+    RTYPEDDATA_DATA(self) = variant;
 
     return Qnil;
 }

@@ -17,6 +17,9 @@
 require "tempfile"
 require "fileutils"
 
+require "gtk3"
+Gtk.init
+
 module GtkTestUtils
   private
   def only_gtk_version(major, minor, micro=nil)
@@ -51,15 +54,8 @@ module GtkTestUtils
     end
   end
 
-  def window_have_default_title?
-    # Maybe 03213b9509fc1df16c66194ea168aed6c15110e9 in GTK+
-    return false if Gtk::Version.or_later?(3, 17, 0)
-    return true if csd_supported?
-
-    false
-  end
-
   def fixture_path(*components)
-    File.join(File.dirname(__FILE__), "fixture", *components)
+    File.expand_path(File.join(*components),
+                     ENV["GTK3_FIXTURE_DIR"] || File.join("test", "fixture"))
   end
 end

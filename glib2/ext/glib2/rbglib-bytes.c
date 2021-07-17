@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2017-2019  Ruby-GNOME Project Team
+ *  Copyright (C) 2017-2021  Ruby-GNOME Project Team
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -20,11 +20,18 @@
 
 #include "rbgprivate.h"
 
-#define RG_TARGET_NAMESPACE cBytes
+static VALUE rb_cGLibBytes;
+
+#define RG_TARGET_NAMESPACE rb_cGLibBytes
 
 #define _SELF(s) (RVAL2BOXED(s, G_TYPE_BYTES))
 
-#if GLIB_CHECK_VERSION(2, 32, 0)
+gboolean
+rbg_is_bytes(VALUE object)
+{
+    return RVAL2CBOOL(rb_obj_is_kind_of(object, RG_TARGET_NAMESPACE));
+}
+
 static VALUE RG_TARGET_NAMESPACE;
 
 static VALUE
@@ -111,12 +118,10 @@ rg_pointer(VALUE self)
 
     return ULONG2NUM((guintptr)data);
 }
-#endif
 
 void
 Init_glib_bytes(void)
 {
-#if GLIB_CHECK_VERSION(2, 32, 0)
     RG_TARGET_NAMESPACE = G_DEF_CLASS(G_TYPE_BYTES, "Bytes", mGLib);
 
     RG_DEF_SMETHOD(try_convert, 1);
@@ -127,5 +132,4 @@ Init_glib_bytes(void)
     RG_DEF_METHOD(size, 0);
     RG_DEF_ALIAS("length", "size");
     RG_DEF_METHOD(pointer, 0);
-#endif
 }

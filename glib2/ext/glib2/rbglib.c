@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011-2019  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2011-2019  Ruby-GNOME Project Team
  *  Copyright (C) 2002,2003  Masahiro Sakai
  *
  *  This library is free software; you can redistribute it and/or
@@ -323,7 +323,7 @@ rbg_filename_from_ruby(VALUE filename)
 struct rval2strv_args {
     VALUE ary;
     long n;
-    const gchar **result;
+    gchar **result;
 };
 
 static VALUE
@@ -333,28 +333,28 @@ rbg_rval2strv_body(VALUE value)
     struct rval2strv_args *args = (struct rval2strv_args *)value;
 
     for (i = 0; i < args->n; i++)
-        args->result[i] = RVAL2CSTR(RARRAY_PTR(args->ary)[i]);
+        args->result[i] = (gchar *)RVAL2CSTR(RARRAY_PTR(args->ary)[i]);
     args->result[args->n] = NULL;
 
     return Qnil;
 }
 
 static G_GNUC_NORETURN VALUE
-rbg_rval2strv_rescue(VALUE value)
+rbg_rval2strv_rescue(VALUE value, VALUE error)
 {
     g_free(((struct rval2strv_args *)value)->result);
 
-    rb_exc_raise(rb_errinfo());
+    rb_exc_raise(error);
 }
 
-const gchar **
+gchar **
 rbg_rval2strv(volatile VALUE *value, long *n)
 {
     struct rval2strv_args args;
 
     args.ary = *value = rb_ary_dup(rb_ary_to_ary(*value));
     args.n = RARRAY_LEN(args.ary);
-    args.result = g_new(const gchar *, args.n + 1);
+    args.result = g_new(gchar *, args.n + 1);
 
     rb_rescue(rbg_rval2strv_body, (VALUE)&args,
               rbg_rval2strv_rescue, (VALUE)&args);
@@ -365,7 +365,7 @@ rbg_rval2strv(volatile VALUE *value, long *n)
     return args.result;
 }
 
-const gchar **
+gchar **
 rbg_rval2strv_accept_nil(volatile VALUE *value, long *n)
 {
     if (!NIL_P(*value))
@@ -397,11 +397,11 @@ rbg_rval2strv_dup_body(VALUE value)
 }
 
 static G_GNUC_NORETURN VALUE
-rbg_rval2strv_dup_rescue(VALUE value)
+rbg_rval2strv_dup_rescue(VALUE value, VALUE error)
 {
-    g_free(((struct rval2strv_dup_args *)value)->result);
+    g_strfreev(((struct rval2strv_dup_args *)value)->result);
 
-    rb_exc_raise(rb_errinfo());
+    rb_exc_raise(error);
 }
 
 gchar **
@@ -411,7 +411,7 @@ rbg_rval2strv_dup(volatile VALUE *value, long *n)
 
     args.ary = *value = rb_ary_dup(rb_ary_to_ary(*value));
     args.n = RARRAY_LEN(args.ary);
-    args.result = g_new(gchar *, args.n + 1);
+    args.result = g_new0(gchar *, args.n + 1);
 
     rb_rescue(rbg_rval2strv_dup_body, (VALUE)&args,
               rbg_rval2strv_dup_rescue, (VALUE)&args);
@@ -427,6 +427,63 @@ rbg_rval2strv_dup_accept_nil(volatile VALUE *value, long *n)
 {
     if (!NIL_P(*value))
         rbg_rval2strv_dup(value, n);
+
+    if (n != NULL)
+        *n = 0;
+
+    return NULL;
+}
+
+struct rval2filenamev_args {
+    VALUE ary;
+    long n;
+    gchar **result;
+};
+
+static VALUE
+rbg_rval2filenamev_body(VALUE value)
+{
+    long i;
+    struct rval2filenamev_args *args = (struct rval2filenamev_args *)value;
+
+    for (i = 0; i < args->n; i++)
+        args->result[i] = RVAL2CSTRFILENAME(RARRAY_PTR(args->ary)[i]);
+    args->result[args->n] = NULL;
+
+    return Qnil;
+}
+
+static G_GNUC_NORETURN VALUE
+rbg_rval2filenamev_rescue(VALUE value, VALUE error)
+{
+    g_strfreev(((struct rval2filenamev_args *)value)->result);
+
+    rb_exc_raise(error);
+}
+
+gchar **
+rbg_rval2filenamev(volatile VALUE *value, long *n)
+{
+    struct rval2filenamev_args args;
+
+    args.ary = *value = rb_ary_dup(rb_ary_to_ary(*value));
+    args.n = RARRAY_LEN(args.ary);
+    args.result = g_new0(gchar *, args.n + 1);
+
+    rb_rescue(rbg_rval2filenamev_body, (VALUE)&args,
+              rbg_rval2filenamev_rescue, (VALUE)&args);
+
+    if (n != NULL)
+        *n = args.n;
+
+    return args.result;
+}
+
+gchar **
+rbg_rval2filenamev_accept_nil(volatile VALUE *value, long *n)
+{
+    if (!NIL_P(*value))
+        return rbg_rval2filenamev(value, n);
 
     if (n != NULL)
         *n = 0;
@@ -490,11 +547,11 @@ rbg_rval2gbooleans_body(VALUE value)
 }
 
 static G_GNUC_NORETURN VALUE
-rbg_rval2gbooleans_rescue(VALUE value)
+rbg_rval2gbooleans_rescue(VALUE value, VALUE error)
 {
     g_free(((struct rbg_rval2gbooleans_args *)value)->result);
 
-    rb_exc_raise(rb_errinfo());
+    rb_exc_raise(error);
 }
 
 gboolean *
@@ -533,11 +590,11 @@ rbg_rval2gints_body(VALUE value)
 }
 
 static G_GNUC_NORETURN VALUE
-rbg_rval2gints_rescue(VALUE value)
+rbg_rval2gints_rescue(VALUE value, VALUE error)
 {
     g_free(((struct rbg_rval2gints_args *)value)->result);
 
-    rb_exc_raise(rb_errinfo());
+    rb_exc_raise(error);
 }
 
 gint *
@@ -576,11 +633,11 @@ rbg_rval2gint8s_body(VALUE value)
 }
 
 static G_GNUC_NORETURN VALUE
-rbg_rval2gint8s_rescue(VALUE value)
+rbg_rval2gint8s_rescue(VALUE value, VALUE error)
 {
     g_free(((struct rbg_rval2gint8s_args *)value)->result);
 
-    rb_exc_raise(rb_errinfo());
+    rb_exc_raise(error);
 }
 
 gint8 *
@@ -619,11 +676,11 @@ rbg_rval2guint8s_body(VALUE value)
 }
 
 static G_GNUC_NORETURN VALUE
-rbg_rval2guint8s_rescue(VALUE value)
+rbg_rval2guint8s_rescue(VALUE value, VALUE error)
 {
     g_free(((struct rbg_rval2guint8s_args *)value)->result);
 
-    rb_exc_raise(rb_errinfo());
+    rb_exc_raise(error);
 }
 
 guint8 *
@@ -662,11 +719,11 @@ rbg_rval2guint16s_body(VALUE value)
 }
 
 static G_GNUC_NORETURN VALUE
-rbg_rval2guint16s_rescue(VALUE value)
+rbg_rval2guint16s_rescue(VALUE value, VALUE error)
 {
     g_free(((struct rbg_rval2guint16s_args *)value)->result);
 
-    rb_exc_raise(rb_errinfo());
+    rb_exc_raise(error);
 }
 
 guint16 *
@@ -705,11 +762,11 @@ rbg_rval2guint32s_body(VALUE value)
 }
 
 static G_GNUC_NORETURN VALUE
-rbg_rval2guint32s_rescue(VALUE value)
+rbg_rval2guint32s_rescue(VALUE value, VALUE error)
 {
     g_free(((struct rbg_rval2guint32s_args *)value)->result);
 
-    rb_exc_raise(rb_errinfo());
+    rb_exc_raise(error);
 }
 
 guint32 *
@@ -748,11 +805,11 @@ rbg_rval2gdoubles_body(VALUE value)
 }
 
 static G_GNUC_NORETURN VALUE
-rbg_rval2gdoubles_rescue(VALUE value)
+rbg_rval2gdoubles_rescue(VALUE value, VALUE error)
 {
     g_free(((struct rbg_rval2gdoubles_args *)value)->result);
 
-    rb_exc_raise(rb_errinfo());
+    rb_exc_raise(error);
 }
 
 gdouble *
@@ -1015,6 +1072,10 @@ extern void Init_glib2(void);
 void
 Init_glib2(void)
 {
+#ifdef HAVE_RB_EXT_RACTOR_SAFE
+    rb_ext_ractor_safe(true);
+#endif
+
     const gchar **filename_charsets;
 
     id_inspect = rb_intern("inspect");

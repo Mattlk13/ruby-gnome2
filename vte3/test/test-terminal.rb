@@ -34,6 +34,17 @@ class TestTerminal < Test::Unit::TestCase
       @child_exit_callback_id = @terminal.signal_connect("child-exited") do
         @loop.quit
       end
+
+      if Vte::Version.or_later?(0, 64)
+        omit("VTE 0.64 or later doesn't work in Docker by default")
+        # Fedora Rawhide test in Docker reports:
+        #   Failed to fdwalk: Operation not permitted
+        # not NotFound.
+        #
+        # The following discussions may be related:
+        #   https://github.com/mviereck/x11docker/issues/346
+        #   https://github.com/containers/podman/issues/10130
+      end
     end
 
     teardown do
@@ -56,10 +67,28 @@ class TestTerminal < Test::Unit::TestCase
     end
 
     test "failure" do
-      assert_raise(GLib::SpawnError) do
-        @terminal.spawn(:argv => ["nonexistent"])
+      if Vte::Version.or_later?(0, 62)
+        error_class = Gio::IOError::NotFound
+      else
+        error_class = GLib::SpawnError
+      end
+      assert_raise(error_class) do
+        @terminal.spawn(:argv => ["/bin/nonexistent"])
         @wait_child_exited = true
       end
     end
+  end
+
+  def test_get_text_range
+    only_vte_version(0, 52)
+    text, attributes = @terminal.get_text_range(0, 0, 1, 1)
+    assert_equal([
+                   "\n",
+                   [[0, 80]],
+                 ],
+                 [
+                   text,
+                   attributes.collect {|a| [a.row, a.column]},
+                 ])
   end
 end

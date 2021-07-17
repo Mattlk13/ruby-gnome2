@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (C) 2017-2018  Ruby-GNOME2 Project Team
+# Copyright (C) 2017-2019  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -36,7 +36,7 @@ $LOAD_PATH.unshift(mkmf_gnome2_dir.to_s)
 module_name = "pango"
 package_id = "pango"
 
-require "mkmf-gnome2"
+require "mkmf-gnome"
 
 depended_packages = [
   "glib2",
@@ -56,7 +56,7 @@ end
 unless required_pkg_config_package([package_id, 1, 14, 0],
                                    :alt_linux => "libpango-devel",
                                    :debian => "libpango1.0-dev",
-                                   :redhat => "pango-devel",
+                                   :redhat => "pkgconfig(#{package_id})",
                                    :arch_linux => "pango",
                                    :homebrew => "pango",
                                    :macports => "pango",

@@ -1,6 +1,18 @@
-=begin
-extconf.rb for Ruby/GLib extention library
-=end
+# Copyright (C) 2002-2021  Ruby-GNOME Project Team
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 require 'pathname'
 
@@ -12,12 +24,12 @@ $LOAD_PATH.unshift(mkmf_gnome2_dir.to_s)
 module_name = "glib2"
 package_id = "gobject-2.0"
 
-require 'mkmf-gnome2'
+require "mkmf-gnome"
 
 unless required_pkg_config_package([package_id, 2, 12, 0],
                                    :alt_linux => "glib2-devel",
                                    :debian => "libglib2.0-dev",
-                                   :redhat => "glib2-devel",
+                                   :redhat => "pkgconfig(#{package_id})",
                                    :arch_linux => "glib2",
                                    :homebrew => "glib",
                                    :macports => "glib2",
@@ -30,10 +42,6 @@ have_header("unistd.h")
 have_header("io.h")
 
 glib_header = "glib.h"
-have_func("g_spawn_close_pid", glib_header)
-have_func("g_thread_init", glib_header)
-have_func("g_main_depth", glib_header)
-have_func("g_listenv", glib_header)
 
 ruby_header = "ruby.h"
 have_func("rb_check_array_type", ruby_header)
@@ -75,7 +83,11 @@ include_paths = PKGConfig.cflags_only_I(package_id)
 headers = include_paths.split.inject(headers) do |result, path|
   result + Dir.glob(File.join(path.sub(/^-I/, ""), "gobject", "gsignal.h"))
 end
-glib_mkenums(enum_types_prefix, headers, "G_TYPE_", ["glib-object.h"])
+glib_mkenums(enum_types_prefix,
+             headers,
+             "G_TYPE_",
+             [],
+             preamble: "#include \"rbgprivate.h\"")
 
 $defs << "-DRUBY_GLIB2_COMPILATION"
 

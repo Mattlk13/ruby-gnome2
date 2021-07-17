@@ -30,4 +30,17 @@ class TestAttrList < Test::Unit::TestCase
                  ],
                  @attrs.collect {|iter| iter.attrs.collect {|a| a.value.to_s}})
   end
+
+  def test_change
+    only_gi_version(1, 60)
+    first_attribute = Pango::AttrLanguage.new(Pango::Language.new("ja-jp"))
+    @attrs.insert(first_attribute)
+    second_attribute = Pango::AttrLanguage.new(Pango::Language.new("en-us"))
+    @attrs.change(second_attribute)
+    assert_equal([
+                   [second_attribute.value.to_s],
+                   [],
+                 ],
+                 @attrs.collect {|iter| iter.attrs.collect {|a| a.value.to_s}})
+  end
 end

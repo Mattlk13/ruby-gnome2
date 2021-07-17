@@ -29,6 +29,8 @@ module GObjectIntrospection
         case value
         when true, false
           value
+        when nil
+          false
         else
           nil
         end
@@ -142,8 +144,10 @@ module GObjectIntrospection
         case get_element_type_info(type_info).tag
         when INT8, UINT8
           case value
-          when String, GLib::Bytes
+          when String
             return value
+          when GLib::Bytes
+            return value.to_s
           end
         end
         super
@@ -152,6 +156,23 @@ module GObjectIntrospection
 
     GLIST.extend(ArrayTypeTag)
     GSLIST.extend(ArrayTypeTag)
+
+    class << GHASH
+      def try_convert(type_info, value)
+        case value
+        when Hash
+          value
+        else
+          nil
+        end
+      end
+
+      def description(type_info)
+        key_type = type_info.get_param_type(0)
+        value_type = type_info.get_param_type(1)
+        "#{super}(#{key_type.description}->#{value_type.description})"
+      end
+    end
 
     class << INTERFACE
       def try_convert(type_info, value)

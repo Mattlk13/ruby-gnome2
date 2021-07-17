@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2012-2019  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2012-2019  Ruby-GNOME Project Team
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -18,11 +18,11 @@
  *  MA  02110-1301  USA
  */
 
-#ifndef RB_GI_PRIVATE_H
-#define RB_GI_PRIVATE_H
+#pragma once
 
 #include <ruby.h>
 #include <rbgobject.h>
+#include <rbglib2conversions.h>
 #include <glib-enum-types.h>
 
 #include <girffi.h>
@@ -36,6 +36,15 @@
 #include "rb-gi-conversions.h"
 
 #include "rb-gobject-introspection.h"
+
+#include "rb-gi-private-arg-info.h"
+#include "rb-gi-private-arguments.h"
+#include "rb-gi-private-arguments-in.h"
+#include "rb-gi-private-arguments-out.h"
+#include "rb-gi-private-array-type.h"
+#include "rb-gi-private-callback.h"
+#include "rb-gi-private-direction.h"
+#include "rb-gi-private-transfer.h"
 
 #ifndef RB_TYPE_P
 #  define RB_TYPE_P(object, type) (TYPE(object) == type)
@@ -114,5 +123,3 @@ VALUE rb_gi_struct_info_to_ruby(GIStructInfo *info,
                                 gboolean is_pointer);
 gpointer rb_gi_struct_info_from_ruby(GIStructInfo *info,
                                      VALUE rb_object);
-
-#endif

@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2011-2021  Ruby-GNOME Project Team
  *  Copyright (C) 2006  Kouhei Sutou
  *
  *  This library is free software; you can redistribute it and/or
@@ -105,7 +105,6 @@ rg_s_get_mirror_char(G_GNUC_UNUSED VALUE self, VALUE unichar)
     }
 }
 
-#if GLIB_CHECK_VERSION(2,14,0)
 static VALUE
 rg_s_combining_class(G_GNUC_UNUSED VALUE self, VALUE unichar)
 {
@@ -130,7 +129,6 @@ rg_s_zero_width_p(G_GNUC_UNUSED VALUE self, VALUE unichar)
 {
     return CBOOL2RVAL(g_unichar_iszerowidth(NUM2UINT(unichar)));
 }
-#endif
 
 static VALUE
 rg_s_to_utf8(G_GNUC_UNUSED VALUE self, VALUE unichar)
@@ -140,6 +138,48 @@ rg_s_to_utf8(G_GNUC_UNUSED VALUE self, VALUE unichar)
 
     len = g_unichar_to_utf8(NUM2UINT(unichar), utf8);
     return CSTR2RVAL_LEN(utf8, len);
+}
+
+static VALUE
+rg_s_compose(G_GNUC_UNUSED VALUE self, VALUE unichar1, VALUE unichar2)
+{
+    gunichar composed_char;
+    if (g_unichar_compose(NUM2UINT(unichar1),
+                          NUM2UINT(unichar2),
+                          &composed_char)) {
+        return UINT2NUM(composed_char);
+    } else {
+        return Qnil;
+    }
+}
+
+static VALUE
+rg_s_decompose(int argc, VALUE *argv, G_GNUC_UNUSED VALUE self)
+{
+    VALUE unichar;
+    VALUE options = Qnil;
+    gboolean compat = FALSE;
+
+    rb_scan_args(argc, argv, "1:", &unichar, &options);
+    if (!NIL_P(options)) {
+        ID keywords[1];
+        VALUE values[1];
+        keywords[0] = rb_intern("compat");
+        rb_get_kwargs(options, keywords, 0, 1, values);
+        if (values[0] != Qundef) {
+            compat = CBOOL2RVAL(values[0]);
+        }
+    }
+
+    /* 18 is enough. See g_unichar_fully_decompose() document. */
+    gunichar result[G_UNICHAR_MAX_DECOMPOSITION_LENGTH];
+    gsize result_len =
+        g_unichar_fully_decompose(NUM2UINT(unichar),
+                                  compat,
+                                  result,
+                                  G_UNICHAR_MAX_DECOMPOSITION_LENGTH);
+    return CSTR2RVAL_LEN_UCS4((const char *)result,
+                              result_len * sizeof(gunichar));
 }
 
 void
@@ -190,12 +230,13 @@ Init_glib_unichar(void)
 
     RG_DEF_SMETHOD(get_mirror_char, 1);
 
-#if GLIB_CHECK_VERSION(2,14,0)
     RG_DEF_SMETHOD(combining_class, 1);
     RG_DEF_SMETHOD(get_script, 1);
     RG_DEF_SMETHOD_P(mark, 1);
     RG_DEF_SMETHOD_P(zero_width, 1);
-#endif
 
     RG_DEF_SMETHOD(to_utf8, 1);
+
+    RG_DEF_SMETHOD(compose, 2);
+    RG_DEF_SMETHOD(decompose, -1);
 }

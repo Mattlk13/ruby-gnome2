@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (C) 2013-2016  Ruby-GNOME2 Project Team
+# Copyright (C) 2013-2021  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -16,40 +16,24 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-ruby_gnome2_base = File.join(File.dirname(__FILE__), "..", "..")
-ruby_gnome2_base = File.expand_path(ruby_gnome2_base)
+require_relative "../../glib2/test/run-test"
 
-glib_base = File.join(ruby_gnome2_base, "glib2")
-gobject_introspection_base = File.join(ruby_gnome2_base, "gobject-introspection")
-gio2_base = File.join(ruby_gnome2_base, "gio2")
-
-modules = [
-  [glib_base, "glib2"],
-  [gobject_introspection_base, "gobject-introspection"],
-  [gio2_base, "gio2"],
-]
-
-modules.each do |target, module_name|
-  makefile = File.join(target, "Makefile")
-  if File.exist?(makefile) and system("which make > /dev/null")
-    `make -C #{target.dump} > /dev/null` or exit(false)
+run_test(__dir__,
+         [
+           "glib2",
+           "gobject-introspection",
+           "gio2",
+         ]) do |context|
+  ENV["GSETTINGS_SCHEMA_DIR"] = File.join(context[:build_fixture_dir],
+                                          "schema",
+                                          "default")
+  ENV["GIO2_FIXTURE_DIR"] = context[:build_fixture_dir]
+  begin
+    require "gio2"
+  rescue GObjectIntrospection::RepositoryError
+    puts("Omit because typelib file doesn't exist: #{$!.message}")
+    exit(true)
   end
-  $LOAD_PATH.unshift(File.join(target, "ext", module_name))
-  $LOAD_PATH.unshift(File.join(target, "lib"))
+
+  require_relative "gio2-test-utils"
 end
-
-fixture_dir = File.join(gio2_base, "test", "fixture")
-Dir.chdir(fixture_dir) do
-  system("rake") or exit(false)
-end
-ENV["GSETTINGS_SCHEMA_DIR"] = File.join(fixture_dir, "schema", "default")
-
-$LOAD_PATH.unshift(File.join(glib_base, "test"))
-require "glib-test-init"
-
-$LOAD_PATH.unshift(File.join(gio2_base, "test"))
-require "gio2-test-utils"
-
-require "gio2"
-
-exit Test::Unit::AutoRunner.run(true, File.join(gio2_base, "test"))

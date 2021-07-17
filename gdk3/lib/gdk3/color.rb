@@ -1,4 +1,4 @@
-# Copyright (C) 2014  Ruby-GNOME2 Project Team
+# Copyright (C) 2014-2019  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -27,14 +27,21 @@ module Gdk
           message << "\"\#rrggbb\", "
           message << "\"\#rrggbb\", "
           message << "\"\#rrrgggbbb\", "
-          message << "\"\#rrrrggggbbbb\", "
-          message << "\"\#fff\", "
-          message << "\"\#ffffff\", "
-          message << "\"\#fffffffff\", "
-          message << "\"\#fffffffffffff\""
+          message << "\"\#rrrrggggbbbb\""
           raise ArgumentError, message
         end
         color
+      end
+
+      def try_convert(value)
+        case value
+        when String
+          parse(value)
+        when Symbol
+          parse(value.to_s)
+        else
+          nil
+        end
       end
     end
 

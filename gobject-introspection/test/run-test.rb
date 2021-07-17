@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (C) 2012-2015  Ruby-GNOME2 Project Team
+# Copyright (C) 2012-2021  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -16,31 +16,24 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-ruby_gnome2_base = File.join(File.dirname(__FILE__), "..", "..")
-ruby_gnome2_base = File.expand_path(ruby_gnome2_base)
+require_relative "../../glib2/test/run-test"
 
-glib_base = File.join(ruby_gnome2_base, "glib2")
-gobject_introspection_base = File.join(ruby_gnome2_base, "gobject-introspection")
+run_test(__dir__,
+         [
+           "glib2",
+           "gobject-introspection",
+         ]) do |context|
+  require_relative "gobject-introspection-test-utils"
 
-modules = [
-  [glib_base, "glib2"],
-  [gobject_introspection_base, "gobject-introspection"]
-]
-modules.each do |target, module_name|
-  if File.exist?("#{target}/Makefile") and system("which make > /dev/null")
-    `make -C #{target.dump} > /dev/null` or exit(false)
+  begin
+    repository = GObjectIntrospection::Repository.default
+    repository.require("Gio")
+  rescue GObjectIntrospection::RepositoryError
+    puts("Omit because typelib file doesn't exist: #{$!.message}")
+    exit(true)
   end
-  $LOAD_PATH.unshift(File.join(target, "ext", module_name))
-  $LOAD_PATH.unshift(File.join(target, "lib"))
+
+  module Gio
+    GObjectIntrospection::Loader.load("Gio", self)
+  end
 end
-
-$LOAD_PATH.unshift(File.join(glib_base, "test"))
-require "glib-test-init"
-
-$LOAD_PATH.unshift(File.join(gobject_introspection_base, "test"))
-require "gobject-introspection-test-utils"
-
-require "gobject-introspection"
-
-exit Test::Unit::AutoRunner.run(true,
-                                File.join(gobject_introspection_base, "test"))

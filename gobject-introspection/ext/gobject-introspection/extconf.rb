@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (C) 2012-2013  Ruby-GNOME2 Project Team
+# Copyright (C) 2012-2021  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -37,7 +37,7 @@ $LOAD_PATH.unshift(mkmf_gnome2_dir.to_s)
 module_name = "gobject_introspection"
 package_id = "gobject-introspection-1.0"
 
-require "mkmf-gnome2"
+require "mkmf-gnome"
 
 ["glib2"].each do |package|
   directory = "#{package}#{version_suffix}"
@@ -51,7 +51,7 @@ end
 unless required_pkg_config_package(package_id,
                                    :alt_linux => "gobject-introspection-devel",
                                    :debian => "libgirepository1.0-dev",
-                                   :redhat => "gobject-introspection-devel",
+                                   :redhat => "pkgconfig(gobject-introspection-1.0)",
                                    :homebrew => "gobject-introspection",
                                    :arch_linux => "gobject-introspection",
                                    :macports => "gobject-introspection",
@@ -62,9 +62,6 @@ end
 # TODO: Remove this when we dropped support for GObject Introspection < 1.60
 make_version_header("GI", package_id, ".")
 
-gi_headers = ["girepository.h"]
-have_func("g_interface_info_find_signal", gi_headers)
-
 enum_type_prefix = "gobject-introspection-enum-types"
 include_paths = PKGConfig.cflags_only_I(package_id)
 headers = include_paths.split.inject([]) do |result, path|
@@ -73,7 +70,7 @@ end
 glib_mkenums(enum_type_prefix, headers, "G_TYPE_", ["girepository.h"])
 
 create_pkg_config_file("Ruby/GObjectIntrospection",
-                       package_id, ruby_gnome2_version,
+                       package_id, ruby_gnome_version,
                        "ruby-gobject-introspection.pc")
 
 ensure_objs

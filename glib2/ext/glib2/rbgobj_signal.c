@@ -1,7 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011-2019  Ruby-GNOME2 Project Team
- *  Copyright (C) 2002-2004  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2002-2021  Ruby-GNOME Project Team
  *  Copyright (C) 2002,2003  Masahiro Sakai
  *
  *  This library is free software; you can redistribute it and/or
@@ -27,8 +26,6 @@
 static VALUE RG_TARGET_NAMESPACE;
 VALUE rbgobj_signal_wrap(guint sig_id);
 
-#define default_handler_method_prefix "signal_do_"
-
 /**********************************************************************/
 
 static const rb_data_type_t rg_glib_signal_type = {
@@ -36,8 +33,6 @@ static const rb_data_type_t rg_glib_signal_type = {
     {
         NULL,
         NULL,
-        NULL,
-        {0},
     },
     NULL,
     NULL,
@@ -66,45 +61,57 @@ rbgobj_signal_get_raw(VALUE rb_signal)
     return query;
 }
 
-static VALUE signal_func_table;
+static GHashTable *rbg_signal_func_table;
+static GMutex rbg_signal_func_table_mutex;
 
 void
-rbgobj_set_signal_func(VALUE klass, const gchar *sig_name, GValToRValSignalFunc func)
+rbgobj_set_signal_func(VALUE klass,
+                       const gchar *signal_name,
+                       GValToRValSignalFunc func)
 {
-    VALUE obj = Data_Wrap_Struct(rb_cData, NULL, NULL, func);
-    guint signal_id = g_signal_lookup(sig_name, CLASS2GTYPE(klass));
-    rb_hash_aset(signal_func_table, UINT2NUM(signal_id), obj);
+    guint signal_id = g_signal_lookup(signal_name, CLASS2GTYPE(klass));
+    g_mutex_lock(&rbg_signal_func_table_mutex);
+    g_hash_table_insert(rbg_signal_func_table,
+                        GUINT_TO_POINTER(signal_id),
+                        func);
+    g_mutex_unlock(&rbg_signal_func_table_mutex);
 }
 
 GValToRValSignalFunc
 rbgobj_get_signal_func(guint signal_id)
 {
-    GValToRValSignalFunc func = NULL;
-    VALUE func_obj = rb_hash_aref(signal_func_table, UINT2NUM(signal_id));
-    if (!NIL_P(func_obj))
-        Data_Get_Struct(func_obj, void, func);
+    g_mutex_lock(&rbg_signal_func_table_mutex);
+    GValToRValSignalFunc func =
+        g_hash_table_lookup(rbg_signal_func_table,
+                            GUINT_TO_POINTER(signal_id));
+    g_mutex_unlock(&rbg_signal_func_table_mutex);
     return func;
 }
 
-static VALUE signal_call_func_table;
+static GHashTable *rbg_signal_call_func_table;
+static GMutex rbg_signal_call_func_table_mutex;
 
 void
 rbgobj_set_signal_call_func(VALUE klass,
                             const gchar *signal_name,
                             RGClosureCallFunc func)
 {
-    VALUE obj = Data_Wrap_Struct(rb_cData, NULL, NULL, func);
     guint signal_id = g_signal_lookup(signal_name, CLASS2GTYPE(klass));
-    rb_hash_aset(signal_call_func_table, UINT2NUM(signal_id), obj);
+    g_mutex_lock(&rbg_signal_call_func_table_mutex);
+    g_hash_table_insert(rbg_signal_call_func_table,
+                        GUINT_TO_POINTER(signal_id),
+                        func);
+    g_mutex_unlock(&rbg_signal_call_func_table_mutex);
 }
 
 RGClosureCallFunc
 rbgobj_get_signal_call_func(guint signal_id)
 {
-    RGClosureCallFunc func = NULL;
-    VALUE func_obj = rb_hash_aref(signal_call_func_table, UINT2NUM(signal_id));
-    if (!NIL_P(func_obj))
-        Data_Get_Struct(func_obj, void, func);
+    g_mutex_lock(&rbg_signal_call_func_table_mutex);
+    RGClosureCallFunc func =
+        g_hash_table_lookup(rbg_signal_call_func_table,
+                            GUINT_TO_POINTER(signal_id));
+    g_mutex_unlock(&rbg_signal_call_func_table_mutex);
     return func;
 }
 
@@ -152,17 +159,17 @@ rbg_rval2gtypes_body(VALUE value)
     struct rval2gtypes_args *args = (struct rval2gtypes_args *)value;
 
     for (i = 0; i < args->n; i++)
-        args->result[i] = rbgobj_gtype_get(RARRAY_PTR(args->ary)[i]);
+        args->result[i] = rbgobj_gtype_from_ruby(RARRAY_PTR(args->ary)[i]);
 
     return Qnil;
 }
 
 static G_GNUC_NORETURN VALUE
-rbg_rval2gtypes_rescue(VALUE value)
+rbg_rval2gtypes_rescue(VALUE value, VALUE error)
 {
     g_free(((struct rval2gtypes_args *)value)->result);
 
-    rb_exc_raise(rb_errinfo());
+    rb_exc_raise(error);
 }
 
 static GType *
@@ -226,23 +233,16 @@ gobj_s_define_signal(int argc, VALUE* argv, VALUE self)
     signal_flags = RVAL2GFLAGS(rbsignal_flags, G_TYPE_SIGNAL_FLAGS);
 
     {
-        VALUE rb_method_name;
-        VALUE proc;
-        ID method_id;
-
-        rb_method_name =
-            rb_str_concat(rb_str_new_cstr(default_handler_method_prefix),
-                          rbsignal_name);
-        method_id = rb_to_id(rb_method_name);
-
-        proc = rb_funcall(mMetaInterface, rb_intern("signal_callback"), 2,
-                          self, ID2SYM(method_id));
-
+        VALUE proc = rb_funcall(mMetaInterface,
+                                rb_intern("signal_callback"),
+                                2,
+                                self,
+                                rbsignal_name);
         class_closure = g_rclosure_new(proc, Qnil, NULL);
-        g_rclosure_set_tag(class_closure, RVAL2CSTR(rb_method_name));
+        g_rclosure_set_tag(class_closure, RVAL2CSTR(rbsignal_name));
     }
 
-    return_type = rbgobj_gtype_get(rbreturn_type);
+    return_type = rbgobj_gtype_from_ruby(rbreturn_type);
     param_types = RVAL2GTYPES_ACCEPT_NIL(params, n_params);
 
     signal = g_signal_newv(signal_name,
@@ -442,29 +442,33 @@ struct emit_arg {
 
     GSignalQuery query;
     GQuark detail;
-    GValueArray* instance_and_params;
+    GArray *instance_and_params;
 };
 
 static VALUE
-emit_body(struct emit_arg* arg)
+emit_body(VALUE rb_arg)
 {
-    GValue param = G_VALUE_INIT;
+    struct emit_arg *arg = (struct emit_arg *)rb_arg;
 
-    g_value_init(&param, G_TYPE_FROM_INSTANCE(RVAL2GOBJ(arg->self)));
-    rbgobj_rvalue_to_gvalue(arg->self, &param);
-    g_value_array_append(arg->instance_and_params, &param);
-    g_value_unset(&param);
+    gsize value_index = 0;
+    GValue *gself = &g_array_index(arg->instance_and_params,
+                                   GValue,
+                                   value_index);
+    g_value_init(gself, G_TYPE_FROM_INSTANCE(RVAL2GOBJ(arg->self)));
+    rbgobj_rvalue_to_gvalue(arg->self, gself);
+    value_index++;
 
     {
         guint i;
         for (i = 0; i < arg->query.n_params; i++){
             GType gtype = arg->query.param_types[i] & ~G_SIGNAL_TYPE_STATIC_SCOPE;
 
-            g_value_init(&param,  gtype);
-
-            rbgobj_rvalue_to_gvalue(rb_ary_entry(arg->args, i), &param);
-            g_value_array_append(arg->instance_and_params, &param);
-            g_value_unset(&param);
+            GValue *gparam = &g_array_index(arg->instance_and_params,
+                                            GValue,
+                                            value_index);
+            g_value_init(gparam,  gtype);
+            rbgobj_rvalue_to_gvalue(rb_ary_entry(arg->args, i), gparam);
+            value_index++;
         }
     }
 
@@ -476,7 +480,7 @@ emit_body(struct emit_arg* arg)
             g_value_init(&return_value,
                          arg->query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE);
 
-        g_signal_emitv(arg->instance_and_params->values,
+        g_signal_emitv((GValue *)(arg->instance_and_params->data),
                        arg->query.signal_id, arg->detail,
                        (use_ret) ? &return_value : NULL);
 
@@ -491,9 +495,10 @@ emit_body(struct emit_arg* arg)
 }
 
 static VALUE
-emit_ensure(struct emit_arg* arg)
+emit_ensure(VALUE rb_arg)
 {
-    g_value_array_free(arg->instance_and_params);
+    struct emit_arg *arg = (struct emit_arg *)rb_arg;
+    g_array_unref(arg->instance_and_params);
     return Qnil;
 }
 
@@ -525,7 +530,13 @@ gobj_sig_emit(int argc, VALUE *argv, VALUE self)
                  arg.query.n_params + 1);
 
     arg.self = self;
-    arg.instance_and_params = g_value_array_new(1 + arg.query.n_params);
+    arg.instance_and_params = g_array_sized_new(FALSE,
+                                                TRUE,
+                                                sizeof(GValue),
+                                                1 + arg.query.n_params);
+    g_array_set_clear_func(arg.instance_and_params,
+                           (GDestroyNotify)g_value_unset);
+    g_array_set_size(arg.instance_and_params, 1 + arg.query.n_params);
 
     return rb_ensure(emit_body, (VALUE)&arg, emit_ensure, (VALUE)&arg);
 }
@@ -625,19 +636,27 @@ guint    g_signal_handlers_disconnect_matched (gpointer         instance,
 #endif
 
 static VALUE
-chain_from_overridden_body(struct emit_arg* arg)
+chain_from_overridden_body(VALUE rb_arg)
 {
-    g_value_init(arg->instance_and_params->values,
-                 G_TYPE_FROM_INSTANCE(RVAL2GOBJ(arg->self)));
-    rbgobj_rvalue_to_gvalue(arg->self, arg->instance_and_params->values);
+    struct emit_arg *arg = (struct emit_arg *)rb_arg;
+    gsize value_index = 0;
+    GValue *gself = &g_array_index(arg->instance_and_params,
+                                   GValue,
+                                   value_index);
+    g_value_init(gself, G_TYPE_FROM_INSTANCE(RVAL2GOBJ(arg->self)));
+    rbgobj_rvalue_to_gvalue(arg->self, gself);
+    value_index++;
 
     {
-        GValue* params = arg->instance_and_params->values + 1;
         guint i;
         for (i = 0; i < arg->query.n_params; i++) {
             GType gtype = arg->query.param_types[i] & ~G_SIGNAL_TYPE_STATIC_SCOPE;
-            g_value_init(params + i, gtype);
-            rbgobj_rvalue_to_gvalue(rb_ary_entry(arg->args, i), params + i);
+            GValue *gparam = &g_array_index(arg->instance_and_params,
+                                            GValue,
+                                            value_index);
+            g_value_init(gparam, gtype);
+            rbgobj_rvalue_to_gvalue(rb_ary_entry(arg->args, i), gparam);
+            value_index++;
         }
     }
 
@@ -649,7 +668,7 @@ chain_from_overridden_body(struct emit_arg* arg)
             g_value_init(&return_value,
                          arg->query.return_type & ~G_SIGNAL_TYPE_STATIC_SCOPE);
 
-        g_signal_chain_from_overridden(arg->instance_and_params->values,
+        g_signal_chain_from_overridden((GValue *)(arg->instance_and_params->data),
                                        (use_ret) ? &return_value : NULL);
 
         if (use_ret) {
@@ -681,46 +700,38 @@ gobj_sig_chain_from_overridden(int argc, VALUE *argv, VALUE self)
 
     arg.self = self;
     arg.args = rb_ary_new4(argc, argv);
-    arg.instance_and_params = g_value_array_new(1 + argc);
+    arg.instance_and_params = g_array_sized_new(FALSE,
+                                                TRUE,
+                                                sizeof(GValue),
+                                                1 + argc);
+    g_array_set_clear_func(arg.instance_and_params,
+                           (GDestroyNotify)g_value_unset);
+    g_array_set_size(arg.instance_and_params, 1 + argc);
 
     return rb_ensure(chain_from_overridden_body, (VALUE)&arg,
                      emit_ensure, (VALUE)&arg);
 }
 
 static VALUE
-gobj_s_method_added(VALUE klass, VALUE id)
+gobj_s_signal_handler_attach(VALUE klass,
+                             VALUE rb_signal,
+                             VALUE rb_handler_name)
 {
-    const RGObjClassInfo* cinfo = rbgobj_lookup_class(klass);
-    const char* name = rb_id2name(SYM2ID(id));
-    const int prefix_len = strlen(default_handler_method_prefix);
-    guint signal_id;
-
-    if (cinfo->klass != klass) return Qnil;
-    if (strncmp(default_handler_method_prefix, name, prefix_len)) return Qnil;
-
-    signal_id = g_signal_lookup(name + prefix_len, cinfo->gtype);    
-    if (!signal_id) return Qnil;
-
-    {
-        GSignalQuery query;
-        g_signal_query(signal_id, &query);
-        if (query.itype == cinfo->gtype)
-            return Qnil;
-    }
-
-    {
-        VALUE proc = rb_funcall(mMetaInterface, rb_intern("signal_callback"), 2,
-                                klass, id);
-        GClosure* rclosure = g_rclosure_new(proc, Qnil,
-                                            rbgobj_get_signal_func(signal_id));
-        g_rclosure_attach((GClosure *)rclosure, klass);
-        g_signal_override_class_closure(signal_id, cinfo->gtype, rclosure);
-    }
+    const RGObjClassInfo *cinfo = rbgobj_lookup_class(klass);
+    guint signal_id = rbgobj_signal_get_raw(rb_signal)->signal_id;
+    VALUE handler_name = RVAL2CSTR(rb_handler_name);
+    VALUE proc = rb_block_proc();
+    GClosure* rclosure = g_rclosure_new(proc,
+                                        Qnil,
+                                        rbgobj_get_signal_func(signal_id));
+    g_rclosure_set_tag(rclosure, handler_name);
+    g_rclosure_attach((GClosure *)rclosure, klass);
+    g_signal_override_class_closure(signal_id, cinfo->gtype, rclosure);
 
     {
         VALUE mod = rb_define_module_under(klass, RubyGObjectHookModule);
         rb_include_module(klass, mod);
-        rbg_define_method(mod, name, gobj_sig_chain_from_overridden, -1);
+        rbg_define_method(mod, handler_name, gobj_sig_chain_from_overridden, -1);
     }
 
     return Qnil;
@@ -946,7 +957,7 @@ Init_gobject_gsignal(void)
 {
     VALUE cSignalFlags, cSignalMatchType;
 
-    RG_TARGET_NAMESPACE = rb_define_class_under(mGLib, "Signal", rb_cData);
+    RG_TARGET_NAMESPACE = rb_define_class_under(mGLib, "Signal", rb_cObject);
 
     RG_DEF_METHOD(id, 0);
     RG_DEF_METHOD(name, 0);
@@ -989,11 +1000,11 @@ Init_gobject_gsignal(void)
 
     eNoSignalError = rb_define_class_under(mGLib, "NoSignalError", rb_eNameError);
 
-    signal_func_table = rb_hash_new();
-    rb_global_variable(&signal_func_table);
+    rbg_signal_func_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+    g_mutex_init(&rbg_signal_func_table_mutex);
 
-    signal_call_func_table = rb_hash_new();
-    rb_global_variable(&signal_call_func_table);
+    rbg_signal_call_func_table = g_hash_table_new(g_direct_hash, g_direct_equal);
+    g_mutex_init(&rbg_signal_call_func_table_mutex);
 
     rbg_define_method(mMetaInterface, "define_signal", gobj_s_define_signal, -1);
     rb_define_alias(mMetaInterface, "signal_new", "define_signal");
@@ -1025,6 +1036,8 @@ Init_gobject_gsignal(void)
     rbg_define_method(cInstantiatable, "signal_handler_is_connected?",
                      gobj_sig_handler_is_connected, 1);
 
-    rbg_define_singleton_method(cInstantiatable, "method_added",
-                               gobj_s_method_added, 1);
+    rbg_define_singleton_method(cInstantiatable,
+                                "signal_handler_attach",
+                                gobj_s_signal_handler_attach,
+                                2);
 }

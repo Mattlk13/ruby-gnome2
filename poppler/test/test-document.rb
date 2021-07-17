@@ -1,4 +1,22 @@
+# Copyright (C) 2008-2021  Ruby-GNOME Project Team
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+
 class TestDocument < Test::Unit::TestCase
+  include PopplerTestUtils
+
   sub_test_case("#initialize") do
     sub_test_case(":data") do
       def with_default_internal(encoding)
@@ -42,27 +60,27 @@ class TestDocument < Test::Unit::TestCase
   end
 
   def test_save
-    saved_pdf = File.join(tmp_dir, "saved.pdf")
-    FileUtils.rm_f(saved_pdf)
-
-    document = Poppler::Document.new(text_field_pdf)
-    find_first_text_field(document).text = "XXX"
-    document.save(saved_pdf)
-    reread_document = Poppler::Document.new(saved_pdf)
-    assert_equal("XXX", find_first_text_field(reread_document).text)
+    Dir.mktmpdir do |tmp_dir|
+      saved_pdf = File.join(tmp_dir, "saved.pdf")
+      document = Poppler::Document.new(text_field_pdf)
+      find_first_text_field(document).text = "XXX"
+      document.save(saved_pdf)
+      reread_document = Poppler::Document.new(saved_pdf)
+      assert_equal("XXX", find_first_text_field(reread_document).text)
+    end
   end
 
   def test_save_a_copy
-    copied_pdf = File.join(tmp_dir, "copied.pdf")
-    FileUtils.rm_f(copied_pdf)
-
-    document = Poppler::Document.new(text_field_pdf)
-    first_text_field = find_first_text_field(document)
-    default_text = first_text_field.text
-    first_text_field.text = "XXX"
-    document.save_a_copy(copied_pdf)
-    reread_document = Poppler::Document.new(copied_pdf)
-    assert_equal(default_text, find_first_text_field(reread_document).text)
+    Dir.mktmpdir do |tmp_dir|
+      copied_pdf = File.join(tmp_dir, "copied.pdf")
+      document = Poppler::Document.new(text_field_pdf)
+      first_text_field = find_first_text_field(document)
+      default_text = first_text_field.text
+      first_text_field.text = "XXX"
+      document.save_a_copy(copied_pdf)
+      reread_document = Poppler::Document.new(copied_pdf)
+      assert_equal(default_text, find_first_text_field(reread_document).text)
+    end
   end
 
   def test_each

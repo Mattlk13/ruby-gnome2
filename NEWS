@@ -2,6 +2,509 @@
 
 = NEWS
 
+== Ruby-GNOME 3.4.6: 2021-07-17
+
+This is a bug fix release for macOS.
+
+=== Changes
+
+==== Ruby/Pango
+
+  * Fixes
+
+    * Fixed a bug that (({require "pango"})) is failed on environment
+      that has multiple font types.
+      [GitHub#1429][Reported by Cameron Gose]
+
+=== Thanks
+
+  * Cameron Gose
+
+== Ruby-GNOME 3.4.5: 2021-07-07
+
+This is a release that supports implementing virtual functions in
+Ruby.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * Added (({GError})) domain and code for Ruby.
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * (({GObjectIntrospection::BaseInfo#container})): Added.
+
+    * (({GObjectIntrospection::ObjectInfo#class_struct})): Added.
+
+    * (({GObjectIntrospection::StructInfo#find_field})): Added.
+
+    * (({RVAL2GI_VFUNC_INFO()})): Added.
+
+    * Added support for implementing virtual functions in Ruby.
+      [GitHub#1386][Based on patch by Yuto Tokunaga]
+
+      You need to define (({virtual_do_#{virtual_function_name}}))
+      method in (({type_register}))-ed class.
+
+    * Added support for implementing virtual functions of interface in
+      Ruby.
+      [GitHub#985][Reported by Matijs van Zuijlen]
+      [GitHub#1938][Reported by Yuto Tokunaga]
+
+    * Added support for "transfer everything" UTF-8 return/output
+      value.
+
+    * Changed to accepted one character for (({gunichar})).
+      [GitHub#1426][Reported by rubyFeedback]
+
+    * (({GObjectIntrospection::CallableInfo#can_throw_gerror?})): Added.
+
+    * Added support for (({GError **})) in callback.
+
+    * Added support for returning (({GList<GObject *>})) from callback.
+
+    * Changed to return (({[]})) for (({NULL})) list.
+
+  * Fixes
+
+    * Fixed a bug that wrong type information is used for output
+      arguments.
+
+==== Ruby/Pango
+
+  * Added support for (({PangoFT2})).
+
+  * Added support for (({PangoFc})).
+
+  * Added support for (({PangoOT})).
+
+  * Added support for (({PangoCairoFontMaps})).
+
+  * Updated gem metadata.
+    [GitHub#1428][Patch by Gabriel Mazetto]
+
+=== Thanks
+
+  * Yuto Tokunaga
+
+  * Matijs van Zuijlen
+
+  * rubyFeedback
+
+  * Gabriel Mazetto
+
+== Ruby-GNOME 3.4.4: 2021-04-22
+
+This is a bug fix release for Windows.
+
+=== Changes
+
+==== All
+
+  * Dropped support for CentOS 6.
+
+  * Dropped support for Ubuntu 16.04.
+
+  * Dropped support for Ruby 2.4.
+
+  * Dropped support for Ruby 2.5.
+
+  * Added support for Ruby 3.0.
+
+==== Document
+
+  * Improvements
+
+    * Improved how to use on Heroku.
+      [GitHub#1414][Patch by Juan D Lopez]
+
+    * Improved README.
+      [Patch by kojix2]
+
+==== Ruby/GLib
+
+  * Improvements
+
+    * Added (({RVAL2POINTER()})).
+
+    * Added (({POINTER2RVAL()})).
+
+    * Changed to use (({rb_cObject})) instead of (({rb_cData})) as a
+      parent class of typed data.
+
+    * Changed to use typed data instead of data for all data types.
+
+    * Added support for Ractor partially.
+
+    * Required GLib 2.48 or later.
+
+    * (({GLib::UniChar.compose})): Added.
+
+    * (({GLib::UniChar.decompose})): Added.
+
+    * (({GLib::UniChar.canonical_decomposition})): Deprecated. Use
+      (({GLib::UniChar.decompose})) instead.
+
+    * (({GLib.format_size_for_display})): Deprecated. Use
+      (({GLib.format_size})) instead.
+
+  * Fixes
+
+    * Fixed wrong conversions between (({VALUE})) and (({GType})).
+      [GitHub#1386][Patch by Yuto Tokunaga]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Removed needless transfer check for struct.
+      [GitHub#1396][Reported by Konrad Narewski]
+
+    * Added support freeing (({GArray})) of raw struct out parameter.
+      [GitHub#1356][Reported by aycabta]
+
+==== Ruby/Pango
+
+  * Improvements
+
+    * Added (({Pango::Render::PART_*})) to keep backward compatibility.
+      [GitHub#1311][Reported by rubyFeedback]
+
+==== Ruby/GStreamer
+
+  * Improvements
+
+    * Removed needless workaround for
+      (({Gst::ElementFactory#static_pad_templates})).
+      [GitHub#1400][Reported by Justin Weiss]
+
+==== Ruby/Gnumeric
+
+  * Improvements
+
+    * Added support for the latest Gnumeric.
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * (({Gtk::Widget#set_size_request})): Added support for
+      (({width:})) and (({height:})).
+      [GitHub#1406][Reported by rubyFeedback]
+
+    * (({Gtk::Dialog#set_default_response})): Added support for
+      (({Symbol})).
+      [GitHub#1418][Reported by rubyFeedback]
+
+==== Ruby/GDK4
+
+  * Added.
+
+==== Ruby/GTK4
+
+  * Added.
+
+==== Ruby/VTE3
+
+  * Improvements
+
+    * Improved description.
+      [GitHub#1406][Reported by rubyFeedback]
+
+==== Ruby/GTK2
+
+  * Removed.
+
+==== Ruby/GtkSourceView2
+
+  * Removed.
+
+==== Ruby/WebKitGtk2
+
+  * Removed.
+
+==== Ruby/VTE
+
+  * Removed.
+
+=== Thanks
+
+  * Konrad Narewski
+
+  * aycabta
+
+  * rubyFeedback
+
+  * Justin Weiss
+
+  * Yuto Tokunaga
+
+  * Juan D Lopez
+
+  * kojix2
+
+== Ruby-GNOME 3.4.3: 2020-05-11
+
+This is a follow-up release of 3.4.2.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Fixes
+
+    * Windows: Fixed a link errors.
+
+== Ruby-GNOME 3.4.2: 2020-05-02
+
+This is a follow-up release of 3.4.1.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * Added support for Ruby 2.8.
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * (({Gtk::Widget#style_get_property})): Added a validation.
+
+    * Updated examples.
+      [GitHub#1318][GitHub#1319][GitHub#1320][GitHub#1321][GitHub#1322]
+      [GitHub#1323][GitHub#1324][GitHub#1325][GitHub#1326][GitHub#1327]
+      [GitHub#1328][GitHub#1329][GitHub#1330][GitHub#1331][GitHub#1332]
+      [GitHub#1353][GitHub#1354][GitHub#1355][GitHub#1391]
+      [Patch by kojix2]
+
+  * Fixes
+
+    * Fixed a typo.
+      [GitHub#1307][Patch by İsmail Arılık]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Changed to accept (({nil})) as a false value for boolean.
+      [GitHub#1305][Reported by Matijs van Zuijlen]
+
+    * Added support for UTF-8 (({GHashTable})) value.
+
+    * Added workaround for (({rsvg_handle_set_stylesheet()})).
+
+  * Fixes
+
+    * Fixed a bug that pointer struct isn't allocated correctly.
+      [GitHub#1315][Reported by Konrad Narewski]
+
+==== Ruby/GtkSourceView4
+
+  * Improvements
+
+    * Added support for auto native package install on Ubuntu.
+      [GitHub#1309][Patch by İsmail Arılık]
+
+    * Added support for auto native package install on Debian GNU/Linux.
+
+==== Ruby/VTE3
+
+  * Improvements
+
+    * (({Vte::Terminal#spawn})): Made options optional.
+      [GitHub#1333][Patch by kojix2]
+
+    * Updated README.
+      [GitHub#1335][Patch by kojix2]
+
+==== Ruby/GdkPixbuf2
+
+  * Improvements
+
+    * Updated examples.
+      [GitHub#1336][GitHub#1337][GitHub#1338][GitHub#1339][GitHub#1340]
+      [GitHub#1341][GitHub#1342][GitHub#1343][GitHub#1344][GitHub#1347]
+      [GitHub#1348][GitHub#1349]
+      [Patch by kojix2]
+
+    * Updated README.
+      [GitHub#1346][Patch by kojix2]
+
+==== Ruby/WebKit2GTK
+
+  * Fixes
+
+    * Fixed dependency check.
+      [GitHub#1351][Patch by kojix2]
+
+==== Ruby/RSVG2
+
+  * Improvements
+
+    * Updated examples.
+      [GitHub#1357][Patch by kojix2]
+      [GitHub#1393][Patch by Jean-Christophe Le Lann]
+
+=== Thanks
+
+  * Matijs van Zuijlen
+
+  * İsmail Arılık
+
+  * Konrad Narewski
+
+  * kojix2
+
+  * Jean-Christophe Le Lann
+
+== Ruby-GNOME 3.4.1: 2019-10-16
+
+This is a follow-up release of 3.4.0.
+
+=== Changes
+
+==== Ruby/GDK3
+
+  * Improvements
+
+    * Added support for (({String})) and (({Symbol})) as (({Gdk::Color})).
+      [GitHub#1286][Reported by rubyFeedback]
+
+    * Added support for (({String})) and (({Symbol})) as (({Gdk::RGBA})).
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Added support for (({GBytes **})).
+
+=== Thanks
+
+  * rubyFeedback
+
+== Ruby-GNOME 3.4.0: 2019-10-10
+
+This is a bug fix release of 3.3.9.
+
+=== Changes
+
+==== Ruby/ATK
+
+  * Fixes
+
+    * Fixed a typo.
+      [GitHub#1302][Reported by kojix2]
+
+=== Thanks
+
+  * kojix2
+
+== Ruby-GNOME 3.3.9: 2019-10-10
+
+This is a full GLib 2.62.0 support release.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * Deprecated (({GLib::Param::PRIVATE})). Use
+      (({GLib::Param::STATIC_NAME})) instead.
+
+    * Deprecated (({GLib::Param#private?})). Use
+      (({GLib::Param#static_name?})) instead.
+
+    * Added new flags:
+
+      * (({GLib::Param::STATIC_NICK}))
+
+      * (({GLib::Param::STATIC_BLURB}))
+
+      * (({GLib::Param::EXPLICIT_NOTIFY}))
+
+      * (({GLib::Param::DEPRECATED}))
+
+    * Added new predicates:
+
+      * (({GLib::Param#static_nick?}))
+
+      * (({GLib::Param#static_blurb?}))
+
+      * (({GLib::Param#explicit_notify?}))
+
+      * (({GLib::Param#deprecated?}))
+
+    * Deprecated (({ruby_gnome2_version})) in `mkmf-gnome`. Use
+      (({ruby_gnome_version})) instead.
+
+    * Added (({rbgobj_gtype_from_ruby()})).
+
+    * Added (({rbg_is_object()})).
+
+    * Added (({rbg_is_value()})).
+
+    * Added (({rbg_is_bytes()})).
+
+    * Removed needless const from the return value of
+      (({rbg_rval2strv()})).
+
+    * Removed needless const from the return value of
+      (({rbg_rval2strv_accept_nil()})).
+
+    * Added (({rbg_rval2filenamev()})).
+
+    * Added (({rbg_rval2filenamev_accept_nil()})).
+
+    * Stopped to define (({GType})) for (({GPollFD})).
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Added support for conversion from (({GLib::Bytes})) to
+      (({[gint8]})) and (({[guint8]})).
+
+    * Added more information to inspected result.
+
+==== Ruby/GIO2
+
+  * Improvements
+
+    * Added support for GLib 2.62.0 or later.
+      [GitHub#1296][Reported by Mamoru TASAKA]
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * Added (({Gtk::TreeModelSort.new})).
+      [GitHub#1298][Reported by LutzLue]
+      (({[gint8]})) and (({[guint8]})).
+
+==== Ruby/GStreamer
+
+  * Improvements
+
+    * Removed all custom callbacks.
+
+    * (({Gst::TagList#each})): Changed to yield tag name and tag
+      values.
+
+=== Thanks
+
+  * LutzLue
+
+  * Mamoru TASAKA
+
 == Ruby-GNOME 3.3.8: 2019-09-10
 
 This is a partially GLib 2.62.0 support release.
