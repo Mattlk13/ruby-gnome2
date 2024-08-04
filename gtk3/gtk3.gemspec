@@ -1,6 +1,6 @@
 # -*- ruby -*-
 #
-# Copyright (C) 2018  Ruby-GNOME Project Team
+# Copyright (C) 2018-2022  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.description   = "Ruby/GTK3 is a Ruby binding of GTK+-3.x."
   s.author        = "The Ruby-GNOME Project Team"
   s.email         = "ruby-gnome2-devel-en@lists.sourceforge.net"
-  s.homepage      = "https://ruby-gnome2.osdn.jp/"
+  s.homepage      = "https://ruby-gnome.github.io/"
   s.licenses      = ["LGPL-2.1+"]
   s.version       = ruby_glib2_version
   s.extensions    = ["ext/#{s.name}/extconf.rb"]
@@ -42,9 +42,6 @@ Gem::Specification.new do |s|
   s.files += Dir.glob("sample/**/*")
   s.files += Dir.glob("test/**/*")
 
-  s.add_runtime_dependency("gio2", "= #{s.version}")
   s.add_runtime_dependency("atk", "= #{s.version}")
-  s.add_runtime_dependency("pango", "= #{s.version}")
-  s.add_runtime_dependency("gdk_pixbuf2", "= #{s.version}")
   s.add_runtime_dependency("gdk3", "= #{s.version}")
 end

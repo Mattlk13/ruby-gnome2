@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2011-2021  Ruby-GNOME Project Team
  *  Copyright (C) 2006  Kouhei Sutou
  *
  *  This library is free software; you can redistribute it and/or
@@ -65,11 +65,10 @@ rbglib_m_win32_locale_filename_from_utf8_deprecated(VALUE self,
     return rg_s_locale_filename_from_utf8(self, utf8_filename);
 }
 
-#  if GLIB_CHECK_VERSION(2, 16, 0)
 static VALUE
 rg_s_get_package_installation_directory_of_module(int argc,
-                                VALUE *argv,
-                                VALUE self)
+                                                  VALUE *argv,
+                                                  VALUE self)
 {
     VALUE rb_module;
     gchar *directory;
@@ -84,7 +83,6 @@ rg_s_get_package_installation_directory_of_module(int argc,
     directory = g_win32_get_package_installation_directory_of_module(hmodule);
     return CSTR2RVAL_FREE(directory);
 }
-#  endif
 #endif
 
 void
@@ -92,21 +90,19 @@ Init_glib_win32(void)
 {
 #ifdef G_OS_WIN32
     /* glib/gwin32.h */
-    VALUE RG_TARGET_NAMESPACE = rb_define_module_under(mGLib, "Win32");
+    VALUE RG_TARGET_NAMESPACE = rb_define_module_under(rbg_mGLib(), "Win32");
 
     RG_DEF_SMETHOD(error_message, 1);
     RG_DEF_SMETHOD(locale, 0);
     RG_DEF_SMETHOD(version, 0);
     /* Deprecated */
-    rbg_define_singleton_method(mGLib, "win32_locale", rbglib_m_win32_locale_deprecated, 0);
+    rbg_define_singleton_method(rbg_mGLib(), "win32_locale", rbglib_m_win32_locale_deprecated, 0);
 
     RG_DEF_SMETHOD(locale_filename_from_utf8, 1);
     /* Deprecated */
-    rbg_define_singleton_method(mGLib, "win32_locale_filename_from_utf8",
+    rbg_define_singleton_method(rbg_mGLib(), "win32_locale_filename_from_utf8",
                               rbglib_m_win32_locale_filename_from_utf8_deprecated, 1);
 
-#  if GLIB_CHECK_VERSION(2, 16, 0)
     RG_DEF_SMETHOD(get_package_installation_directory_of_module, -1);
-#  endif
 #endif
 }

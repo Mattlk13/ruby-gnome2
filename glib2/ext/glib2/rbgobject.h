@@ -1,7 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011-2018  Ruby-GNOME2 Project Team
- *  Copyright (C) 2003,2006  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2003-2023  Ruby-GNOME Project Team
  *  Copyright (C) 2002,2003  Masahiro Sakai
  *
  *  This library is free software; you can redistribute it and/or
@@ -147,6 +146,8 @@ extern void rbgobj_instance_unref(gpointer instance);
 
 extern void rbgobj_object_add_relative(VALUE rb_gobject,
                                        VALUE rb_relative);
+extern void rbgobj_gobject_remove_relative(GObject *gobject,
+                                           VALUE rb_relative);
 extern void rbgobj_object_remove_relative(VALUE rb_gobject,
                                           VALUE rb_relative);
 extern void rbgobj_object_remove_relatives(VALUE rb_gobject,
@@ -192,6 +193,7 @@ extern const RGObjClassInfo *rbgobj_lookup_class_by_gtype_full(GType gtype,
 							       VALUE parent,
 							       gboolean create_object);
 extern VALUE rbgobj_gtype_to_ruby_class(GType gtype);
+extern GType rbgobj_gtype_from_ruby(VALUE rb_gtype);
 extern VALUE rbgobj_define_class(GType gtype, const gchar* name, VALUE module,
                                  RGMarkFunc mark, RGFreeFunc free, VALUE parent); 
 extern VALUE rbgobj_define_class_dynamic(const gchar* gtype_name, 
@@ -205,6 +207,7 @@ extern void rbgobj_register_mark_func(GType gtype, RGMarkFunc mark);
 extern void rbgobj_register_free_func(GType gtype, RGFreeFunc free);
 extern VALUE rbgobj_cType;
 extern VALUE rbgobj_gtype_new(GType gtype);
+/* Deprecated. Use rbgobj_gtype_from_ruby() instead. */
 extern GType rbgobj_gtype_get(VALUE obj);
 
 /* rbgobj_signal.c */
@@ -236,6 +239,9 @@ extern GClosure* g_rclosure_new_call(VALUE callback_proc,
                                      VALUE extra_args,
                                      RGClosureCallFunc func);
 extern void g_rclosure_attach(GClosure *closure, VALUE object);
+extern void g_rclosure_attach_gobject(GClosure *closure, VALUE object);
+extern void g_rclosure_detach(GClosure *closure, VALUE object);
+extern void g_rclosure_detach_gobject(GClosure *closure, VALUE object);
 extern void g_rclosure_set_tag(GClosure *closure, const gchar *tag);
 
 /* rbgobj_value.c */
@@ -291,29 +297,6 @@ extern VALUE rbgobj_enum_alloc_func(VALUE klass);
 extern VALUE rbgobj_flags_alloc_func(VALUE klass);
 
 
-/* rbglib_mainloop.c */
-#if !GLIB_CHECK_VERSION(2,30,0)
-  #define G_TYPE_MAIN_LOOP (g_main_loop_get_type())
-  extern GType g_main_loop_get_type(void);
-#endif
-
-/* rbglib_maincontext.c */
-#if !GLIB_CHECK_VERSION(2,30,0)
-  #define G_TYPE_MAIN_CONTEXT (g_main_context_get_type())
-  #define G_TYPE_SOURCE (g_source_get_type())
-  extern GType g_main_context_get_type(void);
-  extern GType g_source_get_type(void);
-#endif
-
-#define G_TYPE_POLL_FD (g_poll_fd_get_type())
-extern GType g_poll_fd_get_type(void);
-
-/* rbglib_keyfile.c */
-#if !GLIB_CHECK_VERSION(2,31,2)
-  #define G_TYPE_KEY_FILE (g_key_file_get_type())
-  extern GType g_key_file_get_type(void);
-#endif
-
 /* rbgobj_convert.c */
 typedef struct {
     GType type;
@@ -331,6 +314,7 @@ typedef struct {
 } RGConvertTable;
 
 extern void rbgobj_convert_define(const RGConvertTable *table);
+
 
 G_END_DECLS
 

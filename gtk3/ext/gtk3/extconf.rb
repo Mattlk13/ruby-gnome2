@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (C) 2015  Ruby-GNOME2 Project Team
+# Copyright (C) 2015-2023  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -23,39 +23,25 @@ top_dir = base_dir.parent
 top_build_dir = Pathname(".").parent.parent.parent.expand_path
 
 mkmf_gnome2_dir = top_dir + "glib2" + "lib"
-version_suffix = ""
-unless mkmf_gnome2_dir.exist?
-  if /(-\d+\.\d+\.\d+)\z/ =~ base_dir.basename.to_s
-    version_suffix = $1
-    mkmf_gnome2_dir = top_dir + "glib2#{version_suffix}" + "lib"
-  end
-end
+$LOAD_PATH.unshift(mkmf_gnome2_dir.to_s) if mkmf_gnome2_dir.exist?
 
-$LOAD_PATH.unshift(mkmf_gnome2_dir.to_s)
 
 module_name = "gtk3"
 package_id = "gtk+-3.0"
 
-require "mkmf-gnome2"
+require "mkmf-gnome"
 
 depended_packages = [
   "glib2",
   "gobject-introspection",
   "cairo-gobject",
-  "atk",
   "pango",
-  "gdk_pixbuf2",
-  "gdk3",
 ]
 depended_packages.each do |package|
-  directory = "#{package}#{version_suffix}"
-  build_base_path = "#{directory}/tmp/#{RUBY_PLATFORM}"
-  package_library_name = package.gsub(/-/, "_")
-  build_dir = "#{build_base_path}/#{package_library_name}/#{RUBY_VERSION}"
-  add_depend_package(package, "#{directory}/ext/#{package}",
+  add_depend_package(package,
+                     "#{package}/ext/#{package}",
                      top_dir.to_s,
-                     :top_build_dir => top_build_dir.to_s,
-                     :target_build_dir => build_dir)
+                     top_build_dir: top_build_dir.to_s)
 end
 
 unless check_cairo(:top_dir => top_dir)
@@ -64,9 +50,13 @@ end
 
 unless required_pkg_config_package(package_id,
                                    :alt_linux => "libgtk+3-devel",
-                                   :debian => "libgtk-3-dev",
-                                   :redhat => "gtk3-devel",
                                    :arch_linux => "gtk3",
+                                   :conda => [
+                                     "gtk3",
+                                     "xorg-xineramaproto",
+                                   ],
+                                   :debian => "libgtk-3-dev",
+                                   :redhat => "pkgconfig(#{package_id})",
                                    :homebrew => "gtk+3",
                                    :macports => "gtk3",
                                    :msys2 => "gtk3")
@@ -80,6 +70,36 @@ end
 create_pkg_config_file("Ruby/GTK3", package_id)
 
 $defs << "-DRUBY_GTK3_COMPILATION"
+case RUBY_PLATFORM
+when /darwin/
+  symbols_in_external_bundles = [
+    "_rb_gi_callback_data_get_rb_callback",
+    "_rb_gi_callback_register_finder",
+    "_rb_gi_struct_new_raw",
+    "_rbg_check_array_type",
+    "_rbg_cstr2rval",
+    "_rbg_define_private_method",
+    "_rbg_define_singleton_method",
+    "_rbg_rval2cstr",
+    "_rbg_rval_inspect",
+    "_rbg_strv2rval",
+    "_rbgobj_boxed_not_copy_obj",
+    "_rbgobj_gc_mark_gvalue",
+    "_rbgobj_gc_mark_instance",
+    "_rbgobj_gvalue_to_rvalue",
+    "_rbgobj_instance_from_ruby_object",
+    "_rbgobj_lookup_class",
+    "_rbgobj_make_boxed",
+    "_rbgobj_make_flags",
+    "_rbgobj_register_mark_func",
+    "_rbgobj_ruby_object_from_instance",
+    "_rbgobj_rvalue_to_gvalue",
+    "_rbgobj_set_signal_call_func",
+  ]
+  symbols_in_external_bundles.each do |symbol|
+    $DLDFLAGS << " -Wl,-U,#{symbol}"
+  end
+end
 create_makefile(module_name)
 
 pkg_config_dir = with_config("pkg-config-dir")

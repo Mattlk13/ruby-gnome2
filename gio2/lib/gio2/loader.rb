@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2019  Ruby-GNOME Project Team
+# Copyright (C) 2013-2023  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -39,6 +39,18 @@ module Gio
       end
       require_extension
       require_libraries
+
+      if defined?(Ractor)
+        [
+          @content_type_class,
+          @mime_type_class,
+          @dbus_module,
+          @resources_module,
+        ].each do |klass|
+          Ractor.make_shareable(klass::INVOKERS)
+          Ractor.make_shareable(klass.singleton_class::INVOKERS)
+        end
+      end
     end
 
     def require_extension
@@ -55,18 +67,25 @@ module Gio
       require "gio2/inet-address"
       require "gio2/input-stream"
       require "gio2/menu-item"
+      require "gio2/output-stream"
       require "gio2/pollable-input-stream"
       require "gio2/pollable-output-stream"
       require "gio2/resources"
+      require "gio2/ruby-input-stream"
+      require "gio2/ruby-output-stream"
       require "gio2/settings"
       require "gio2/settings-schema-source"
       require "gio2/simple-action"
+      require "gio2/volume"
 
       require "gio2/deprecated"
     end
 
     def define_content_type_class
       @content_type_class = Class.new do
+        const_set(:INVOKERS, {})
+        singleton_class.const_set(:INVOKERS, {})
+
         def initialize(type)
           @type = type
         end
@@ -80,6 +99,9 @@ module Gio
 
     def define_mime_type_class
       @mime_type_class = Class.new do
+        const_set(:INVOKERS, {})
+        singleton_class.const_set(:INVOKERS, {})
+
         def initialize(type)
           @type = type
         end
@@ -92,12 +114,18 @@ module Gio
     end
 
     def define_dbus_module
-      @dbus_module = Module.new
+      @dbus_module = Module.new do
+        const_set(:INVOKERS, {})
+        singleton_class.const_set(:INVOKERS, {})
+      end
       @base_module.const_set("DBus", @dbus_module)
     end
 
     def define_resources_module
-      @resources_module = Module.new
+      @resources_module = Module.new do
+        const_set(:INVOKERS, {})
+        singleton_class.const_set(:INVOKERS, {})
+      end
       @base_module.const_set("Resources", @resources_module)
     end
 
@@ -107,13 +135,13 @@ module Gio
       when /\Acontent_type_/
         load_function_info_content_type(info)
       when "content_types_get_registered"
-        define_singleton_method(@content_type_class, "registered", info)
+        define_singleton_method(info, @content_type_class, "registered")
       when /\Aresources_/
         name = rubyish_method_name(info, :prefix => "resources_")
-        define_singleton_method(@resources_module, name, info)
+        define_singleton_method(info, @resources_module, name)
       when /\Adbus_/
         name = rubyish_method_name(info, :prefix => "dbus_")
-        define_singleton_method(@dbus_module, name, info)
+        define_singleton_method(info, @dbus_module, name)
       when /\A{file,icon}_/
         # Ignore because they are defined by load_interface_info
       else
@@ -158,7 +186,7 @@ module Gio
       when "guess_for_tree"
         @content_type_guess_for_tree_info = info
       when "guess"
-        define_singleton_method(@content_type_class, name, info)
+        define_singleton_method(info, @content_type_class, name)
       else
         case name
         when /\Aget_/
@@ -183,6 +211,20 @@ module Gio
       end
     end
 
+    def rubyish_method_name(function_info, options={})
+      case function_info.name
+      when "get_mount"
+        case function_info.container&.name
+        when "Volume"
+          "get_mount"
+        else
+          super
+        end
+      else
+        super
+      end
+    end
+
     def rubyish_class_name(info)
       case info.name
       when /Enum\z/
@@ -196,17 +238,60 @@ module Gio
       Error
     end
 
-    def should_unlock_gvl?(function_info, klass)
+    def prepare_function_info_lock_gvl(function_info, klass)
+      super
       case klass.name
+      when "Gio::Seekable"
+        function_info.lock_gvl_default = false
+        if defined?(Ractor)
+          predicate = Ractor.current.instance_eval do
+            lambda do |_, receiver|
+              receiver.is_a?(RubySeekable)
+            end
+          end
+          Ractor.make_shareable(predicate)
+        else
+          predicate = lambda do |_, receiver|
+            receiver.is_a?(RubySeekable)
+          end
+        end
+        function_info.add_lock_gvl_predicate(&predicate)
       when "Gio::InputStream"
         case function_info.name
-        when "read", "read_all"
-          true
-        else
-          false
+        when "read", "read_all", "skip", "close"
+          function_info.lock_gvl_default = false
+          if defined?(Ractor)
+            predicate = Ractor.current.instance_eval do
+              lambda do |_, receiver|
+                receiver.is_a?(RubyInputStream)
+              end
+            end
+            Ractor.make_shareable(predicate)
+          else
+            predicate = lambda do |_, receiver|
+              receiver.is_a?(RubyInputStream)
+            end
+          end
+          function_info.add_lock_gvl_predicate(&predicate)
         end
-      else
-        false
+      when "Gio::OutputStream"
+        case function_info.name
+        when "write", "write_all", "flush", "close"
+          function_info.lock_gvl_default = false
+          if defined?(Ractor)
+            predicate = Ractor.current.instance_eval do
+              lambda do |_, receiver|
+                receiver.is_a?(RubyOutputStream)
+              end
+            end
+            Ractor.make_shareable(predicate)
+          else
+            predicate = lambda do |_, receiver|
+              receiver.is_a?(RubyOutputStream)
+            end
+          end
+          function_info.add_lock_gvl_predicate(&predicate)
+        end
       end
     end
   end

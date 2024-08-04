@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2015-2018  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2015-2022  Ruby-GNOME Project Team
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -574,26 +574,6 @@ rb_gtk3_text_tag_table_mark(gpointer object)
 }
 
 void
-rbgtk3_class_init_func(gpointer g_class, G_GNUC_UNUSED gpointer class_data)
-{
-    VALUE rb_class;
-
-    rb_class = GTYPE2CLASS(G_TYPE_FROM_CLASS(g_class));
-    rb_funcall(rb_class, rb_intern("init"), 0);
-}
-
-void
-rbgtk3_initialize(VALUE self)
-{
-    GObject *object;
-
-    object = RVAL2GOBJ(self);
-    g_object_ref_sink(object);
-
-    rb_funcall(self, rb_intern("initialize_post"), 0);
-}
-
-void
 Init_gtk3(void)
 {
     id_call = rb_intern("call");
@@ -615,6 +595,7 @@ Init_gtk3(void)
     rbgobj_register_mark_func(GTK_TYPE_TEXT_TAG_TABLE,
                               rb_gtk3_text_tag_table_mark);
 
+    rbgtk3_accel_map_init();
     rbgtk3_cell_layout_init();
     rbgtk3_container_init();
     rbgtk3_spin_button_init();

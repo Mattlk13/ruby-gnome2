@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2012-2018  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2012-2019  Ruby-GNOME Project Team
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -28,35 +28,17 @@
 
 typedef gpointer (*RBGICallbackFinderFunc)(GIArgInfo *info);
 
-typedef struct
-{
-    GICallableInfo *callable_info;
-    GIArgInfo arg_info;
-    GIScopeType scope_type;
-    GIDirection direction;
-    gboolean callback_p;
-    gboolean closure_p;
-    gboolean destroy_p;
-    gboolean array_p;
-    gboolean array_length_p;
-    gint in_arg_index;
-    gint closure_in_arg_index;
-    gint destroy_in_arg_index;
-    gint array_in_arg_index;
-    gint array_length_in_arg_index;
-    gint array_length_arg_index;
-    gint rb_arg_index;
-    gint out_arg_index;
-} RBGIArgMetadata;
-
 typedef struct RBGICallbackData_ RBGICallbackData;
+typedef struct RBGIArgMetadata_ RBGIArgMetadata;
 
-void rb_gi_callback_register_finder (RBGICallbackFinderFunc  finder);
 void rb_gi_callback_data_free       (RBGICallbackData       *callback_data);
 RBGIArgMetadata *
 rb_gi_callback_data_get_metadata(RBGICallbackData *callback_data);
 VALUE
 rb_gi_callback_data_get_rb_callback(RBGICallbackData *callback_data);
+
+void
+rb_gi_callback_register_finder(RBGICallbackFinderFunc finder);
 
 VALUE rb_gi_struct_new_raw(VALUE klass,
                            gpointer instance,

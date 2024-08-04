@@ -1,4 +1,4 @@
-# Copyright (C) 2015  Ruby-GNOME2 Project Team
+# Copyright (C) 2015-2021  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- 
+
 class TestGLibUnicode < Test::Unit::TestCase
   include GLibTestUtils
 
@@ -113,7 +113,6 @@ class TestGLibUnicode < Test::Unit::TestCase
   end
 
   def test_unichar_wide_cjk?
-    only_glib_version(2, 12, 0)
     assert(GLib::UniChar.wide_cjk?(unichar("あ")))
     assert(GLib::UniChar.wide_cjk?(0xD55C)) # HANGUL SYLLABLE HAN
     assert(!GLib::UniChar.wide_cjk?(unichar("a")))
@@ -176,17 +175,28 @@ class TestGLibUnicode < Test::Unit::TestCase
                  GLib::Unicode.canonical_ordering(utf8_to_utf32(original)))
   end
 
-  def test_unicode_canonical_decomposition
+  def test_unichar_compose
+    a_with_acute = 0x00E1
+    assert_equal(a_with_acute,
+                 GLib::UniChar.compose(unichar("a"), 0x0301))
+
+    hiragana_ga = 0x304C
+    hiragana_ka = 0x304B
+    assert_equal(hiragana_ga,
+                 GLib::UniChar.compose(hiragana_ka, 0x3099))
+  end
+
+  def test_unichar_decompose
     a_with_acute = 0x00E1
     expected = [unichar("a"), 0x0301].pack("U*")
     assert_equal(utf8_to_utf32(expected),
-                 GLib::Unicode.canonical_decomposition(a_with_acute))
+                 GLib::UniChar.decompose(a_with_acute))
 
     hiragana_ga = 0x304C
     hiragana_ka = 0x304B
     expected = [hiragana_ka, 0x3099].pack("U*")
     assert_equal(utf8_to_utf32(expected),
-                 GLib::Unicode.canonical_decomposition(hiragana_ga))
+                 GLib::UniChar.decompose(hiragana_ga))
   end
 
   def test_unichar_get_mirror_char
@@ -196,7 +206,6 @@ class TestGLibUnicode < Test::Unit::TestCase
   end
 
   def test_unichar_get_script
-    only_glib_version(2, 14, 0)
     assert_equal(GLib::Unicode::SCRIPT_HIRAGANA,
                  GLib::UniChar.get_script(unichar("あ")))
   end
@@ -261,14 +270,12 @@ class TestGLibUnicode < Test::Unit::TestCase
   end
 
   def test_utf8_collate
-    only_glib_version(2, 16, 0)
     assert_operator(0, :>, GLib::UTF8.collate("あ", "い"))
     assert_operator(0, :<, GLib::UTF8.collate("い", "あ"))
     assert_equal(0, GLib::UTF8.collate("あ", "あ"))
   end
 
   def test_utf8_collate_key
-    only_glib_version(2, 16, 0)
     assert_operator(0, :>,
                     GLib::UTF8.collate_key("あ") <=>
                     GLib::UTF8.collate_key("い"))
@@ -340,20 +347,17 @@ class TestGLibUnicode < Test::Unit::TestCase
   end
 
   def test_unichar_combining_class
-    only_glib_version(2, 14, 0)
     assert_equal(0, GLib::UniChar.combining_class(unichar("a")))
     assert_equal(230, GLib::UniChar.combining_class(unichar("́")))
   end
 
   def test_unichar_mark?
-    only_glib_version(2, 14, 0)
     assert(!GLib::UniChar.mark?(unichar("a")))
     assert(!GLib::UniChar.mark?(0x200E)) # LEFT-TO-RIGHT MARK
     assert(GLib::UniChar.mark?(0x1DC3)) # COMBINING SUSPENSION MARK
   end
 
   def test_unichar_zero_width?
-    only_glib_version(2, 14, 0)
     assert(!GLib::UniChar.zero_width?(unichar("a")))
     assert(GLib::UniChar.zero_width?(0x200B)) # ZERO WIDTH SPACE
   end

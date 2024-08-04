@@ -1,11 +1,10 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011-2018  Ruby-GNOME2 Project Team
- *  Copyright (C) 2003-2006  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2003-2022  Ruby-GNOME Project Team
  *  Copyright (C) 2002,2003  Masahiro Sakai
- *  Copyright (C) 1998-2000 Yukihiro Matsumoto,
- *                          Daisuke Kanda,
- *                          Hiroshi Igarashi
+ *  Copyright (C) 1998-2000  Yukihiro Matsumoto,
+ *                           Daisuke Kanda,
+ *                           Hiroshi Igarashi
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -180,12 +179,7 @@ rbgobj_ruby_object_from_instance_with_unref(gpointer instance)
 void
 rbgobj_add_relative(VALUE obj, VALUE relative)
 {
-    static VALUE mGLibObject = Qnil;
-    if (NIL_P(mGLibObject)) {
-        mGLibObject = rb_const_get(mGLib, rb_intern("Object"));
-    }
-
-    if (rb_obj_is_kind_of(obj, mGLibObject)) {
+    if (rb_obj_is_kind_of(obj, rbg_cGLibObject())) {
         rbgobj_object_add_relative(obj, relative);
     } else {
         VALUE rb_gc_marker = Qnil;
@@ -213,13 +207,8 @@ rbgobj_invalidate_relatives(VALUE obj)
 void
 rbgobj_add_relative_removable(VALUE obj, VALUE relative, ID obj_ivar_id, VALUE hash_key)
 {
-    static VALUE cGLibObject = Qnil;
-    if (NIL_P(cGLibObject)) {
-        cGLibObject = rb_const_get(mGLib, rb_intern("Object"));
-    }
-
     if (obj_ivar_id == rbgobj_id_children &&
-        rb_obj_is_kind_of(obj, cGLibObject)) {
+        rb_obj_is_kind_of(obj, rbg_cGLibObject())) {
         rbgobj_object_add_relative(obj, hash_key);
     } else {
         VALUE hash = Qnil;
@@ -252,17 +241,12 @@ rbgobj_get_relative_removable(VALUE obj, ID obj_ivar_id, VALUE hash_key)
 void
 rbgobj_remove_relative(VALUE obj, ID obj_ivar_id, VALUE relative)
 {
-    static VALUE cGLibObject = Qnil;
-    if (NIL_P(cGLibObject)) {
-        cGLibObject = rb_const_get(mGLib, rb_intern("Object"));
-    }
-
     if (obj_ivar_id == (ID)0) {
         obj_ivar_id = id_relatives;
     }
 
     if ((obj_ivar_id == id_relatives || obj_ivar_id == rbgobj_id_children) &&
-        rb_obj_is_kind_of(obj, cGLibObject)) {
+        rb_obj_is_kind_of(obj, rbg_cGLibObject())) {
         rbgobj_object_remove_relative(obj, relative);
     } else {
         VALUE rb_gc_marker = Qnil;
@@ -344,7 +328,7 @@ rbgobj_define_property_accessors(VALUE klass)
 
         if (pspec->flags & G_PARAM_READABLE){
             g_string_append_printf(
-                source, 
+                source,
                 "def %s%s; get_property('%s'); end\n",
                 prop_name,
                 (G_PARAM_SPEC_VALUE_TYPE(pspec) == G_TYPE_BOOLEAN) ? "?" : "",
@@ -362,11 +346,12 @@ rbgobj_define_property_accessors(VALUE klass)
         g_free(buf);
     }
 
-    if (source->len > 0)
+    if (source->len > 0) {
         rb_funcall(klass, id_module_eval, 3,
                    rb_str_new2(source->str),
                    rb_str_new2(__FILE__),
                    INT2NUM(__LINE__));
+    }
     g_string_free(source, TRUE);
 }
 

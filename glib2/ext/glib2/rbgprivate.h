@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2007-2019  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2007-2024  Ruby-GNOME Project Team
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -21,13 +21,17 @@
 #pragma once
 
 /*
- * CentOS 6: GLib 2.28
- * CentOS 7: GLib 2.50
- * Ubuntu 14.04: GLib 2.40
- * Ubuntu 16.04: GLib 2.48
- * Ubuntu 18.04: GLib 2.54
+ * CentOS 7: GLib 2.56
+ * AlmaLinux 8: GLib 2.56
+ * AlmaLinux 9: GLib 2.68
+ * Ubuntu 20.04: GLib 2.64
+ * Ubuntu 22.04: GLib 2.72
  */
-#define GLIB_VERSION_MIN_REQUIRED GLIB_VERSION_2_28
+#ifndef GLIB_VERSION_MIN_REQUIRED
+#  define GLIB_VERSION_MIN_REQUIRED GLIB_VERSION_2_56
+#endif
+
+#define G_LOG_DOMAIN "Ruby/GLib2"
 
 #include "rbgobject.h"
 
@@ -41,6 +45,10 @@
 
 #ifndef G_VALUE_INIT
 #  define G_VALUE_INIT { 0, { { 0 } } }
+#endif
+
+#ifndef RUBY_TYPED_FROZEN_SHAREABLE
+#  define RUBY_TYPED_FROZEN_SHAREABLE 0
 #endif
 
 G_BEGIN_DECLS
@@ -59,7 +67,7 @@ typedef struct {
     GType type;
 } boxed_holder;
 
-G_GNUC_INTERNAL extern GStaticPrivate rg_polling_key;
+G_GNUC_INTERNAL extern GPrivate rg_polling_key;
 G_GNUC_INTERNAL extern rb_encoding *rbg_filename_encoding;
 
 extern VALUE rbgobj_cEnum;
@@ -71,6 +79,7 @@ extern VALUE rbgobj_cObject;
 
 extern VALUE rbgobj_cInstantiatable;
 extern VALUE rbgobj_mMetaInterface;
+extern VALUE rbgobj_mMetaSignal;
 #define cInstantiatable   rbgobj_cInstantiatable
 #define mMetaInterface rbgobj_mMetaInterface
 
@@ -98,6 +107,8 @@ VALUE rbgutil_generic_s_gtype(VALUE klass);
 VALUE rbgutil_generic_gtype(VALUE self);
 #define generic_s_gtype rbgutil_generic_s_gtype
 #define generic_gtype rbgutil_generic_gtype
+
+VALUE rbgutil_generic_s_to_s_gtype_name_fallback(VALUE klass);
 
 extern gboolean rbgobj_convert_has_type(GType type);
 extern RGConvertTable *rbgobj_convert_lookup(GType type);

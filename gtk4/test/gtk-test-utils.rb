@@ -1,4 +1,4 @@
-# Copyright (C) 2011-2018  Ruby-GNOME2 Project Team
+# Copyright (C) 2011-2022  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -17,6 +17,8 @@
 require "tempfile"
 require "fileutils"
 
+require "gtk4"
+
 module GtkTestUtils
   private
   def only_gtk_version(major, minor, micro=nil)
@@ -27,10 +29,44 @@ module GtkTestUtils
   end
 
   def window_system_type_name
-    Gdk::Screen.default.class.gtype.name
+    Gdk::Display.default.class.gtype.name
+  end
+
+  module WindowSystemTypeNames
+    BROADWAY = "GdkBroadwayDisplay"
+    X11 = "GdkX11Display"
+    WINDOWS = "GdkWin32Display"
+  end
+
+  def x11?
+    gdk_backend = ENV["GDK_BACKEND"]
+    if gdk_backend.nil?
+      window_system_type_name == WindowSystemTypeNames::X11
+    else
+      gdk_backend == "x11"
+    end
+  end
+
+  def broadway?
+    gdk_backend = ENV["GDK_BACKEND"]
+    if gdk_backend.nil?
+      window_system_type_name == WindowSystemTypeNames::BROADWAY
+    else
+      gdk_backend == "broadway"
+    end
   end
 
   def fixture_path(*components)
-    File.join(File.dirname(__FILE__), "fixture", *components)
+    File.expand_path(File.join(*components),
+                     ENV["GTK4_FIXTURE_DIR"] || File.join("test", "fixture"))
+  end
+
+  def suppress_warning
+    verbose, $VERBOSE = $VERBOSE, nil
+    begin
+      yield
+    ensure
+      $VERBOSE = verbose
+    end
   end
 end

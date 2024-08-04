@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2018  Ruby-GNOME2 Project Team
+# Copyright (C) 2015-2022  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -28,9 +28,30 @@ class TestGtkBox < Test::Unit::TestCase
 
   test "set_child_packing" do
     box = Gtk::Box.new(:vertical)
-    child = Gtk::Label.new("test")
-    box.add(child)
-    box.set_child_packing(child, :end)
-    assert_equal(Gtk::PackType::END, box.query_child_packing(child))
+    child = Gtk::Box.new(:horizontal)
+    box.append(child)
+    suppress_warning do
+      box.set_child_packing(child,
+                            expand: false,
+                            fill: true,
+                            padding: 100,
+                            pack_type: :end)
+    end
+    assert_equal([
+                   false,
+                   Gtk::Align::END,
+                   100,
+                   100,
+                   100,
+                   100,
+                 ],
+                 [
+                   child.vexpand?,
+                   child.valign,
+                   child.margin_top,
+                   child.margin_bottom,
+                   child.margin_start,
+                   child.margin_end,
+                 ])
   end
 end

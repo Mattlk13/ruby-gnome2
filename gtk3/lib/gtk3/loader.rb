@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2019  Ruby-GNOME2 Project Team
+# Copyright (C) 2014-2023  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -31,6 +31,7 @@ module Gtk
       call_init_function(repository, namespace)
       define_stock_module
       define_version_module
+      define_methods_modules
       setup_pending_constants
     end
 
@@ -54,6 +55,36 @@ module Gtk
       @base_module.const_set("Version", @version_module)
     end
 
+    def define_methods_modules
+      @stock_singleton_methods_module =
+        define_methods_module(:StockSingletonMethods)
+      @widget_methods_module =
+        define_methods_module(:WidgetMethods)
+      @gdk_drag_context_methods_module =
+        define_methods_module(:GdkDragContextMethods)
+      @icon_size_class_methods_module =
+        define_methods_module(:IconSizeClassMethods)
+      @accel_group_class_methods_module =
+        define_methods_module(:AccelGroupClassMethods)
+      @gdk_event_methods_module =
+        define_methods_module(:GdkEventMethods)
+    end
+
+    def apply_methods_modules
+      apply_methods_module(@stock_singleton_methods_module,
+                           @base_module::Stock.singleton_class)
+      apply_methods_module(@widget_methods_module,
+                           @base_module::Widget)
+      apply_methods_module(@gdk_drag_context_methods_module,
+                           Gdk::DragContext)
+      apply_methods_module(@icon_size_class_methods_module,
+                           @base_module::IconSize.singleton_class)
+      apply_methods_module(@accel_group_class_methods_module,
+                           @base_module::AccelGroup.singleton_class)
+      apply_methods_module(@gdk_event_methods_module,
+                           Gdk::Event)
+    end
+
     def level_bar_class
       @level_bar_class ||= @base_module.const_get(:LevelBar)
     end
@@ -64,6 +95,7 @@ module Gtk
 
     def post_load(repository, namespace)
       apply_pending_constants
+      apply_methods_modules
       require_extension
       require_libraries
     end
@@ -114,6 +146,7 @@ module Gtk
       require "gtk3/radio-action"
       require "gtk3/radio-button"
       require "gtk3/recent-chooser-dialog"
+      require "gtk3/response-type"
       require "gtk3/scale-button"
       require "gtk3/scrolled-window"
       require "gtk3/search-bar"
@@ -139,6 +172,7 @@ module Gtk
       require "gtk3/tree-iter"
       require "gtk3/tree-model"
       require "gtk3/tree-model-filter"
+      require "gtk3/tree-model-sort"
       require "gtk3/tree-path"
       require "gtk3/tree-selection"
       require "gtk3/tree-store"
@@ -168,46 +202,54 @@ module Gtk
       when "init", /_get_type\z/
         # ignore
       when /\Astock_/
-        stock_module = @base_module.const_get(:Stock)
         method_name = rubyish_method_name(info, :prefix => "stock_")
-        define_singleton_method(stock_module, method_name, info)
+        define_module_function(info,
+                               @stock_singleton_methods_module,
+                               method_name)
       when /\Adrag_(?:source_|dest_|get_data\z|(?:un)highlight\z|begin|check_threshold\z)/
         # For OS X. It may be broken. It's not tested.
-        widget_class = @base_module.const_get(:Widget)
         method_name = rubyish_method_name(info)
-        define_method(info, widget_class, method_name)
+        define_method(info, @widget_methods_module, method_name)
       when /\Adrag_/
         method_name = rubyish_method_name(info,
                                           :prefix => "drag_",
                                           :n_in_args_offset => -1)
-        define_method(info, Gdk::DragContext, method_name)
+        define_method(info, @gdk_drag_context_methods_module, method_name)
       when /\Abinding_/
         # Ignore because singleton methods are defined.
       when /\Aicon_size_/
-        icon_size_class = @base_module.const_get(:IconSize)
         method_name = rubyish_method_name(info, :prefix => "icon_size_")
-        define_singleton_method(icon_size_class, method_name, info)
+        define_module_function(info,
+                               @icon_size_class_methods_module,
+                               method_name)
       when /\Atest_widget_/
         name = $POSTMATCH
-        define_method(info, Gtk::Widget, name)
+        define_method(info, @widget_methods_module, name)
       when /\Aaccel_groups_/
-        accel_group_class = @base_module.const_get(:AccelGroup)
         method_name = rubyish_method_name(info, :prefix => "accel_groups_")
-        define_singleton_method(accel_group_class, method_name, info)
+        define_module_function(info,
+                               @accel_group_class_methods_module,
+                               method_name)
       else
         super
       end
     end
 
-    def define_singleton_method(klass, name, info)
+    def define_singleton_method(info, klass, name)
       case klass.name
       when "Gtk"
         case name
         when "get_event_widget"
-          define_gdk_event_widget(info)
+          define_method(info, @gdk_event_methods_module, "widget")
           return
         when "events_pending"
           name = "events_pending?"
+        end
+      when "Gtk::AccelMap"
+        case name
+        when "each", "foreach_unfiltered"
+          # Implemented in C
+          return
         end
       when "Gtk::Widget"
         case name
@@ -217,11 +259,7 @@ module Gtk
         end
       end
 
-      super(klass, name, info)
-    end
-
-    def define_gdk_event_widget(info)
-      define_method(info, Gdk::Event, "widget")
+      super(info, klass, name)
     end
 
     def define_enum(info)

@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2018  Ruby-GNOME2 Project Team
+# Copyright (C) 2015-2022  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -21,14 +21,9 @@ class TestGtkWindow < Test::Unit::TestCase
     @window = Gtk::Window.new
   end
 
-  sub_test_case "#icon=" do
-    test "String" do
-      @window.icon = fixture_path("gnome-logo-icon.png")
-    end
-
-    test "GdkPixbuf::Pixbuf" do
-      icon = GdkPixbuf::Pixbuf.new(:file => fixture_path("gnome-logo-icon.png"))
-      @window.icon = icon
-    end
+  def test_icon_name
+    assert_nil(@window.icon_name)
+    @window.icon_name = "gnome"
+    assert_equal("gnome", @window.icon_name)
   end
 end

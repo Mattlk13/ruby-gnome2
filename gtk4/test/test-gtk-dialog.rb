@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2018  Ruby-GNOME2 Project Team
+# Copyright (C) 2015-2022  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -65,7 +65,6 @@ class TestGtkDialog < Test::Unit::TestCase
     end
 
     test "#use_header_bar?" do
-      only_gtk_version(3, 12, 0)
       assert do
         not @dialog.use_header_bar?
       end

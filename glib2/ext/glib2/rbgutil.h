@@ -1,7 +1,7 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011-2015  Ruby-GNOME2 Project Team
- *  Copyright (C) 2002,2003 Masao Mutoh
+ *  Copyright (C) 2011-2023  Ruby-GNOME Project Team
+ *  Copyright (C) 2002,2003  Masao Mutoh
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -55,6 +55,10 @@ G_BEGIN_DECLS
 #define RG_DEF_ATTR(attr, read, write, ex) \
         rb_attr(RG_TARGET_NAMESPACE, rb_intern(attr), read, write, ex)
 #define RG_DEF_ALIAS(new, old) rb_define_alias(RG_TARGET_NAMESPACE, new, old)
+#define RG_DEF_SALIAS(new, old) \
+        rb_define_alias(rb_class_of(RG_TARGET_NAMESPACE), new, old)
+#define RG_DEF_PRIVATE_METHOD(method, argc) \
+        rbg_define_private_method(RG_TARGET_NAMESPACE, #method, rg_ ## method, argc)
 
 #define RG_REG_GLIBID_SETTER(name) \
         rbgobj_register_property_setter(CLASS2GTYPE(RG_TARGET_NAMESPACE), name, rbgutil_glibid_r2g_func)
@@ -88,10 +92,12 @@ G_BEGIN_DECLS
     (rbgutil_string_set_utf8_encoding(string))
 
 extern void rbg_define_method(VALUE klass, const char *name, VALUE (*func)(ANYARGS), int argc);
+extern void rbg_define_private_method(VALUE klass, const char *name, VALUE (*func)(ANYARGS), int argc);
 extern void rbg_define_singleton_method(VALUE obj, const char *name, VALUE (*func)(ANYARGS), int argc);
 extern VALUE rbgutil_def_setters(VALUE klass);
 extern void rbgutil_set_properties(VALUE self, VALUE hash);
 extern VALUE rbgutil_protect(VALUE (*proc) (VALUE), VALUE data);
+extern void rbgutil_on_callback_error(VALUE error);
 extern VALUE rbgutil_invoke_callback(VALUE (*func)(VALUE), VALUE arg);
 extern void rbgutil_start_callback_dispatch_thread(void);
 extern void rbgutil_stop_callback_dispatch_thread(void);
@@ -104,7 +110,7 @@ extern GSource *rbg_interrupt_source_new(void);
 
 extern gchar *rbg_name_to_nick(const gchar *name);
 
-extern void *rbg_memzero(void *poitner, size_t size);
+extern void *rbg_memzero(void *pointer, size_t size);
 
 /*< protected >*/
 RUBY_GLIB2_VAR ID rbgutil_id_module_eval;

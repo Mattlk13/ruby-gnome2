@@ -1,0 +1,8271 @@
+# -*- RD -*-
+
+= NEWS
+
+== Ruby-GNOME 3.5.1: 2022-01-17
+
+This is a release for Windows.
+
+=== Changes
+
+==== All
+
+  * windows: Added workaround for mingw-w64-x86_64-gettext-0.21-1 or
+    later. Dummy (({DllMain()})) is defined.
+
+==== Ruby/GdkPixbuf2
+
+  * Improvements
+
+    * Suppressed method redefining warnings.
+
+==== Ruby/Pango
+
+  * Fixes
+
+    * Fixed a bug that can't be started.
+      [GitHub#1456][Reported by Akira Ouchi]
+
+==== Ruby/GObjectIntrospection
+
+  * Fixes
+
+    * Fixed a bug that (({NoMethodError})) is raised on invalid
+      signature for constructor.
+
+=== Thanks
+
+  * Akira Ouchi
+
+== Ruby-GNOME 3.5.0: 2022-01-11
+
+This is a release that adds support for Ractor.
+
+Ruby/GObjectIntrospection has some backward incompatibilities for
+Ractor support. If you have any problem, please report it to
+https://github.com/ruby-gnome/ruby-gnome/issues .
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * Added support for Ractor.
+
+    * Added support for signal handlers and virtual methods in
+      included module.
+
+    * Added support for (({try_convert})) protocol for property setter.
+
+    * Added support for converting tuple (({GVariant})) to Ruby.
+
+==== Ruby/GIO2
+
+  * Improvements
+
+    * Added support for GIO 2.70.
+
+    * Added (({Gio::RubyInputStream})) to use Ruby objects as
+      (({Gio::InputStream})).
+
+    * Added (({Gio::RubyOutputStream})) to use Ruby objects as
+      (({Gio::OutputStream})).
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Added support for Ractor. This introduced some backward
+      incompatiblities.
+
+    * Added support for "transfer full" for out (({GError})).
+      [GitHub#1437][Reported by mcclumpherty]
+
+    * Added support for changing whether GVL is unlocked per object by
+      the following APIs.
+
+      * (({GObjectIntrospection::FunctionInfo#set_lock_gvl_default}))
+
+      * (({GObjectIntrospection::FunctionInfo#add_lock_gvl_predicate}))
+
+      * (({GObjectIntrospection::Loader#prepare_function_info_lock_gvl}))
+
+    * Added support for converting from raw argument to enum.
+
+    * Added support for (({GList<GVariant>})) return value.
+
+    * Added support for reporting an error in callback.
+
+  * Fixes
+
+    * Fixed a bug that virtual functions of grandparent class can't be
+      implemented.
+      [GitHub#1433][Patch by shibafu]
+
+==== Ruby/Pango
+
+  * Improvements
+
+    * Added support for Ruby 3.2.
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * Improved documentation.
+      [GitHub#1454][Patch by Andy Maleh]
+
+    * Added support for Ruby 3.2.
+
+==== Ruby/GDK4
+
+  * Improvements
+
+    * Updated pkg-config ID.
+      [GitHub#1435][Patch by Sasi Olin]
+
+==== Ruby/GTK4
+
+  * Improvements
+
+    * Removed needless rsvg2 dependency on Windows.
+      [GitHub#1440][Reported by HuBandiT]
+
+  * Fixes
+
+    * Fixed typos in warning messages.
+      [GitHub#1442][Patch by HuBandiT]
+      [GitHub#1415][Reported by rubyFeedback]
+
+=== Thanks
+
+  * shibafu
+
+  * Sasi Olin
+
+  * mcclumpherty
+
+  * HuBandiT
+
+  * rubyFeedback
+
+  * Andy Maleh
+
+== Ruby-GNOME 3.4.9: 2021-08-10
+
+This is a bug fix release of 3.4.8.
+
+=== Changes
+
+==== Ruby/GObjectIntrospection
+
+  * Fixes
+
+    * Fixed a bug that (({gpointer})) to Ruby conversion breaks a
+      value when pointer value is (({2 ** 32})) or larger.
+
+== Ruby-GNOME 3.4.8: 2021-08-09
+
+This is a bug fix release of 3.4.7.
+
+=== Changes
+
+==== Ruby/GObjectIntrospection
+
+  * Fixes
+
+    * Fixed a bug that (({gpointer})) to Ruby conversion breaks a
+      value when pointer value is (({2 ** 32})) or larger.
+
+== Ruby-GNOME 3.4.7: 2021-07-30
+
+This is a release that improves virtual function support.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * (({GLib::Error})): Added support for setting (({code})) and
+      (({domain})) automatically.
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Added support for returning object from callback.
+
+  * Fixes
+
+    * Fixed a bug that (({GError})) detection doesn't work.
+
+== Ruby-GNOME 3.4.6: 2021-07-17
+
+This is a bug fix release for macOS.
+
+=== Changes
+
+==== Ruby/Pango
+
+  * Fixes
+
+    * Fixed a bug that (({require "pango"})) is failed on environment
+      that has multiple font types.
+      [GitHub#1429][Reported by Cameron Gose]
+
+=== Thanks
+
+  * Cameron Gose
+
+== Ruby-GNOME 3.4.5: 2021-07-07
+
+This is a release that supports implementing virtual functions in
+Ruby.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * Added (({GError})) domain and code for Ruby.
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * (({GObjectIntrospection::BaseInfo#container})): Added.
+
+    * (({GObjectIntrospection::ObjectInfo#class_struct})): Added.
+
+    * (({GObjectIntrospection::StructInfo#find_field})): Added.
+
+    * (({RVAL2GI_VFUNC_INFO()})): Added.
+
+    * Added support for implementing virtual functions in Ruby.
+      [GitHub#1386][Based on patch by Yuto Tokunaga]
+
+      You need to define (({virtual_do_#{virtual_function_name}}))
+      method in (({type_register}))-ed class.
+
+    * Added support for implementing virtual functions of interface in
+      Ruby.
+      [GitHub#985][Reported by Matijs van Zuijlen]
+      [GitHub#1938][Reported by Yuto Tokunaga]
+
+    * Added support for "transfer everything" UTF-8 return/output
+      value.
+
+    * Changed to accepted one character for (({gunichar})).
+      [GitHub#1426][Reported by rubyFeedback]
+
+    * (({GObjectIntrospection::CallableInfo#can_throw_gerror?})): Added.
+
+    * Added support for (({GError **})) in callback.
+
+    * Added support for returning (({GList<GObject *>})) from callback.
+
+    * Changed to return (({[]})) for (({NULL})) list.
+
+  * Fixes
+
+    * Fixed a bug that wrong type information is used for output
+      arguments.
+
+==== Ruby/Pango
+
+  * Added support for (({PangoFT2})).
+
+  * Added support for (({PangoFc})).
+
+  * Added support for (({PangoOT})).
+
+  * Added support for (({PangoCairoFontMaps})).
+
+  * Updated gem metadata.
+    [GitHub#1428][Patch by Gabriel Mazetto]
+
+=== Thanks
+
+  * Yuto Tokunaga
+
+  * Matijs van Zuijlen
+
+  * rubyFeedback
+
+  * Gabriel Mazetto
+
+== Ruby-GNOME 3.4.4: 2021-04-22
+
+This is a bug fix release for Windows.
+
+=== Changes
+
+==== All
+
+  * Dropped support for CentOS 6.
+
+  * Dropped support for Ubuntu 16.04.
+
+  * Dropped support for Ruby 2.4.
+
+  * Dropped support for Ruby 2.5.
+
+  * Added support for Ruby 3.0.
+
+==== Document
+
+  * Improvements
+
+    * Improved how to use on Heroku.
+      [GitHub#1414][Patch by Juan D Lopez]
+
+    * Improved README.
+      [Patch by kojix2]
+
+==== Ruby/GLib
+
+  * Improvements
+
+    * Added (({RVAL2POINTER()})).
+
+    * Added (({POINTER2RVAL()})).
+
+    * Changed to use (({rb_cObject})) instead of (({rb_cData})) as a
+      parent class of typed data.
+
+    * Changed to use typed data instead of data for all data types.
+
+    * Added support for Ractor partially.
+
+    * Required GLib 2.48 or later.
+
+    * (({GLib::UniChar.compose})): Added.
+
+    * (({GLib::UniChar.decompose})): Added.
+
+    * (({GLib::UniChar.canonical_decomposition})): Deprecated. Use
+      (({GLib::UniChar.decompose})) instead.
+
+    * (({GLib.format_size_for_display})): Deprecated. Use
+      (({GLib.format_size})) instead.
+
+  * Fixes
+
+    * Fixed wrong conversions between (({VALUE})) and (({GType})).
+      [GitHub#1386][Patch by Yuto Tokunaga]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Removed needless transfer check for struct.
+      [GitHub#1396][Reported by Konrad Narewski]
+
+    * Added support freeing (({GArray})) of raw struct out parameter.
+      [GitHub#1356][Reported by aycabta]
+
+==== Ruby/Pango
+
+  * Improvements
+
+    * Added (({Pango::Render::PART_*})) to keep backward compatibility.
+      [GitHub#1311][Reported by rubyFeedback]
+
+==== Ruby/GStreamer
+
+  * Improvements
+
+    * Removed needless workaround for
+      (({Gst::ElementFactory#static_pad_templates})).
+      [GitHub#1400][Reported by Justin Weiss]
+
+==== Ruby/Gnumeric
+
+  * Improvements
+
+    * Added support for the latest Gnumeric.
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * (({Gtk::Widget#set_size_request})): Added support for
+      (({width:})) and (({height:})).
+      [GitHub#1406][Reported by rubyFeedback]
+
+    * (({Gtk::Dialog#set_default_response})): Added support for
+      (({Symbol})).
+      [GitHub#1418][Reported by rubyFeedback]
+
+==== Ruby/GDK4
+
+  * Added.
+
+==== Ruby/GTK4
+
+  * Added.
+
+==== Ruby/VTE3
+
+  * Improvements
+
+    * Improved description.
+      [GitHub#1406][Reported by rubyFeedback]
+
+==== Ruby/GTK2
+
+  * Removed.
+
+==== Ruby/GtkSourceView2
+
+  * Removed.
+
+==== Ruby/WebKitGtk2
+
+  * Removed.
+
+==== Ruby/VTE
+
+  * Removed.
+
+=== Thanks
+
+  * Konrad Narewski
+
+  * aycabta
+
+  * rubyFeedback
+
+  * Justin Weiss
+
+  * Yuto Tokunaga
+
+  * Juan D Lopez
+
+  * kojix2
+
+== Ruby-GNOME 3.4.3: 2020-05-11
+
+This is a follow-up release of 3.4.2.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Fixes
+
+    * Windows: Fixed a link errors.
+
+== Ruby-GNOME 3.4.2: 2020-05-02
+
+This is a follow-up release of 3.4.1.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * Added support for Ruby 2.8.
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * (({Gtk::Widget#style_get_property})): Added a validation.
+
+    * Updated examples.
+      [GitHub#1318][GitHub#1319][GitHub#1320][GitHub#1321][GitHub#1322]
+      [GitHub#1323][GitHub#1324][GitHub#1325][GitHub#1326][GitHub#1327]
+      [GitHub#1328][GitHub#1329][GitHub#1330][GitHub#1331][GitHub#1332]
+      [GitHub#1353][GitHub#1354][GitHub#1355][GitHub#1391]
+      [Patch by kojix2]
+
+  * Fixes
+
+    * Fixed a typo.
+      [GitHub#1307][Patch by İsmail Arılık]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Changed to accept (({nil})) as a false value for boolean.
+      [GitHub#1305][Reported by Matijs van Zuijlen]
+
+    * Added support for UTF-8 (({GHashTable})) value.
+
+    * Added workaround for (({rsvg_handle_set_stylesheet()})).
+
+  * Fixes
+
+    * Fixed a bug that pointer struct isn't allocated correctly.
+      [GitHub#1315][Reported by Konrad Narewski]
+
+==== Ruby/GtkSourceView4
+
+  * Improvements
+
+    * Added support for auto native package install on Ubuntu.
+      [GitHub#1309][Patch by İsmail Arılık]
+
+    * Added support for auto native package install on Debian GNU/Linux.
+
+==== Ruby/VTE3
+
+  * Improvements
+
+    * (({Vte::Terminal#spawn})): Made options optional.
+      [GitHub#1333][Patch by kojix2]
+
+    * Updated README.
+      [GitHub#1335][Patch by kojix2]
+
+==== Ruby/GdkPixbuf2
+
+  * Improvements
+
+    * Updated examples.
+      [GitHub#1336][GitHub#1337][GitHub#1338][GitHub#1339][GitHub#1340]
+      [GitHub#1341][GitHub#1342][GitHub#1343][GitHub#1344][GitHub#1347]
+      [GitHub#1348][GitHub#1349]
+      [Patch by kojix2]
+
+    * Updated README.
+      [GitHub#1346][Patch by kojix2]
+
+==== Ruby/WebKit2GTK
+
+  * Fixes
+
+    * Fixed dependency check.
+      [GitHub#1351][Patch by kojix2]
+
+==== Ruby/RSVG2
+
+  * Improvements
+
+    * Updated examples.
+      [GitHub#1357][Patch by kojix2]
+      [GitHub#1393][Patch by Jean-Christophe Le Lann]
+
+=== Thanks
+
+  * Matijs van Zuijlen
+
+  * İsmail Arılık
+
+  * Konrad Narewski
+
+  * kojix2
+
+  * Jean-Christophe Le Lann
+
+== Ruby-GNOME 3.4.1: 2019-10-16
+
+This is a follow-up release of 3.4.0.
+
+=== Changes
+
+==== Ruby/GDK3
+
+  * Improvements
+
+    * Added support for (({String})) and (({Symbol})) as (({Gdk::Color})).
+      [GitHub#1286][Reported by rubyFeedback]
+
+    * Added support for (({String})) and (({Symbol})) as (({Gdk::RGBA})).
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Added support for (({GBytes **})).
+
+=== Thanks
+
+  * rubyFeedback
+
+== Ruby-GNOME 3.4.0: 2019-10-10
+
+This is a bug fix release of 3.3.9.
+
+=== Changes
+
+==== Ruby/ATK
+
+  * Fixes
+
+    * Fixed a typo.
+      [GitHub#1302][Reported by kojix2]
+
+=== Thanks
+
+  * kojix2
+
+== Ruby-GNOME 3.3.9: 2019-10-10
+
+This is a full GLib 2.62.0 support release.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * Deprecated (({GLib::Param::PRIVATE})). Use
+      (({GLib::Param::STATIC_NAME})) instead.
+
+    * Deprecated (({GLib::Param#private?})). Use
+      (({GLib::Param#static_name?})) instead.
+
+    * Added new flags:
+
+      * (({GLib::Param::STATIC_NICK}))
+
+      * (({GLib::Param::STATIC_BLURB}))
+
+      * (({GLib::Param::EXPLICIT_NOTIFY}))
+
+      * (({GLib::Param::DEPRECATED}))
+
+    * Added new predicates:
+
+      * (({GLib::Param#static_nick?}))
+
+      * (({GLib::Param#static_blurb?}))
+
+      * (({GLib::Param#explicit_notify?}))
+
+      * (({GLib::Param#deprecated?}))
+
+    * Deprecated (({ruby_gnome2_version})) in `mkmf-gnome`. Use
+      (({ruby_gnome_version})) instead.
+
+    * Added (({rbgobj_gtype_from_ruby()})).
+
+    * Added (({rbg_is_object()})).
+
+    * Added (({rbg_is_value()})).
+
+    * Added (({rbg_is_bytes()})).
+
+    * Removed needless const from the return value of
+      (({rbg_rval2strv()})).
+
+    * Removed needless const from the return value of
+      (({rbg_rval2strv_accept_nil()})).
+
+    * Added (({rbg_rval2filenamev()})).
+
+    * Added (({rbg_rval2filenamev_accept_nil()})).
+
+    * Stopped to define (({GType})) for (({GPollFD})).
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Added support for conversion from (({GLib::Bytes})) to
+      (({[gint8]})) and (({[guint8]})).
+
+    * Added more information to inspected result.
+
+==== Ruby/GIO2
+
+  * Improvements
+
+    * Added support for GLib 2.62.0 or later.
+      [GitHub#1296][Reported by Mamoru TASAKA]
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * Added (({Gtk::TreeModelSort.new})).
+      [GitHub#1298][Reported by LutzLue]
+      (({[gint8]})) and (({[guint8]})).
+
+==== Ruby/GStreamer
+
+  * Improvements
+
+    * Removed all custom callbacks.
+
+    * (({Gst::TagList#each})): Changed to yield tag name and tag
+      values.
+
+=== Thanks
+
+  * LutzLue
+
+  * Mamoru TASAKA
+
+== Ruby-GNOME 3.3.8: 2019-09-10
+
+This is a partially GLib 2.62.0 support release.
+
+=== Changes
+
+==== All
+
+  * Improvements
+
+    * Changed our project name to Ruby-GNOME from Ruby-GNOME2.
+      [GitHub#1277][Suggested by kojix2]
+      [GitHub#1291][Patch by kojix2]
+
+    * Stopped to release (({.tar.gz})) because they are no longer
+      used.
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * (({GLib.convert})): Changed to set correct encoding.
+
+    * (({GLib::FILENAME_ENCODING})): Added.
+
+    * Changed to use the same enum object for the same enum value.
+
+    * (({GLib::Enum.find})): Added.
+
+    * (({GLib::Bytes#initialize})): Changed to reuse (({String})) data
+      even if the given (({String})) isn't frozen.
+
+    * (({GLib::Bytes.try_convert})): Added.
+
+    * (({GLib::Enum.try_convert})): Added.
+
+    * (({GLib::Flags.try_convert})): Added.
+
+    * (({GLib::Type.try_convert})): Added.
+
+    * (({GLib::MkEnums.create})): Added support for flags to enum
+      definition.
+      [GitHub#1295][Patch by Mamoru TASAKA]
+
+==== Ruby/GIO2
+
+  * Fixes
+
+    * Renamed to (({Gio::Icon#hash})) from (({Gio::Icon.hash})).
+      [GitHub#1293][Reported by Erik Czumadewski]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Introduced (({try_convert})) protocol.
+
+==== Ruby/CairoGObject
+
+  * Improvements
+
+    * (({Cairo::Context.try_convert})): Added.
+
+    * (({Cairo::Device.try_convert})): Added.
+
+    * (({Cairo::Pattern.try_convert})): Added.
+
+    * (({Cairo::Surface.try_convert})): Added.
+
+    * (({Cairo::ScaledFont.try_convert})): Added.
+
+    * (({Cairo::FontFace.try_convert})): Added.
+
+    * (({Cairo::FontOptions.try_convert})): Added.
+
+    * (({Cairo::Region.try_convert})): Added.
+
+=== Thanks
+
+  * kojix2
+
+  * Erik Czumadewski
+
+  * Mamoru TASAKA
+
+== Ruby-GNOME2 3.3.7: 2019-08-17
+
+This is the bug fix release of 3.3.6.
+
+=== Changes
+
+==== Ruby/Pango
+
+  * Improvements
+
+    * (({Pango::AttrList#each})): Added.
+
+    * (({Pango::AttrType})): Added support for (({PANGO_ATTR_FONT_DESC})).
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Added support for (({GHashTable<utf8, enum>})).
+
+    * Added support for GObject Introspection 1.60.0.
+
+==== Ruby/Pango
+
+  * Improvements
+
+    * Added support for Pango 1.44.
+      [GitHub#1288][Reported by Toshiaki Asai]
+
+==== Ruby/GTK3
+
+  * Fixes
+
+    * Fixed document markup.
+      [GitHub#1280][GitHub#1281][GitHub#1282][Patch by İsmail Arılık]
+
+==== Ruby/WNCK3
+
+  * Added.
+    [GitHub#1284][Reported by Christopher L. Ramsey]
+
+==== Ruby/libsecret
+
+  * Added.
+
+=== Thanks
+
+  * İsmail Arılık
+
+  * Christopher L. Ramsey
+
+  * Toshiaki Asai
+
+== Ruby-GNOME2 3.3.6: 2019-03-21
+
+This is a follow-up release of 3.3.5.
+
+=== Changes
+
+==== Ruby/GIO2
+
+  * Improvements
+
+    * (({Gio::File#read})): Added support for block.
+
+    * (({Gio::File.open})): Added support for (({Pathname})).
+
+    * (({Gio::InputStream.open})): Added support for block.
+
+==== Ruby/CairoGObject
+
+  * Fixes
+
+    * Fixed a bug that old cairo may be used.
+
+==== Ruby/GObjectIntrospection
+
+  * Fixes
+
+    * Fixed a bug that 64bit integer conversion may be failed for
+      large integer.
+
+    * Fixed typos.
+
+== Ruby-GNOME2 3.3.5: 2019-03-10
+
+This is a follow-up release of 3.3.4.
+
+=== Changes
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Ignored no (({GType})) interface.
+
+== Ruby-GNOME2 3.3.4: 2019-03-09
+
+This is a real release to support GLib 2.60.
+
+=== Changes
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Ignored no (({GType})) interface.
+
+== Ruby-GNOME2 3.3.3: 2019-03-09
+
+This is a release to support GLib 2.60.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * Made tests more robust.
+      [GitHub#1272][Reported by Jeremy Bicha]
+
+    * Required pkg-config 1.3.5 or later.
+
+    * Added support for GLib 2.60.
+
+    * Windows: Removed support for static compilation.
+
+  * Fixes
+
+    * (({GLib::PollFD#fd=})): Fixed wrong conversion.
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Improved auto (({#==}))/(({#!=})) implementations.
+      They returns (({true}))/(({false})) for invalid argument instead
+      of raising an error.
+
+==== Ruby/GTK2
+
+  * Improvements
+
+    * Made tests more robust.
+      [GitHub#1275][Reported by Jeremy Bicha]
+
+==== Ruby/RSVG2
+
+  * Improvements
+
+    * Made tests more robust.
+      [GitHub#1273][Reported by Mamoru TASAKA]
+
+==== Ruby/Poppler
+
+  * Improvements
+
+    * (({Poppler::Document.new(data:)})):
+      Added support for (({Encoding.default_internal})).
+
+    * (({Poppler::Document.new})):
+      Added support for (({#to_path})) objects as path.
+
+=== Thanks
+
+  * Jeremy Bicha
+
+  * Mamoru TASAKA
+
+== Ruby-GNOME2 3.3.2: 2019-02-03
+
+This is a bug fix release of 3.3.1.
+
+=== Changes
+
+==== Ruby/GObjectIntrospection
+
+  * Fixed
+
+    * Fixed wrong nil check.
+      [GitHub#1270][Patch by moveccr]
+
+    * Fixed a memory leak when module function is used with block.
+      [GitHub#1270][Reported by Izumi Tsutsui]
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * Add backward compatibility APIs:
+
+      * (({Gtk::Screen#add_style_provider}))
+
+      * (({Gtk::Screen#remove_style_provider}))
+
+      * (({Gtk::StyleContext.add_provider_for_screen}))
+
+      * (({Gtk::StyleContext#add_provider}))
+
+=== Thanks
+
+  * moveccr
+
+  * Izumi Tsutsui
+
+== Ruby-GNOME2 3.3.1: 2019-01-09
+
+This is a release that improves GObject Introspection support.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * (({rbgobj_remove_relative()})): Added support for removing a
+      relative added by (({rbgobj_add_relative()})).
+
+    * Stopped to use raw (({Hash})) to guard objects from GC.
+
+    * (({GLib::Idle.remove})): Deprecated. Use
+      (({GLib::Source.remove})) instead.
+
+  * Fixes
+
+    * Fixed typos in samples.
+      [GitHub#1267][Patch by kojix2]
+
+==== Ruby/CairoGObject
+
+  * Improvements
+
+    * Started to require cairo gem 1.16.2 or later.
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Added support for input object validation.
+
+    * Added support for callback with module function such as
+      (({Gdk.threads_add_idle})).
+      [GitHub#1256][Reported by xetum]
+
+    * Added support for converting (({GHash<utf8, GObject>})).
+
+    * Added support for transfer full (({GHash})).
+
+    * Added support for freeing array of primitive types.
+      [GitHub#1266][Patch by Yosuke Shiro]
+
+    * Improved suitable method detection for array and list.
+
+    * Added support for converting an array of (({GObject})).
+
+    * Added support for renaming compare operations:
+
+      * (({not_equal})): (({!=}))
+
+      * (({less_than})): (({<}))
+
+      * (({less_than_or_equal})): (({<=}))
+
+      * (({greater_than})): (({>}))
+
+      * (({greater_than_or_equal})): (({>=}))
+
+==== Ruby/GdkPixbuf2
+
+  * Fixes
+
+    * Fixed markup.
+      [GitHub#1250][Patch by kojix2]
+
+    * Fixed a bug that data passed to (({GdkPixbuf::Pixbuf.new(data:
+      array)})) is corrupt by GC.
+
+==== Ruby/Pango
+
+  * Improvements
+
+    * (({Pango::Layout#get_pixel_extents})): Added for backward
+      compatibility.
+
+    * (({Pango::Rectangle#ascent})): Added for backward
+      compatibility.
+
+    * (({Pango::Rectangle#descent})): Added for backward
+      compatibility.
+
+    * (({Pango::Rectangle#lbearing})): Added for backward
+      compatibility.
+
+    * (({Pango::Rectangle#rbearing})): Added for backward
+      compatibility.
+
+    * (({Pango::Rectangle#left_bearing})): Added.
+
+    * (({Pango::Rectangle#right_bearing})): Added.
+
+==== Ruby/GTK2
+
+  * Fixes
+
+    * Fixed typos in samples.
+      [GitHub#1268][Patch by kojix2]
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * Updated sample to work on HiDPI environment.
+      [GitHub#1246][Patch by noanoa07]
+
+    * Updated samples.
+      [GitHub#1258][GitHub#1259][GitHub#1260][Patch by kojix2]
+
+==== Ruby/RSVG2
+
+  * Fixes
+
+    * Fixed typos.
+      [GitHub#1253][Patch by kojix2]
+
+    * Removed needless rsvg2 gem dependency for Windows.
+      [GitHub#1261][Reported by noanoa07]
+
+==== Ruby/GEGL
+
+  * Fixes
+
+    * Fixed a typo in README.
+      [GitHub#1263][Patch by kojix2]
+
+=== Thanks
+
+  * noanoa07
+
+  * kojix2
+
+  * xetum
+
+  * Yosuke Shiro
+
+== Ruby-GNOME2 3.3.0: 2018-10-31
+
+This is a release for fixing memory leak bugs of cairo-gobject,
+improving macOS support and adding support for GEGL.
+
+We stopped to provide fat gems for Windows. You can use normal gems
+with MSYS2 packages.
+
+=== Changes
+
+==== All
+
+  * Improvements
+
+    * Windows: Stopped to provide fat gems. You can use normal gems with
+      MSYS2 packages.
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * Added support for the same constant name and class name for error.
+
+  * Fixes
+
+    * Fixed wrong constant values:
+
+      * (({GLib2::MINLONG}))
+
+      * (({GLib2::MAXLONG}))
+
+      * (({GLib2::MAXULONG}))
+
+      * (({GLib2::MINUINT64}))
+
+      * (({GLib2::MAXSIZE}))
+
+      * (({GLib2::MINFLOAT}))
+
+      * (({GLib2::MINDOUBLE}))
+
+      [GitHub#1244][Reported by cobodo]
+
+==== Ruby/CairoGObject
+
+  * Fixes
+
+    * Fixed a memory leak.
+      [GitHub#1232][Reported by Jean-Christophe Le Lann]
+
+    * Stopped to increase needless reference.
+      [GitHub#1079][Reported by noanoa07]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Added support for transfer full output parameter.
+
+  * Fixes
+
+    * Fixed a bug that class method closure doesn't work.
+      [GitHub#1245][Reported by kojix2]
+
+==== Ruby/GdkPixbuf2
+
+  * Improvements
+
+    * (({GdkPixbuf::Pixbuf.new})): Added support for auto row stride
+      detection for (({[Integer]})) data.
+
+==== Ruby/Pango
+
+  * Improvements
+
+    * Made test more robust.
+      [GitHub#1239][Reported by Michael Hudson-Doyle]
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * Improved backward compatibility for (({Gtk::ListStore#set_column_types})).
+      [GitHub#1240][Reported by Edward Hennessy]
+
+  * Fixes
+
+    * Fixed wrong size used bug on HiDPI.
+      [GitHub#1079][Reported by noanoa07]
+
+==== Ruby/Poppler
+
+  * Improvements
+
+    * Added support for Popper 0.70.0.
+
+==== Ruby/GEGL
+
+  * Improvements
+
+    * Added.
+
+=== Thanks
+
+  * Jean-Christophe Le Lann
+
+  * Michael Hudson-Doyle
+
+  * Edward Hennessy
+
+  * cobodo
+
+  * kojix2
+
+  * noanoa07
+
+== Ruby-GNOME2 3.2.9: 2018-08-08
+
+This is a packaging bug fix release of 3.2.8.
+
+=== Changes
+
+==== All
+
+  * Fixes
+
+    * Fixed wrong gem content.
+      [GitHub#1236][Reported by Izumi Tsutsui]
+
+==== Ruby/GtkSourceView4
+
+  * Improvements
+
+    * Added.
+
+=== Thanks
+
+  * Izumi Tsutsui
+
+== Ruby-GNOME2 3.2.8: 2018-08-06
+
+This is an installation improvement release of 3.2.7.
+
+=== Changes
+
+==== All
+
+  * Improvements
+
+    * Added support for static gemspec.
+      [Patch by cedlemo]
+
+    * Added support for msys2_mingw_dependencies.
+      [GitHub#1194]
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * test: Removed a needless assertion.
+      [GitHub#1235][Patch by Iain Lane]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Improved setter method detection.
+      [GitHub#1233][Patch by yosuke shiro]
+
+  * Fixes
+
+    * Fixed a memory leak for callback method.
+      [GitHub#1230][GitHub#1231][Reported by Izumi Tsutsui]
+
+==== Ruby/GTK3
+
+  * Fixes
+
+    * demo: Fix a crash bug.
+      [GitHub#1193][Reported by kojix2]
+
+=== Thanks
+
+  * cedlemo
+
+  * kojix2
+
+  * Izumi Tsutsui
+
+  * yosuke shiro
+
+  * Iain Lane
+
+== Ruby-GNOME2 3.2.7: 2018-06-07
+
+This is a packaging bug fix release of 3.2.6.
+
+=== Changes
+
+==== All
+
+  * Improvements
+
+    * Added support for using unreleased version with Bundler.
+      [Patch by cedlemo]
+
+  * Fixes
+
+    * Fixed a packaging bug that dependencies are missing.
+
+== Ruby-GNOME2 3.2.6: 2018-06-06
+
+This is a bug fix release of 3.2.5.
+
+=== Changes
+
+==== Document
+
+  * Improvements
+
+    * Updated project URL.
+      [GitHub#1174][Patch by okkez]
+
+==== All
+
+  * Improvements
+
+    * Added support for using unreleased version with Bundler.
+      [Patch by cedlemo]
+
+    * Windows: Upgraded bundled library versions.
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * (({GLib::Object.define_signal})): Added.
+      (({GLib::Object.signal_new})) is deprecated.
+
+    * (({GLib::Object.signal_new})): Changed to accept (({Symbol})) as
+      flags.
+
+    * (({GLib::Signal})): Migrated to (({TypedData})).
+
+    * (({GLib::Enum})): Migrated to (({TypedData})).
+
+    * (({GLib::Flags})): Migrated to (({TypedData})).
+
+    * (({GLib::Boxed})): Migrated to (({TypedData})).
+
+    * (({GLib::Param})): Migrated to (({TypedData})).
+
+    * (({rbgobj_signal_new()})): Added.
+      (({rbgobj_signal_wrap()})) is deprecated.
+
+    * Dropped GLib < 2.28 support.
+
+    * (({GLib::Variant.new})): Changed to accept (({String})) as
+      variant type.
+
+    * (({rbg_variant_type_from_ruby()})): Added.
+
+    * (({rbg_gc_guard()})): Added.
+
+    * (({rbg_gc_unguard()})): Added.
+
+  * Fixes
+
+    * Fixed a bug that signal created by (({GLib::Object.signal_new}))
+      may be GC-ed.
+      [GitHub#1166][Reported by Izumi Tsutsui]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * (({GObjectIntrospection::Struct})): Migrated to (({TypedData})).
+
+    * Improved better function detection.
+
+    * Added heuristic callback data detection.
+
+    * Added support for getting flags field value.
+
+    * (({RBGICallbackData})): Hidden details.
+
+    * (({rb_gi_callback_data_get_metadata()})): Added.
+
+    * (({rb_gi_callback_data_get_rb_callback()})): Added.
+
+    * Added (({to_integer})) to (({to_i})) mapping.
+      [GitHub#1191][Patch by yosuke shiro]
+
+==== Ruby/CairoGObject
+
+  * Improvements
+
+    * Added (({gtype})) class methods.
+
+==== Ruby/GIO2
+
+  * Improvements
+
+    * (({Gio::MenuItem#set_attribute_value})): Improved argument conversion.
+      Callers don't need to create (({GLib::Variant})).
+
+    * (({Gio::Settings.new})): Added support for keyword (({Hash})).
+      [GitHub#1187][Patch by cedlemo]
+
+==== Ruby/Pango
+
+  * Improvements
+
+    * (({Pango::Attribute})): Migrated to (({GLib::Boxed})).
+
+    * (({Pango::Rectangle#dup})): Added.
+
+    * (({rbpango_attribute_from_ruby()})): Added.
+
+  * Fixes
+
+    * Fixed a bug that wrong (({Pango::Attribute})) conversion.
+      [GitHub#1188][Reported by kojix2]
+
+==== Ruby/GdkPixbuf2
+
+  * Improvements
+
+    * (({GdkPixbuf::Pixbuf#subpixbuf})): Added.
+      (({GdkPixbuf::Pixbuf#new_subpixbuf})) is deprecated.
+
+    * (({GdkPixbuf::Pixbuf#new})): Improved the default
+      (({row_stride})) value.
+
+==== Ruby/GDK3
+
+  * Improvements
+
+    * (({Gdk::Cursor.new})): Added multiple calls with the same value.
+      [GitHub#1195][Reported by kojix2]
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * Removed needless custom callback handlers.
+
+    * Dropped GTK+ 3.10 support.
+
+    * (({Gtk::Application.new})): Changed to all arguments are omittable.
+
+    * (({Gtk::TextBuffer#insert})): Changed to raise an exception for
+      unknown tag.
+
+  * Fixes
+
+    * Fixed a bug that (({Gtk::Version.or_later?})) requires the 3rd
+      argument.
+
+    * Fixed demo.
+      * [GitHub#1175][GitHub#1176][GitHub#1177][GitHub#1178][GitHub#1183]
+        [GitHub#1184][GitHub#1185]
+        [Reported by kojix2]
+      * [GitHub#1181][GitHub#1186][GitHub#1197][GitHub#1210]
+        [Patch by kojix2]
+
+==== Ruby/Poppler
+
+  * Improvements
+
+    * (({Cairo::Context#show_poppler_page})): Added for consistency.
+
+==== Ruby/RSVG2
+
+  * Improvements
+
+    * (({Cairo::Context#show_rsvg_handle})): Added for consistency.
+
+==== Ruby/GStreamer
+
+  * Improvements
+
+    * (({Gst::Element.[]})): Added as a shortcut of
+      (({Gst::ElementFactory.make})).
+
+    * (({Gst::Bus#poll})): Made all arguments omittable.
+
+=== Thanks
+
+  * Izumi Tsutsui
+
+  * okkez
+
+  * kojix2
+
+  * cedlemo
+
+  * yosuke shiro
+
+== Ruby-GNOME2 3.2.5: 2018-05-02
+
+This is a bug fix release of 3.2.4.
+
+=== Changes
+
+==== Document
+
+  * Fixes
+
+    * Fixed typos.
+      [GitHub#1158][Patch by kojix2]
+      [GitHub#1160][Patch by kojix2]
+
+==== Ruby/GLib2
+
+  * Fixes
+
+    * Fixed a GC related crash bug.
+      [GitHub#1162][Reported by Izumi Tsutsui]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Disabled NULL check for GObject Introspection < 1.42. Because
+      GObject Introspection < 1.42 doesn't support "(nullable)"
+      annotation yet.
+
+==== Ruby/GdkPixbuf2
+
+  * Improvements
+
+    * (({GdkPixbuf::Pixbuf#composite})): Suppressed wrong warning.
+      [GitHub#1156][Reported by Chaistrin]
+      [GitHub#1157][Patch by cedlemo]
+
+  * Fixes
+
+    * Added a missing white space into message.
+      [GitHub#1155][Reported by Robert A. Heiler]
+
+    * (({GdkPixbuf::Pixbuf#composite})): Fixed a bug that width and
+      height are ignored.
+      [Patch by cedlemo]
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * (({Gtk::TextBuffer#initialize})): Accepted "property-name" form.
+      [GitHub#1161][Reported by kojix2]
+
+==== Ruby/Poppler
+
+  * Improvements
+
+    * Added a workaround for poppler-glib 0.63 bug.
+      [GitHub#1159][Reported by HIGUCHI Daisuke]
+
+=== Thanks
+
+  * Robert A. Heiler
+
+  * Chaistrin
+
+  * cedlemo
+
+  * kojix2
+
+  * Izumi Tsutsui
+
+  * HIGUCHI Daisuke
+
+== Ruby-GNOME2 3.2.4: 2018-04-09
+
+This is a bug fix release of 3.2.3.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Fixes
+
+    * Fixed a bug that some constants aren't defined. If a content
+      name is the same constant name at the top level such as
+      (({Gtk::Object})), the constant isn't defined.
+
+      [GitHub#1154][Debian#894816][mikutter#1199]
+      [Reported by Akira Ouchi][Forwarded by HIGUCHI Daisuke]
+
+==== Ruby/Rsvg2
+
+  * Improvements
+
+    * Windows: Upgraded bundled librsvg to 2.42.3.
+
+=== Thanks
+
+  * Akira Ouchi
+
+  * HIGUCHI Daisuke
+
+== Ruby-GNOME2 3.2.3: 2018-04-03
+
+This is a bug fix release of 3.2.2.
+
+=== Changes
+
+==== Ruby/GObjectIntrospection
+
+  * Fixes
+
+    * Fixed a crash bug when (({GLib::Bytes})) is passed as an argument.
+
+== Ruby-GNOME2 3.2.2: 2018-04-02
+
+This is a release to support Ruby 2.5 on Windows.
+
+=== Changes
+
+==== All
+
+  * Windows: Added Ruby 2.5 support.
+    [GitHub#1148][Reported by Andy Meneely]
+
+  * Red Hat: Use (({pkgconfig(name)})) style.
+    [GitHub#1117][Patch by Mamoru TASAKA]
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * (({GLib::Bytes#to_s})): Changed to return a frozen string to
+      reduce data copy.
+
+    * Migrated to (({TypedData})) from (({Data})).
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * Added (({nil})) argument check.
+
+    * (({GObjectIntrospection::Loader#rubyish_method_name})):
+      Added (({:n_in_args_offset})) option.
+
+    * Suppressed a needless copy of (({GLib::Bytes})).
+
+    * Added filename array support.
+      [GitHub#1151][Patch by cedlemo]
+
+  * Fixes
+
+    * Fixed a overflow bug on 32bit.
+      [Debian#766020][Reported by Mario Lang]
+      [GitHub#1137][Forwarded by HIGUCHI Daisuke]
+
+==== Ruby/GTK2
+
+  * Fixes
+
+    * Fix the wrong number of arguments.
+      [GitHub#1133][Reported by Mamoru TASAKA]
+
+==== Ruby/GDK3
+
+  * Improvements
+
+    * Ensured loading GDK 3.
+      [GitHub#1126][Patch by cedlemo]
+
+  * Fixes
+
+    * (({Gdk::Screen.default})): Fixed a GC related crash.
+
+    * (({Gtk::Widget#style_context})): Fixed a GC related crash.
+      [GitHub#1149][Reported by Valentin Pelloin]
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * Added a tool palette demo.
+      [GitHub#1116][Patch by cedlemo]
+
+    * Added a shortcut demo.
+      [GitHub#1120][Patch by cedlemo]
+
+    * Updated demo.
+      [Reported by Titouan Teyssier]
+      [GitHub#1139][Patch by Titouan Teyssier]
+
+    * Updated README.
+      [GitHub#1127][Patch by cedlemo]
+
+  * Fixes
+
+    * (({Gtk::Container#add_child(child)})): Made workable again.
+
+==== Ruby/Poppler
+
+  * Fixes
+
+    * (({Poppler::Page#thumbnail_size})): Fixed return value.
+      [GitHub:rcairo/rcairo#51][Reported by Mamoru TASAKA]
+
+==== Ruby/Gnumeric
+
+  * Improvements
+
+    * Improved .typelib for Gnumeric detection.
+      [GitHub#1118][Reported by cedlemo]
+
+=== Thanks
+
+  * cedlemo
+
+  * Mamoru TASAKA
+
+  * Titouan Teyssier
+
+  * Mario Lang
+
+  * HIGUCHI Daisuke
+
+  * Andy Meneely
+
+  * Valentin Pelloin
+
+== Ruby-GNOME2 3.2.1: 2017-11-19
+
+This is a memory related bug fix release.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+
+    * (({GLib::Bytes#initialize})): Stopped to copy data for frozen
+      (({String})).
+
+==== Ruby/GObjectIntrospection
+
+  * Fixes
+
+    * Fixed memory leaks for output parameters.
+      [GitHub#1113][Reported by Will Bryant]
+
+==== Ruby/GIO2
+
+  * Improvements
+
+    * (({Gio::InputStream#read_all})): Made workable.
+      [GitHub#1110][Reported by Paul van Tilburg]
+
+    * (({Gio::InputStream#read})): If the given size is (({nil})),
+      read until EOF or error. It's compatible with Ruby's IO objects.
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * Marked top-level windows automatically.
+      [GitHub#1103][Reported by cedlemo]
+
+=== Thanks
+
+  * Paul van Tilburg
+
+  * cedlemo
+
+  * Will Bryant
+
+== Ruby-GNOME2 3.2.0: 2017-11-07
+
+This is a bug fix release for Ruby/Poppler.
+
+=== Changes
+
+==== Ruby/GLib
+
+  * Improvements
+
+    * (({GLib::IOChannel#create_watch})): Supported.
+      [GitHub#1106][Reported by kspt-johs]
+
+    * (({GLib::IOChannel#create_watch})): Supported.
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * Added a sample.
+      [GitHub#1109][Patch by cedlemo]
+
+==== Ruby/Poppler
+
+  * Improvements
+
+    * (({Poppler#Document#size})): Added again.
+
+    * (({Poppler#Document#pages})): Added again.
+
+  * Fixes
+
+    * Updated dependencies.
+      [GitHub#1107][Reported by OBATA Akio]
+
+    * (({Poppler#Document#initialize(:data => data)})): Added
+      workaround. It should be fixed in upstream.
+
+=== Thanks
+
+  * kspt-johs
+
+  * OBATA Akio
+
+  * cedlemo
+
+== Ruby-GNOME2 3.1.9: 2017-10-16
+
+This is a release that includes GObject Introspection migrated Ruby/Poppler.
+
+=== Changes
+
+==== All
+
+  * Improvements
+
+    * Added (({Makefile})) existence check before running (({make})).
+      [GitHub#1065][Patch by HIGUCHI Daisuke]
+
+  * Fixes
+
+    * Fixed shebang paths.
+      [GitHub#1066][Patch by HIGUCHI Daisuke]
+
+==== Ruby/GLib
+
+  * Improvements
+
+    * Windows: Updated required cairo gem dependency.
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+
+    * (({GObjectIntrospection::Loader.register_object_class_converter})):
+      Added.
+
+    * Added (({gboolean *})) output support.
+
+    * Added (({[GBoxed]})) output support.
+
+    * Added (({[gboolean]})) input support.
+
+==== Ruby/GDK3
+
+  * Improvements
+
+    * (({Gdk::Window#origin})): Ignored garbage return value.
+
+==== Ruby/GTK3
+
+  * Improvements
+
+    * Added more demos.
+      [GitHub#1096][GitHub#1098][GitHub#1099][GitHub#1103]
+      [Patch by cedlemo]
+
+    * (({Gtk::Container#add_child})): Added.
+      [GitHub#1101][Reported by Robert A. Heiler]
+
+    * (({Gtk::Container#remove_child})): Added.
+      [GitHub#1101][Reported by Robert A. Heiler]
+
+==== Ruby/Poppler
+
+  * Improvements
+
+    * Migrated to GObject Introspection bindings.
+      [Patch by cedlemo]
+
+==== Ruby/WebKit2GTK
+
+  * Improvements
+
+    * Reduced fragile test failure.
+      [GitHub#1067][Patch by HIGUCHI Daisuke]
+
+    * Followed upstream fix for
+      (({webkit_web_view_new_with_related_view})).
+      [GitHub#1095][Reported by Jeremy Bicha]
+
+    * Relaxed test to support the latest WebKit2GTK+.
+      [GitHub#1095][Reported by Jeremy Bicha]
+
+==== Ruby/Rsvg2
+
+  * Improvements
+
+    * Added document how to install on Heroku.
+      [GitHub#1071][Patch by Ciocanel Razvan]
+
+==== Ruby/VTE3
+
+  * Improvements
+
+    * (({Vte::Regex})): Added.
+      [GitHub#1087][Patch by cedlemo]
+
+=== Thanks
+
+  * HIGUCHI Daisuke
+
+  * cedlemo
+
+  * Ciocanel Razvan
+
+  * Jeremy Bicha
+
+  * Robert A. Heiler
+
+== Ruby-GNOME2 3.1.8: 2017-07-15
+
+This is a bug fix release for macOS install.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Supported (({--enable-debug})) for C++ sources.
+
+  * Fixes
+    * Fixed auto libffi detection for Homebrew.
+      [GitHub#1058][Reported by Andy Meneely]
+
+==== Ruby/Pango
+
+  * Improvements
+    * (({Pango::Rectangle#to_a})): Added.
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Supported non-pointer struct field reader.
+      [GitHub#1042][Reported by cedlemo]
+    * Supported (({GHashTable<UTF-8, UTF-8>})).
+
+==== Ruby/CairoGObject
+
+  * Improvements
+    * CentOS 7: Supported auto native package install.
+
+==== Ruby/GDK3
+
+  * Improvements
+    * CentOS 7: Supported auto native package install.
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Made more demos workable.
+
+==== Ruby/WebKit2GTK
+
+  * Improvements
+    * Added a sample that uses proxy.
+
+==== Ruby/GtkSourceView3
+
+  * Improvements
+    * CentOS 7: Supported auto native package install.
+
+=== Thanks
+
+  * cedlemo
+
+  * Andy Meneely
+
+== Ruby-GNOME2 3.1.7: 2017-07-10
+
+=== Changes
+
+==== All
+
+  * Improvements
+    * Windows: Supported running commands in bundled packages.
+
+==== Ruby/GLib
+
+  * Improvements
+    * (({GLib::Bytes#size})): Added.
+    * (({GLib::Bytes#length})): Added.
+    * (({GLib::Bytes#pointer})): Added.
+    * Made stable glib-mkenums output.
+      [GitHub#1054][Patch by dai]
+    * Supported GError in callback argument.
+    * Windows: Upgraded bundled GLib to 2.52.3.
+    * Windows: Upgraded bundled Libtasn1 to 4.12.
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Supported freeing GSList.
+    * Supported not GObject Introspection based bindings object for
+      receiver.
+    * Supported int16 array output.
+    * Supported uint16 array output.
+    * Supported uint32 array output.
+    * Supported uint64 array output.
+    * Supported float array output.
+    * Supported double array output.
+    * Supported auto (({#inspect})) defining.
+    * Homebrew: Supported Homebrew not installed at /usr/local.
+
+==== Ruby/Pango
+
+  * Improvements
+    * Supported attribute again.
+      [GItHub#1033][Reported by Mamoru TASAKA]
+    * Supported (({Pango::Scale})) again.
+      [GItHub#1048][Reported by cedlemo]
+    * Added missing backward compatibility constants.
+    * Windows: Upgraded bundled Pango to 1.40.6.
+
+==== Ruby/GDK3
+
+  * Improvements
+    * Windows: Upgraded bundled GTK+ to 3.22.16.
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Updated demo.
+      [GitHub#1038][GitHub#1039][GitHub#1040][GitHub#1044][GitHub#1045]
+      [GitHub#1046][GitHub#1047][GitHub#1049][GitHub#1050][GitHub#1051]
+      [GitHub#1052]
+      [Patch by cedlemo]
+    * Supported working on environment that has GTK+ 4.
+      [GitHub#1041][Reported by cedlemo]
+    * (({Gtk::TextTag#weight=})) accepts (({Pango::Weight})).
+    * (({Gtk::TextBuffer#insert_markup})) stops to require length.
+    * (({Gtk::TextTag#scale=})) accepts scale name such as (({:x_small})).
+    * Supported (({GLib::Bytes})) as text buffer input.
+    * (({Gtk::CssProvider#load_from_data})) accepts (({GLib::Bytes})).
+
+  * Fixes
+    * Fixed a crash bug in demo.
+      [GitHub#1036][Reported by Mamoru TASAKA]
+
+==== Ruby/Rsvg2
+
+  * Improvements
+    * Added samples again.
+
+  * Fixes
+    * Added missing Ruby/CairoGObject dependency.
+      [GitHub#1035][Reported by peret]
+
+==== Ruby/Clutter
+
+  * Improvements
+    * Windows: Built GDK backend again.
+      [GitHub:#1034][Reported by Alanzote]
+    * Windows: Upgraded bundled Clutter to 1.26.2.
+
+==== Ruby/WebKit2GTK
+
+  * Improvements
+    * Added a sample that saves screenshot.
+    * Supported (({WebKit2Gtk::WebContext.new(ephemeral: true)})).
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * Windows: Upgraded bundled libsoup to 2.58.1.
+    * Windows: Upgraded bundled GStreamer to 1.12.1.
+
+==== Ruby/GtkSourceView3
+
+  * Improvements
+    * Windows: Upgraded bundled GtkSourceView to 3.24.3.
+
+==== Ruby/VTE3
+
+  * Improvements
+    * Windows: Upgraded bundled VTE to 0.48.3.
+
+=== Thanks
+
+  * Alanzote
+  * peret
+  * cedlemo
+  * Mamoru TASAKA
+  * dai
+
+== Ruby-GNOME2 3.1.6: 2017-06-03
+
+=== Changes
+
+This is a bug fix release for Windows packages.
+
+==== All
+
+  * Fixes
+    * Added a missing path existence check on Windows.
+
+== Ruby-GNOME2 3.1.5: 2017-06-03
+
+=== Changes
+
+This is a bug fix release for Windows packages.
+
+==== All
+
+  * Improvements
+    * Supported RubyInstaller2.
+
+==== Ruby/Pango
+
+  * Improvements
+    * Add backward compatibility APIs:
+      * (({Pango::FontDescription::WEIGHT_*}))
+      * (({Pango::FontDescription::STYLE_*}))
+
+== Ruby-GNOME2 3.1.4: 2017-05-30
+
+=== Changes
+
+This is a release that supports Ruby 2.4 on Windows.
+
+==== All
+
+  * Improvements
+    * Supported MSYS2.
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Added (({GLib::Object#floating?})) for debugging.
+
+==== Ruby/GIO2
+
+  * Improvements
+    * Added (({Gio::File.open})). The followings are deprecated.
+      * (({Gio::File.commandline_arg}))
+      * (({Gio::File.path}))
+      * (({Gio::File.uri}))
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Relaxed expected test result for 32bit environment.
+      [GitHub#1026][Reported by Mamoru TASAKA]
+    * Added tests for (({GObjectIntrospection::ConstantInfo})).
+      [GitHub#1027][Patch by cedlemo]
+    * Supported floating "transfer full" GObject.
+
+==== Ruby/GDK3
+
+  * Improvements
+    * Supported (({Cairo::Surface#to_pixbuf(options={})})).
+      (({Cairo::Surface#to_pixbuf(src_x, src_y, width, height)})) is
+      deprecated.
+
+==== Ruby/Rsvg2
+
+  * Improvements
+    * Migrated to GObject Introspection bindings.
+    * Renamed to (({Rsvg})) from (({RSVG})). (({RSVG})) is still
+      usable but it's deprecated.
+      [GitHub#1030][Patch by cedlemo]
+    * Supported (({Cairo::Context#render_rsvg_handle(handle, :id =>
+      ...)})).
+
+==== Ruby/WebKit2GTK
+
+  * Improvements
+    * (({WebKit3Gtk::WebView#initialize})): Supported (({Hash}))
+      options.
+      [GitHub#1028][Patch by Matijs van Zuijlen]
+
+=== Thanks
+
+  * Mamoru TASAKA
+  * cedlemo
+  * Matijs van Zuijlen
+
+== Ruby-GNOME2 3.1.3: 2017-04-27
+
+=== Changes
+
+This is a release that improve backward compatibility for Ruby/Pango.
+
+==== Ruby/Pango
+
+  * Improvements
+    * Defined constants under (({Pango})) again for backward compatibility.
+      [GitHub#1022][Reported by Andy Meneely]
+    * Defined constants under (({Pango::Layout})) again for backward
+      compatibility.
+      [GitHub#1022][Reported by Andy Meneely]
+    * (({Pango.pixels})): Added again.
+    * (({Pango::AttrShape#data})): Supported again.
+  * Fixes
+    * (({Pango::Layout#text=})): Fixed a bug that wrong bytesize is
+      used for multibyte string.
+    * (({Pango::Layout#markup=})): Fixed a bug that wrong bytesize
+      is used for multibyte string.
+
+=== Thanks
+
+  * Andy Meneely
+
+== Ruby-GNOME2 3.1.2: 2017-04-26
+
+There is an incompatible change. (({GBytes})) to (({String}))
+conversion is changed to (({GBytes})) to (({GLib::Bytes}))
+conversion. You can get (({String})) by (({GLib::Bytes#to_s})).
+
+Other incompatible changes are bugs. Please report them to us.
+
+=== Changes
+
+==== All
+
+  * Improvements
+    * Supported auto depended package install for GObject
+      Introspection based bindings.
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Supported overriding (({alloc_func})) in super class.
+    * Extracted native package installer code as
+      native-package-installer gem.
+    * (({GLib::Bytes})): Added.
+    * Supported pkg-config 1.1.9 or later.
+  * Fixes
+    * Fixed a build error on CentOS 6 and Ubuntu 12.04. They use
+      GLib < 2.34.
+      [GitHub#1012][Reported by Scot]
+    * Fixed a bug that (({GLib::TypePlugin})) can't be included.
+      [GitHub#1019][Patch by Matijs van Zuijlen]
+
+==== Ruby/GIO2
+
+  * Fixes
+    * Fixed a path in test. [GitHub#990][Reported by Mamoru TASAKA]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Supported getting interface, union and boxed type as a field value.
+    * Supported setting an interface as a field.
+    * Supported more struct types.
+    * Supported cairo-gobject types.
+    * Supported outputting an array of interfaces.
+      [GitHub#1006][Reported by cedlemo]
+    * Supported Rubyish method name conversion for (({list_XXX}))
+      methods that return an array.
+    * Supported customizing field reader method name.
+    * Supported auto (({int})) to boolean conversion for field value.
+    * (({GObjectIntrospection::Repository.default})): Added a GC guard.
+    * Supported inputting (({unichar})).
+    * Supported inputting (({gint64})) C array.
+    * Supported inputting (({gint8})) C array.
+    * Added tests for (({GObjectIntrospection::UnionInfo})).
+      [GitHub#1016][Patch by cedlemo]
+    * Stopped auto (({GBytes})) to (({String}))
+      conversion. (({GBytes})) is converted to (({GLib::Bytes})). It's
+      for efficient byte sequence handling in Ruby. It's
+      an incompatible change. You can use (({GLib::Bytes#to_s})) to
+      get (({String})).
+  * Fixes
+    * (({GObjectIntrospection::RepositoryError})): Fixed parent class.
+    * Fixed a typo. [GitHub#1002][Reported by cedlemo]
+
+==== Ruby/ATK
+
+  * Improvements
+    * Migrated to GObject Introspection bindings.
+      [GitHub#998][Patch by cedlemo]
+
+==== Ruby/CairoGObject
+
+  * Fixes
+    * Fixed a double free bug.
+
+==== Ruby/Pango
+
+  * Improvements
+    * Migrated to GObject Introspection bindings.
+      [GitHub#1007][GitHub#1008][GitHub#1009][GitHub#1010]
+      [GitHub#1011][Patch by cedlemo]
+      [GitHub#1013][GitHub#1014][Patch by Detlef Wagner]
+
+==== Ruby/GdkPixbuf2
+
+  * Improvements
+    * Supported GdkPixbuf 2.31.6 on CentOS 7 again.
+
+==== Ruby/GDK3
+
+  * Improvements
+    * (({Gdk::Event})) and subclasses: Supported again.
+    * Supported old GDK 3 again.
+    * Supported X11 related features.
+      [GitHub#999][Reported by johnlane]
+
+==== Ruby/GTK3
+
+  * Improvements
+    * (({Gtk::Widget#click})): Added.
+    * (({Gtk::Widget#send_key})): Added.
+    * (({Gtk::Widget#wait_for_draw})): Added.
+    * (({Gtk::WiAccelGroup.activate})): Added.
+    * Updated samples.
+      [GitHub#1002][GitHub#1003]
+      [Patch by cedlemo]
+    * (({Gtk::IconTheme#choose_icon})): Changed the default flags to
+      (({0})) from (({:generic_fallback})).
+    * (({Gtk::IconTheme#lookup_icon})): Changed the default flags to
+      (({0})) from (({:generic_fallback})).
+    * Supported GTK+ < 3.20 again.
+  * Fixes
+    * Updated signal name in document.
+      [GitHub#995][Patch by Arnaud Meuret]
+
+==== Ruby/ClutterGdk
+
+  * Fixes
+    * Ensured initializing GDK.
+      [GitHub#1000][Reported by cedlemo]
+
+==== Ruby/GOffice
+
+  * Improvements
+    * (({GOffice::Version})): Added.
+
+=== Thanks
+
+  * Mamoru TASAKA
+  * Arnaud Meuret
+  * cedlemo
+  * johnlane
+  * Scot
+  * Detlef Wagner
+  * Matijs van Zuijlen
+
+== Ruby-GNOME2 3.1.1: 2017-01-26
+
+=== Changes
+
+==== All
+
+  * Improvements
+    * Windows: Supported Ruby 2.4.
+
+==== Ruby/GLib2
+
+  * Improvements
+    * (({GLib::DateTime})): Added.
+      [GitHub#961][GitHub#965]
+      [Patch by cedlemo]
+    * (({GLib::TimeZone})): Added. [GitHub#963][Patch by cedlemo]
+    * Stopped to show "message", "info" and "debug" level logs by default.
+      You can enable them by (({$DEBUG = true})).
+      [GitHub#981][Reported by PeterWAWood]
+    * Windows: Updated bundled PCRE to 8.40.
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Supported outputting (({guint8})) array.
+    * Supported converting (({equal})) method to (({==})) method.
+    * Supported auto (({Enumerable})) inclusion for classes and
+      modules that have (({each})) method.
+
+==== Ruby/GIO2
+
+  * Improvements
+    * (({Gio::Settings#initialize})): Added backward compatible API
+      again.
+  * Fixes
+    * Supported GIO 2.38 or earlier again.
+
+==== Ruby/Pango
+
+  * Fixes
+    * (({Pango::LayoutLine#x_to_index})): Fixed a crash bug.
+    * Windows: Updated bundled HarfBuzz to 1.4.1.
+    * Windows: Updated bundled ICU to 58.2.
+
+==== Ruby/GdkPixbuf2
+
+  * Improvements
+    * (({GdkPixbuf::Pixbuf#save_to_buffer})): Supported again but it's
+      deprecated. Use (({GdkPixbuf::Pixbuf#save})) instead.
+    * Windows: Updated bundled gdk-pixbuf to 2.36.4.
+
+==== Ruby/GDK3
+
+  * Improvements
+    * Windows: Updated bundled GTK+ to 3.22.7.
+
+==== Ruby/GTK3
+
+  * Improvements
+    * (({Gtk::TreeViewColumn#initialize})): Supported option Hash.
+      [GitHub#958][Patch by Detlef Wagner]
+    * Updated samples. [Patch by cedlemo]
+    * (({Gtk::Dialog#get_widget_for_response_id})): Supported
+      (({Symbol})) as response ID.
+      [GitHub#978][Patch by Detlef Wagner]
+    * (({Gtk::Container#add})): Changed to return (({self})) again.
+    * Windows: u
+
+==== Ruby/Poppler
+
+  * Fixes
+    * (({Poppler::IndexIter})): Fixed a crash bug.
+    * (({Poppler::IndexIter#child})): Added a missing (({NULL}))
+      check.
+    * Fixed types of action classes. They must be (({GLib::Boxed})).
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * Windows: Updated bundled GStreamer to 1.10.2.
+
+==== Ruby/ClutterGStreamer
+
+  * Improvements
+    * Windows: Updated bundled Clutter-GStreamer to 3.0.22.
+
+==== Ruby/GtkSourceView3
+
+  * Improvements
+    * Windows: Updated bundled GtkSourceView to 3.22.2.
+
+==== Ruby/GSF
+
+  * Improvements
+    * Windows: Updated bundled GSF to 1.14.41.
+
+=== Thanks
+
+  * Detlef Wagner
+  * cedlemo
+  * PeterWAWood
+
+== Ruby-GNOME2 3.1.0: 2016-11-13
+
+=== Changes
+
+==== All
+
+  * Improvements
+    * update README.
+      [Patch by cedlemo]
+    * fix format in README.
+    * use pthread version of MinGW in build-windows.sh.
+    * improve main Rakefile.
+    * windows : update bundled versions.
+  * Fixes
+    * fix path in gem:windows:push in main Rakefile.
+    * fix markup in NEWS file.
+    * use Win32 thread again in build-windows.sh.
+    * libmount is required for GLib on Linux.
+    * install libgtk-3-dev explicitly.
+
+==== Ruby/GIO2
+
+  * Improvements
+    * make (({Gio::SettingsSchemaSource#list_schemas})) Rubyish.
+    * make (({Gio::Settings#set_value})) Rubyish.
+    * support array like API for (({Gio::Settings})).
+    * (({Gio::ActionMap#add_action})) accepts :state
+    * simplify, load (({Gio::File})) with GObject-Introspection loader.
+    * simplify (({Gio::ContentType})) implementation.
+  * Fixes
+    * add missing required argument in test-settings-schema-source.rb.
+    * add version check in Gio tests.
+    * increase required version.
+    * fix typo in action-map.rb.
+      [Path by cedlemo]
+
+==== Ruby/GLIB2
+
+  * Improvements
+    * New implementation of GRClosure with new APIS:
+      * RGClosureCallData
+      * RGClosureCallFunc
+      * rbgobj_set_signal_call_func()
+      * rbgobj_get_signal_call_func()
+      * g_rclosure_new_call()
+    * support exit_application error message when no backtrace.
+    * improve rbg_scan_options() performance
+    * show all backtrace on GLib log.
+      [GitHub#935][Suggested by Matijs van Zuijlen]
+
+  * Fixes
+    * windows:
+      * Fix indent in windows-binary-build-task.rb.
+      * Export glib2_binary_base_dir.
+      * Remove needless "windows_" in methods name in windows-binary-build-task.rb.
+      * add a debug argument for make command.
+      * add GNOME2::Rake::WindowsBinaryBuildTask#binary_base_dir
+    * fix a bug that SIGUSR1 breaks main loop.
+      [GitHub#933][Reported by Vegard Sandengen]
+    * fix error messages typo
+      [Patch by dai-vr]
+    * fix typo in rbgutil.c.
+      [Patch by Kazuhiro NISHIYAMA]
+    * fix style in rbglib_messages.c
+    * remove needless check in rbglib_messages.c and extconf.rb
+
+==== Ruby/GStreamer
+
+  * Improvements
+  * Fixes
+    * fix text_color_example.rb demo.
+      [Patch by cedlemo]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * support GVariant string array to Ruby
+      [Patch by Konstantinos Natsakis]
+    * use g_variant_iter_init () to reduce dynamic memory allocation
+    * support omitting allow-null arguments in middle of arguments
+    * improve performance in callable-info.rb.
+    * reduce needless method calls.
+    * simplify invoke arguments in rb-gi-method-info.c, it improves performance.
+    * support "can_be_" as predicate prefix.
+    * improve performance calling a method. It catches data from info.
+    * add GI.load shortcut for fast load.
+  * Fixes
+    * use short for 16bit Integer.
+    * accept Array of numbers for gint8/guint8 array
+    * wrong condition in function info arguments management.
+    * use suitable type macros in ruby to C code from rb-gi-argument.c.
+    * assign temporary Ruby object to local variable to guard from GC.
+    * fix name conflict in rb-gi-argument.c.
+      [Reported by kitone]
+    * touch unrefed object in rb-gi-argument.c.
+    * support array of UTF-8.
+    * fill from last omitted arguments in function arguments loader.
+    * add a missing all required case check in function arguments loader.
+    * use rbg_variant_to_ruby in rb-gi-argument.c.
+    * define unlock_gvl as info method.
+    * fix typo in rb-gi-function-info.c.
+    * don't fill missing arguments when given N arguments is less.
+    * sink created GObject based object by default.
+    * fix wrong default argument fill condition.
+    * fix limit when loading arguments infos.
+      [GitHub#895][Reported by cedlemo]
+    * fix libffi return value handling.
+      [GitHub#758][Reported by Mamoru TASAKA]
+    * do not try to run a gtk demo when the user provide a bad demo name.
+      [Patch by cedlemo]
+    * focus on the related line in the TreeView when running demo from command line.
+      [Patch by cedlemo]
+    * do nothing for void type return type.
+      [GitHub#952][Reported by cedlemo]
+    * return value is return type is void but pointer.
+    * windows : update patch support-external-g-ir-scanner.diff.
+
+==== Ruby/GDK
+
+  * Improvements
+    * make (({Gdk::EventFocus#in})) rubyish.
+    * add init hook as Gdk.on_init
+  * Fixes
+    * backport a patch to fix build error.
+
+==== Ruby/GdkPixbuf2
+
+  * Improvements
+    * support loading from file.
+  * Fixes
+    * fix dependency in Rakefile.
+      [GitHub#862][Reported by Mamoru TASAKA]
+    * add missing gio2 dependency in tests.
+    * add missing variable in tests.
+    * omit a test that failed by float error on i386
+      [GitHub#898][Reported by Mamoru TASAKA]
+
+==== Ruby/GTK3
+
+  * Improvements
+    * support for (({Gtk::SpinButton::input})) signal.
+      [GitHub#855][Reported cedlemo]
+    * new gtk demo spinbutton.
+      [Patch by cedlemo]
+    * add demo search_entry.rb
+      [Patch by cedlemo]
+    * update gtk demos to use class form instead of module form.
+      [Patches by cedlemo]
+    * add listbox gtk demo.
+      [Patch by cedlemo]
+    * update editable_cells demo.
+      [Patch by cedlemo]
+    * add glarea demo.
+      [Patch by cedlemo]
+    * update transparent demo.
+      [Patch by Arjun Menon]
+    * update theming_style_classes demo.
+      [Patch by Arjun Menon]
+    * update textscroll demo.
+      [Patch by Arjun Menon]
+    * update stack demo.
+      [Patch by Arjun Menon]
+    * update spinbutton demo.
+      [Patch by Arjun Menon]
+    * create (({Gtk::TreeModel#create_filter})) as an alias of #filter_new.
+  * Fixes
+    * load demos as classes instead of modules in main.rb.
+      [Patch by cedlemo]
+    * enable Gtk::Rc deprecation.
+    * fix treemodelfilter sample issue.
+    * force LC_NUMERIC to C when gtk3 is initialized.
+      [Patch by cedlemo]
+
+==== Ruby/WebKitGTK
+
+  * Improvements
+  * Fixes
+    * windows :
+      * update dependencies in Rakefile and patches.
+      * use Ubuntu 16.04 as build environment.
+      * install jsmin
+
+==== Ruby/WebKit2GTK
+
+  * Improvements
+  * Fixes
+    * windows :
+      * update Rakefile and patches.
+      * support auto latest version detection.
+
+==== Ruby/ClutterGdk
+
+  * Improvements
+  * Fixes
+    * add init hook as Clutter.on_init.
+    * add Clutter and Gdk integration API.
+
+==== Ruby/ClutterGtk
+
+  * Improvements
+    * add clutter-gdk dependency.
+  * Fixes
+    * window-test.rb sample : use icons only included in the default theme.
+    * remove needless pack method usage in test.rb sample.
+    * follow improved API in event.rb sample.
+
+==== Ruby/ClutterGdk
+
+  * Improvements
+    * create a GObject-Introspection loader.
+      [Patch by cedlemo]
+  * Fixes
+    * update description in README and in Rakefile.
+    * remove needless code in Rakefile.
+    * remove needless code in GObject-Introspection loader. ClutterGdk is part of Clutter.
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * add (({Gst::Bin#each})).
+      [GitHub#927][Reported by cedlemo]
+    * add only_gstreamer_version method.
+  * Fixes
+    * use post_load in order to use require_libraries.
+
+==== Ruby/Pango
+
+  * Fixes
+    * pango windows: remove needless patch.
+
+==== Thanks
+
+  * Arjun Menon
+  * cedlemo
+  * dai-vr
+  * Kazuhiro NISHIYAMA
+  * kitone
+  * Konstantinos Natsakis
+  * Mamoru TASAKA
+  * Matijs van Zuijlen
+  * Vegard Sandengen
+
+== Ruby-GNOME2 3.0.9: 2016-08-12
+
+=== Changes
+
+==== All
+
+  * Update Realease date in NEWS.
+  * Use the latest Rubies.
+  * Readme: update ruby versions supported.
+    [Patch by cedlemo]
+  * travis: install experimental gems dependent packages for GSF and GOffice.
+    [patch by Hiroshi Hatake]
+  * add GSF, GOffice and Gnumeric in the main Rakefile.
+    [patch by cedlemo]
+  * ignore no-GI version of gdk_pixbuf2 in main run-test.rb and in the main extconf.rb.
+  * remove conditionnal macro based on HAVE_RUBY_ENCODING_H.
+  * clean code in main Rakefile.
+  * define top level windows:version:update in main Rakefile.
+
+==== Ruby/GIO2
+
+  * Improvements
+  * Fixes
+    * remove needless lazy initialization.
+    * follow GI API improvement.
+
+==== Ruby/GLIB2
+
+  * Improvements
+    * support for GLib 2.30 on CentOS 6.
+      [ruby-list:50310][5.5]
+      [ruby-list:50316][5.5]
+    * add GLib 2.30 check.
+    * add GLib 2.34 check.
+    * support customizing signal callback.
+    * support (({GObject#bind_property_full})).
+      [patch by cedlemo]
+    * clean code and style issue.
+    * fix GC bug that alive proc may be GC-ed.
+  * Fixes
+    * windows: improve rake.
+      * split g-ir-compiler args.
+      * add debug option as comment.
+      * fix wrong define location.
+      * use predicate style.
+    * fix wrong function in rbglib-variant.c.
+    * bump version.
+    * use SPDX format for license.
+    * homebrew:
+      * add workaround for libffi.pc isn't found on OS X.
+      * enable libffi workaround for gi.
+    * remove checks for old Ruby.
+    * Ruby 2.1 or later has (({rb_str_new_cstr})).
+    * set UTF-8 encoding to (({GLIB.XXX_to_utf8})) return value.
+    * remove unused variables in rbglib_convert.c.
+      [patch by cedlemo]
+    * support Ruby 2.4 Integer unification.
+      [patch Hiroshi Hatake]
+    * gnome2 rake add windows:version:update task.
+    * gnome2 rake reduce too much update.
+    * gnome2 rake accept the latest version isn't found case.
+    * gnome2 rake ignore development series.
+    * windows: update dependencies.
+      * support :freedesktop download site.
+      * support :freedesktop_gstreamer download site.
+      * ignore development version in :freedesktop_gstreamer.
+
+==== Ruby/GStreamer
+
+  * Improvements
+  * Fixes
+    * windows: improve rake file.
+      * update patches.
+      * follow file name change.
+      * specify x86_64 as arch for 64bit Windows.
+      * stop splitting g-ir-compiler args by default.
+      * fix typo.
+    * windows: update dependencies.
+      * use :freedesktop_gstreamer download_site.
+      * update external packages.
+
+==== Ruby/Poppler
+
+  * Improvements
+  * Fixes
+    * windows: improve rake file.
+      * use https.
+    * add missing Makefile existence check.
+    * segmentation fault in (({Poppler::Page#text_layout})).
+      [patch by YAMAMOTO Masayuki]
+    * use (({GdkPixbuf::Pixbuf})) form in sample files.
+      [patch by cedlemo]
+    * remove needless gdk_pixbuf2 build dependency.
+    * add missing make file existence check in run-test.rb.
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * support dispatching by Flags and Enums.
+      [GitHub#745][Reported by Mamoru TASAKA]
+    * cache results of methods of (({GI::CallableInfo})).
+      [GitHub#749][Reported by rafagf1]
+    * cache collection reader result.
+      [GitHub#749][Reported by rafagf1]
+    * reduce needless function call.
+      [GitHub#749][Reported by rafagf1]
+    * cache (({GI::AgInfo#gclosure?})).
+    * add (({GI::Loader#rubyish_class_name})).
+      [patch by cedlemo]
+    * accept on_XXX as predicate method name.
+    * support gslist of structure values as return value.
+      [patch by cedlemo]
+    * make constant name easy to customize.
+ * Fixes
+    * fix a typo in loader.rb.
+    * fix a bug that int32[] returns wrong values.
+      [GitHub#758][reported by TASAKA]
+    * don't return array length output argument for return value.
+    * windows: update dependencies.
+
+==== Ruby/GDK3
+
+  * Improvements
+  * Fixes
+    * windows:
+      * support symbolic icons.
+        [GitHub#750][Abby Archer]
+    * use (({GdkPixbuf::Pixbuf})) form in gdk3 library and test files.
+      [patch by cedlemo]
+    * Rake file update GTK+ version.
+
+==== Ruby/GTK3
+
+  * Improvements
+    * update gtk-demo textscroll.
+      [patch by cedlemo]
+    * update gtk-demo data files to Gtk 3.20.
+      [patch by cedlemo]
+    * cache (({Gtk::TreeModel#get_column_type})).
+      [GitHub#749][Reported by rafagf1]
+    * update gtk-demo main.rb to Gtk 3.20.
+      [patch by cedlemo]
+    * update theming_style_classes gtk demo to 3.20.
+      [patch by cedlemo]
+    * update assistant gtk demo to 3.20.
+      [patch by cedlemo]
+    * update css related gtk demos to 3.20.
+      [patch by cedlemo]
+    * update markup gtk demo to 3.20.
+      [patch by cedlemo]
+    * update font-features demo to 3.20.
+      [patch by cedlemo]
+    * make (({Gtk::TreeView#expand_row})) rubyish.
+    * support "row-collapsed" and "row-expanded" signals for (({Gtk::TreeView})).
+      [GitHub#762][Reported Eric Cunningham]
+    * update misc sample bindings.rb to Gtk 3.20.
+      [patch by cedlemo]
+    * update rotated text gtk demo.
+      [patch by cedlemo]
+    * update pixbufs gtk demo.
+      [patch by cedlemo]
+    * hide "found" return value from (({Gtk::TextView#get_iter_at_XXX})).
+      [GitHub#794][Reported by Miguel Hernández]
+    * add (({Gtk::TextView#get_iter_at}))
+  * Fixes
+    * guard text marks from GC.
+      [GitHub#743][Reported by cedlemo]
+    * fix a bug that GC-ed (({Gtk::TextTag})) may be reused.
+    * relax condition in test for (({Gtk::ListStore})).
+    * use GTK+ version check in test for (({Gtk::Image})).
+    * fix issue in the gtk3 tutorial.
+      [patch from Renich Bon Ciric]
+    * follow (({Gtk::TextBuffer#select_bounds})) API change.
+      [GitHub#794][Reported by Miguel Hernandez]
+    * (({Gtk::TextView#get_iter_at*})) return nil when not found.
+      [GitHub#794][Reported by Miguel Hernandez]
+    * fix typo at gtk-demo.
+      [patch by tSU_RooT]
+    * use (({GdkPixbuf::Pixbuf})) form in gtk-demo files.
+      [patch by cedlemo]
+    * use (({GdkPixbuf::Pixbuf})) form in sample misc files.
+      [patch by cedlemo]
+    * use (({GdkPixbuf::Pixbuf})) form in test files.
+      [patch by cedlemo]
+    * gtk3 sample: follow (({Gtk::TextBuffer#select_bounds})) API change.
+      [GitHub#794][Reported by Miguel Hernández]
+    * (({Gtk::TextView#get_iter_at*})) return nil when not found.
+      [GitHub#794][Reported by Miguel Hernández]
+    * fix wrong method used in order to set window size in tutorial samples.
+      [patch by Renich Bon Ciric]
+    * fix label in (({#Gtk::TextView})) tests.
+    * fix typo at gtk-demo.
+      [patch by tSU_RooT]
+    * update all samples, tests, demo, tutorial to use (({GdkPixbuf#Pixbuf})).
+      [patch by cedlemo]
+    * add gtk3 demo transparent.rb.
+      [patch by cedlemo]
+    * update sample with (({Gtk::SeclectionData})) API changes.
+      [patch by cedlemo]
+    * lib and tests follow GI API improvement.
+    * test omit on old GTK+.
+    * require more newer GTK+ version for (({Gtk::TextView})) test.
+
+==== Ruby/Pango
+
+  * Improvements
+    * add tests for (({Pango::Context})).
+      [patch by cedlemo]
+    * improve tests for (({Pango::Context})).
+    * implement (({Pango::Context#set_chape_renderer})).
+    * add (({Pango::AttrShape#data})).
+      [GitHub#766][Reported by cedlemo]
+  * Fixes
+    * fix error with MACRO usage in rbpangoattrlist.c.
+      [patch by cedlemo]
+    * fix a bug that (({Pango#GlyphGeometry#geometry=})) does nothing.
+    * fix GC related problem in rbpangocontext.c.
+    * windows: update external packages.
+
+==== Ruby/GSF
+
+  * Improvements
+    * start GSF module.
+      [patch by cedlemo]
+  * Fixes
+    * follow GI API improvement.
+    * windows: fix external package name.
+    * windows: update external packages.
+
+==== Ruby/GOffice
+
+  * Improvements
+    * start GOffice module.
+      [patch by cedlemo]
+    * support version.
+  * Fixes
+    * add tests for GOffice.
+    * use (({GI::Loader#rubyish_class_nme})) in loader.rb.
+      [patch by cedlemo]
+    * add rules in order to fix issues when building objects.
+      [patch by cedlemo]
+    * add availability check in tests.
+    * fix condition issue in test.
+    * make some tests omitted when run by Travis CI.
+    * windows: update external packages.
+
+==== Ruby/Gnumeric
+
+  * Improvements
+    * start Gnumeric module.
+      [patch by cedlemo]
+  * Fixes
+    * add missing dependency in run-test.rb.
+    * use (({GI::Loader#rubyish_class_nme})) in loader.rb.
+      [patch by cedlemo]
+    * add rules in order to fix issues when building objects.
+      [patch by cedlemo]
+    * travis : add gnumeric as package to install instead of relying on dep.
+      [patch by cedlemo]
+    * improve renaming rules for C structures to ruby Class in GI loader.
+      [patch by cedlemo]
+    * add rules in order to avoid 2 objects information beeing reloaded.
+      [patch by cedlemo]
+    * windows: fix external package version.
+
+==== Ruby/GdkPixbuf2
+  * Improvements
+    * replace C implementation with one based on GObject-Introspection.
+      [patch by cedlemo]
+    * implement backward compatibility for (({GdkPixbuf::Pixbuf.new})).
+      [patch by cedlemo]
+    * add rubyish methods.
+    * add (({GdkPixbuf::Pixbuf#composite!})).
+    * implement rubyish methods:
+       * (({GdkPixbuf#dup}))
+       * (({GdkPixbuf#fill!}))
+       * (({GdkPixbuf#rotate}))
+       * (({GdkPixbuf#saturate_and_pixelate}))
+       * (({GdkPixbuf#save}))
+       * (({GdkPixbuf#scale}))
+       * (({GdkPixbuf#scale!}))
+    * support version information.
+    * support options in (({GdkPixbuf::Pixbuf#composite})) and (({GdkPixbuf::Pixbuf#composite!})).
+  * Fixes
+    * remove needless lazy initialization.
+    * improve tests.
+    * add deprecated message for backward compatibility.
+    * add tests for (({GdkPixbuf::Pixbuf#new})).
+      [patch by cedlemo]
+    * add tests for (({GdkPixbuf::Pixbuf#dup})) and (({GdkPixbuf::Pixbuf#fill!})).
+      [patch by cedlemo]
+    * ignore no-gi version of gdk_pixbuf2 in run-test.rb and extconf.rb.
+    * add tests for (({GdkPixbuf::Pixbuf#rotate})) and (({GdkPixbuf::Pixbuf#new})).
+      [patch by cedlemo]
+    * update and fix issues in the samples.
+      [patch by cedlemo]
+    * improve gdk_pixbuf2 libs and tests style, and add missing copyright header.
+    * add missing GObjectIntrospection dependency in tests.
+    * add backward compatibility between the old Gdk::Pixbuf and GdkPixbuf::Pixbuf.
+    * supports running on different directory for gdk_pixbuf2 samples.
+    * add (({PixbufLoader#last_write})).
+    * add tests for (({GdkPixbuf#new})).
+      [patch by cedlemo]
+    * add tests for (({GdkPixbuf#new})) with :file and :scale parameters.
+      [patch by cedlemo]
+    * add tests for (({GdkPixbuf#new})) from subpixbuf.
+      [patch by cedlemo]
+    * add backward compatibily for (({GdkPixbuf::Pixbuf#new})) and (({GdkPixbuf::Pixbuf#new_subpixbuf})).
+    * simplify and improve tests.
+    * use warn and raise instead of puts messages.
+    * add test for (({GdkPixbuf::Pixbuf#dup})).
+      [patch by cedlemo]
+    * add test for (({GdkPixbuf::Pixbuf#new})) from data.
+      [patch by cedlemo]
+    * add test for (({GdkPixbuf::Pixbuf#fill!})).
+      [patch by cedlemo]
+    * clean (({GdkPixbuf::Pixbuf#fill!})) tests.
+    * add test for (({GdkPixbuf::Pixbuf#new})) from bytes.
+      [patch by cedlemo]
+    * clean (({GdkPixbuf::Pixbuf#new})) tests.
+    * add (({GdkPixbuf::Pixbuf#rotate})) tests.
+      [patch by cedlemo]
+    * clean (({GdkPixbuf::Pixbuf#rotate})) tests.
+    * add (({GdkPixbuf#new})) from resource test.
+      [patch by cedlemo]
+    * add (({GdkPixbuf::Pixbuf#new})) from resource at scale tests.
+      [patch by cedlemo]
+    * clean (({GdkPixbuf::Pixbuf#new})) tests.
+    * update sample with the GdkPixbuf::Pixbuf form.
+    * add deprecated hook for (({GdkPixbuf::PixbufFormat#signature})).
+    * add tests for (({GdkPixbuf::Pixbuf#saturate_and_pixelate})).
+      [patch by cedlemo]
+    * keep backward compatibility for (({Gdk::PixbufError})).
+
+==== Ruby/VTE3
+
+  * Improvements
+  * Fixes
+    * remove needless lazy load.
+    * windows: update external package.
+
+==== Ruby/GTK2
+
+  * Improvements
+  * Fixes
+    * use (({GdkPixbuf::Pixbuf})) form in library, test and sample files.
+      [patch by cedlemo]
+
+==== Ruby/RSVG2
+
+  * Improvements
+  * Fixes
+    * use (({GdkPixbuf::Pixbuf})) form in library, test and sample files.
+      [patch by cedlemo]
+    * windows: update external packages.
+
+==== Ruby/Clutter
+
+  * Improvements
+  * Fixes
+    * use (({GdkPixbuf::Pixbuf})) form in library, test and sample files.
+      [patch by cedlemo]
+    * windows update version.
+
+==== Ruby/ClutterGtk
+
+  * Improvements
+  * Fixes
+    * use (({GdkPixbuf::Pixbuf})) form in library, test and sample files.
+      [patch by cedlemo]
+    * Fix issue with initialization of (({Gtk::IconView})) without hash argument.
+      [patch by cedlemo]
+
+==== Ruby/ClutterGstreamer
+
+  * Improvements
+  * Fixes
+    * add missing gdk_pixbuf2 dependency in tests.
+
+==== Ruby/GtkSourceView3
+
+  * Improvements
+  * Fixes
+    * windows: update dependencies.
+
+==== Ruby/GSF
+
+  * Added.
+
+==== Ruby/GOffice
+
+  * Added.
+
+==== Ruby/Gnumeric
+
+  * Added.
+
+==== Thanks
+
+  * Mamoru TASAKA
+  * rafagf1
+  * 5.5
+  * Abby Archer
+  * Eric Cunningham
+  * Hiroshi Hatake
+  * Renich Bon Ciric
+  * Miguel Hernández
+  * tSU_RooT
+  * YAMAMOTO Masayuki
+  * cedlemo
+
+== Ruby-GNOME2 3.0.8: 2016-04-03
+
+It's a release that improves GTK+ 3 support.
+
+=== Changes
+
+==== All
+
+  * Droped Ruby 2.0.0 support.
+  * Travis: use Trusty beta image.
+    [Patch by Hiroshi Hatake]
+  * Added AltLinux to supported OSes.
+    [Patch by Malo Skrylevo]
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Added (({RVAL2CSTR_PTR_ACCEPT_NIL})).
+    * Added (({RVAL2CSTR_RAW})).
+    * Added (({RVAL2CSTR_RAW_ACCEPT_NIL})).
+    * Supported (({GLib::Variant.new(value, type)})).
+    * Added (({GLib::Regex})) class.
+      [Patch by cedlemo]
+    * Supported more variant types in (({rbg_variant_to_ruby})).
+      [Patch by Aurélien Jacobs]
+    * Supported array in (({rg_ruby_to_variant})).
+      [Patch by Aurélien Jacobs]
+    * Added (({GLib::Regex#split})).
+      [Patch by cedlemo]
+    * Added (({GLib::Regex#match})).
+      [Patch by cedlemo]
+    * Added (({GLib::MatchInfo})) class.
+      [Patch by cedlemo]
+    * Added (({GLib::Regex#max_backref})).
+      [Patch by cedlemo]
+    * Added (({GLib::Regex#capture_count})).
+      [Patch by cedlemo]
+    * Added (({GLib::Regex#has_cr_or_lf?})).
+      [Patch by cedlemo]
+    * Added (({GLib::Regex#max_lookbehind})).
+      [Patch by cedlemo]
+    * Added (({GLib::Regex#string_number})).
+      [Patch by cedlemo]
+    * Added (({GLib::Regex.escape_string})).
+      [Patch by cedlemo]
+    * Added (({GLib::Regex#match?})).
+      [Patch by cedlemo]
+    * Added (({GLib::Regex#match_all})).
+      [Patch by cedlemo]
+    * Added (({GLib::Regex#split})).
+      [Patch by cedlemo]
+    * Added (({GLib::Regex#replace})).
+      [Patch by cedlemo]
+    * Added (({GLib::Regex#check_replacement})).
+      [Patch by cedlemo]
+    * Added (({GLib::Regex#replace_eval})).
+      [Patch by cedlemo]
+    * Added (({GLib::MatchInfo#partial_match})).
+      [Patch by cedlemo]
+    * Added (({GLib::MatchInfo#fetch})).
+      [Patch by cedlemo]
+    * Added (({GLib::MatchInfo#[]})).
+    * Added (({GLib::MatchInfo#fetch_pos})).
+      [Patch by cedlemo]
+    * Added (({GLib::MatchInfo#fetch_position})).
+    * Added (({GLib::MatchInfo#fetch_all})).
+      [Patch by cedlemo]
+    * Added (({GLib::MatchInfo#next})).
+      [Patch by cedlemo]
+
+  * Fixes
+    * Fixed a bug that raw string is converted to UTF-8.
+    * Fixed handling of 64 bits (({FIXNUM})) variant initialization.
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Supported allocated output parameter.
+    * Supported dynamic callback.
+    * Supported enum as output value.
+    * Added function type name in error message.
+    * Added (({RB_ZALLOC})).
+    * Supported freeing GType-ed union.
+      [GitHub#700][Reported by cedlemo]
+    * Added (({GI::Repository#get_version})).
+  * Fixes
+    * Fixed a bug that block is always ignored in singleton method.
+      [ruby-gnome2-devel-ja][Reported by Yuuki Harano]
+
+==== Ruby/GIO2
+
+  * Improvements
+    * Supported (({Gio::Application.new(:arguments => [...]})).
+      [GitHub#519][Reported by Mamoru TASAKA]
+    * Started to use dynamic callback.
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Supported (({Gtk::Clipboard#request_text})).
+      [ruby-gnome2-devel-en][Reported by Detlef Reichl]
+    * Supported (({Gtk::Clipboard#request_contents})).
+    * Supported (({Gtk::Clipboard#request_image})).
+    * Supported (({Gtk::Clipboard#request_targets})).
+    * Supported (({Gtk::Clipboard#request_rich_text})).
+    * Supported (({Gtk::Clipboard#request_uris})).
+    * Updated main demo application.
+      [Patch by cedlemo]
+    * Updated and finished sample tutorial.
+      [Patch by cedlemo]
+    * Supported (({Gtk::TreeModel#set_sort_func})).
+      [GitHub#596][Reported by Christopher L. Ramsey]
+    * Supported (({Gtk::Box#set_child_packing})).
+      [GitHub#602][Reported by Ibrahim Tencer]
+    * Updated stack demo.
+      [Patch by cedlemo]
+    * Added scale demo.
+      [Patch by cedlemo]
+    * Updated theming style classes demo.
+      [Patch by cedlemo]
+    * Created entry buffer demo.
+      [Patch by cedlemo]
+    * Made (({Gtk::EntryBuffer#new more rubyish})).
+      [Patch by cedlemo]
+    * Added markup demo.
+      [Patch by cedlemo]
+    * Added headerbar demo.
+      [Patch by cedlemo]
+    * Updated css accordion demo.
+      [Patch by cedlemo]
+    * Added pickers demo.
+      [Patch by cedlemo]
+    * Updated links demo.
+      [Patch by cedlemo]
+    * Added overlay demo.
+      [Patch by cedlemo]
+    * Added textmask demo.
+      [Patch by cedlemo]
+    * Added sidebar demo.
+      [Patch by cedlemo]
+    * Updated spinner demo.
+      [Patch by cedlemo]
+    * Updated entry completion demo.
+      [Patch by cedlemo]
+    * Added revealer demo.
+      [Patch by cedlemo]
+    * Updated expander demo.
+      [Patch by cedlemo]
+    * Added overlay2 demo.
+      [Patch by cedlemo]
+    * Updated colorsel demo.
+      [Patch by cedlemo]
+    * (({rbgobj_gc_mark_instance})) has to be called
+      for the (({Gtk::TreeSelection})).
+      [Patch by Hiroyuki Ito]
+    * Updated css basics demo.
+      [Patch by cedlemo]
+    * Made (({Gtk::TreeModel#iter_nth_child})) and
+      (({Gtk::TreeModel#iter_children})) work like
+      (({#get_value})).
+    * Added methods to Gtk::TreeIter:
+        * (({Gtk::TreeIter#previous!}))
+        * (({Gtk::TreeIter#has_child?}))
+        * (({Gtk::TreeIter#n_children}))
+        * (({Gtk::TreeIter#nth_child}))
+        * (({Gtk::TreeIter#children})).
+      [Patch by Hiroyuki Ito]
+    * Added support for (({Gtk::TreeSelection})).
+      [Patch by dutchhome]
+    * Updated builder demo.
+      [Patch by cedlemo]
+    * Updated css pixbufs demo.
+      [Patch by cedlemo]
+    * Updated button box demo.
+      [Patch by cedlemo]
+    * Created css shadows demo.
+      [Patch by cedlemo]
+    * Updated infobar demo.
+      [Patch by cedlemo]
+    * Added support for MenuPositionFunc in
+      (({Gtk::Menu#popup})).
+      [GitHub#61][Reported by Abby Archer]
+    * Made (({Gtk::Widget#translate_coordinates})) more
+      rubyish.
+      [Patch by cedlemo]
+    * Added support for (({EntryCompletionMatchFunc})).
+      [Patch by Hiroyuki Ito]
+    * Updated iconview edit demo.
+      [Patch by cedlemo]
+    * Updated sizegroup demo.
+      [Patch by cedlemo]
+    * Updated cursors demo.
+      [Patch by cedlemo]
+    * Made (({Gtk::MenuItem#new})) like
+      (({Gtk::CheckMenuItem#new})).
+      [Patch by Hiroyuki Ito]
+    * Move the (({#set_values})) implementation to
+      (({Gtk::TreeModel})) instead of (({Gtk::ListStore})).
+      [GitHub#659][Reported by detlef]
+    * Updated search entry2 demo.
+      [Patch by cedlemo]
+    * Updated menus demo.
+      [Patch by cedlemo]
+    * Updated css multiplebgs demo.
+      [Patch by cedlemo]
+    * Added auto generated callback for AssistantPageFunc.
+    * Added auto generated callback for BuilderConnectFunc.
+    * Updated model button demo.
+      [Patch by cedlemo]
+    * Updated dialog demo.
+      [Patch by cedlemo]
+    * Added another example sample for (({Gtk::TreeStore})).
+      [Patch by cedlemo]
+    * Added the methods:
+        * (({Gtk::TreePath#next!}))
+        * (({Gtk::TreePath#prev!}))
+        * (({Gtk::TreePath#up!}))
+        * (({Gtk::TreePath#down!})).
+      [Patch by cedlemo]
+    * Added (({Gtk::TreeIter#first_child})).
+      [Patch by cedlemo]
+    * Updated filtermodel demo.
+      [Patch by cedlemo]
+    * Updated popover demo.
+      [Patch by cedlemo]
+    * Supported (({Gtk::Builder#connect_signals})).
+    * Added new sample icons-theme-viewer.rb.
+      [Patch by cedlemo]
+    * Added new sample menus_from_resources.rb.
+      [Patch by cedlemo]
+    * Updated printing demo.
+      [Patch by cedlemo]
+    * Updated assistant demo.
+      [Patch by cedlemo]
+    * Updated panes demo.
+      [Patch by cedlemo]
+    * Updated font features demo.
+      [Patch by cedlemo]
+
+  * Fixes:
+    * Fixed a bug that (({Gtk::Widget.set_connect_func})) doesn't work.
+      [GitHub#703][Reported by cedlemo]
+
+==== Ruby/Poppler
+
+  * Improvements:
+    * Removed needless (({POPPLER_TYPE_ORIENTATION})) binding.
+      [GiHub#653][Reported by Rob Brackett]
+
+==== Ruby/WebKit2GTK
+
+  * Improvements:
+    * Supported old WebKit2GTK+.
+
+=== Thanks
+
+  * Detlef Reichl
+  * Mamoru TASAKA
+  * cedlemo
+  * Christopher L. Ramsey
+  * Hiroyuki Ito
+  * dutchhome Jon Raiford
+  * Rob Brackett
+  * Abby Archer
+  * Yuuki Harano
+  * detlef
+  * Aurélien Jacobs
+  * Hiroshi Hatake
+  * Malo Skrylevo
+
+== Ruby-GNOME2 3.0.7: 2015-10-06
+
+It is a bug fix release of 3.0.6.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Fixes
+    * Fixed a bug that `xxx_yyy` enum name isn't accepted.
+      [ruby-gnome2-devel-en][Reported by Detlef Reichl]
+    * Fixed a bug that internal Ruby API is used.
+      [ruby-gnome2-devel-en][Reported by Detlef Reichl]
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Added backward compatibility API to
+      (({Gtk::TreeView#insert_column})).
+      [ruby-gnome2-devel-en][Reported by Detlef Reichl]
+
+=== Thanks
+
+  * Detlef Reichl
+
+== Ruby-GNOME2 3.0.6: 2015-10-04
+
+It is a bug fix release of 3.0.5.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Supported (({GLib.format_size})) on 32bit.
+      [GitHub#565][Reported by Mamoru TASAKA]
+    * Supported (({GLib.format_size_for_display})) on 32bit.
+      [GitHub#565][Reported by Mamoru TASAKA]
+    * Added (({GLib::Version.or_later?})).
+      [GitHub#570][Patch by cedlemo]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Added (({GObjectIntrospection::Version.or_later?})).
+      [GitHub#572][Patch by cedlemo]
+    * Supported (({GSList})) for filename.
+      [ruby-gnome2-devel-en][Reported by Stefan Salewski]
+
+==== Ruby/GIO2
+
+  * Improvements
+    * Added (({Gio::Version.or_later?})).
+      [GitHub#571][Patch by cedlemo]
+    * Made (({Gio::APplicationCommandLine#attributes})) Rubyish.
+
+==== Ruby/Pango
+
+  * Improvements
+    * Added (({Pango::Version.or_later?})).
+      [GitHub#576][Patch by cedlemo]
+
+==== Ruby/GTK2
+
+  * Improvements
+    * Added (({Gtk::Version.or_later?})).
+      [GitHub#574][Patch by cedlemo]
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Supported (({Gtk::CellLayout#set_cell_data_func})).
+      [ruby-gnome2-devel-en][Reported by Stefan Salewski]
+    * Supported (({Gtk::Container#add})) with child properties.
+      [ruby-gnome2-devel-en][Reported by Stefan Salewski]
+    * Added (({Gtk::StockItem#[]})) for backward compatibility.
+      [ruby-gnome2-devel-en][Reported by Stefan Salewski]
+    * Added (({Gtk::IconSize::IconSize})) for backward compatibility.
+      [ruby-gnome2-devel-en][Reported by Stefan Salewski]
+    * Supported marking cell renderers in (({Gtk::CellLayout})) for GC.
+      [ruby-gnome2-devel-en][Reported by Stefan Salewski]
+    * Supported (({nil})) for (({Gtk::TreeIter#set_value})).
+    * Supported marking columns in (({Gtk::TreeView})) for GC.
+      [ruby-gnome2-devel-en][Reported by Stefan Salewski]
+    * Updated tutorial samples.
+      [GitHub#567][GitHub#568][GitHub#587][Patch by cedlemo]
+    * Supported marking records in (({Gtk::TreeModel})) for GC.
+      [ruby-gnome2-devel-en][Reported by Stefan Salewski]
+    * Started updating gtk-demo with (({Gtk::Application})).
+      [GitHub#583][GitHub#586][GitHub#588][Patch by cedlemo]
+    * Supported option style API by (({Gtk::Builder#add})).
+    * Supported (({:object_ids})) by (({Gtk::Builder#add})).
+      [GitHub#585][Patch by cedlemo]
+    * Added backward compatible API to (({Gtk.show_uri})).
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * Added (({Gst::Version.or_later?})).
+      [GitHub#573][Patch by cedlemo]
+
+==== Ruby/Poppler
+
+  * Improvements
+    * Added (({Poppler::Version.or_later?})).
+      [GitHub#577][Patch by cedlemo]
+
+==== Ruby/RSVG2
+
+  * Improvements
+    * Added (({RSVG::Version.or_later?})).
+      [GitHub#578][Patch by cedlemo]
+
+==== Ruby/VTE3
+
+  * Improvements
+    * Stopped to run tests for old VTE with new VTE.
+      [GitHub#566][Reported by Mamoru TASAKA]
+
+==== Ruby/WebKitGTK
+
+  * Improvements
+    * Added (({WebKitGtk::Version.or_later?})).
+
+=== Thanks
+
+  * Stefan Salewski
+  * Mamoru TASAKA
+  * cedlemo
+
+== Ruby-GNOME2 3.0.5: 2015-09-22
+
+It is a bug fix release for mikutter.
+
+=== Changes
+
+==== Ruby/GTK2
+
+  * Fixes
+    * Fixed a bug that (({g_object_ref_sink()})) isn't called for
+      instance of (({type_register}))ed class.
+      [http://dev.mikutter.hachune.net/issues/771#note-3]
+      [Reported by toshi_a]
+
+=== Thanks
+
+  * toshi_a
+
+== Ruby-GNOME2 3.0.4: 2015-09-21
+
+It is a build fix release for 32bit Windows.
+
+=== Changes
+
+==== All
+
+  * Improvements
+    * Supported auto native package installation on Arch Linux.
+      [GitHub#553][GitHub#563] [Patch by lilole]
+
+==== Ruby/GObjctIntrospection
+
+  * Fixes
+    * 32bit Windows: Fixed strut field accessors access wrong address.
+
+==== Ruby/ATK
+
+  * Improvements
+    * Added (({Atk::Version.or_later?}))
+      [GitHub#552] [Patch by cedlemo]
+
+==== Ruby/GdkPixbuf2
+
+  * Improvements
+    * Added (({Gdk::Pixbuf::Version.or_later?})).
+      [GitHub#561] [Patch by cedlemo]
+
+==== Ruby/GDK3
+
+  * Improvements
+    * Supported GTK+ 3.17.9.
+      [GitHub#558] [Reported by Mamoru TASAKA]
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Updated examples.
+      [GitHub#550] [Patch by cedlemo]
+
+==== Ruby/ClutterGstreamer
+
+  * Improvements
+    * Added (({ClutterGst.load_version})).
+    * Added (({ClutterGst.load_version=})).
+    * Added (({ClutterGst::Version.or_later?})).
+      [GitHub#556] [Patch by cedlemo]
+
+=== Thanks
+
+  * cedlemo
+  * lilole
+  * Mamoru TASAKA
+
+== Ruby-GNOME2 3.0.3: 2015-09-16
+
+It is a compatibility improvement release of 3.0.2.
+
+=== Changes
+
+==== All
+
+  * Improvements
+    * Removed test-unit-notify gem from development dependencies.
+      [GitHub#547] [Patch by cedlemo]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Supported (({GObjectIntrospection::Repository.prepend_search_path})).
+    * Supported (({GObjectIntrospection::Repository.search_path})).
+    * Windows: Supported requiring library after one
+      (({GObjectIntrospection::Loader#load})).
+      [GitHub#546] [Reported by Abby Archer]
+
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Supported (({Gtk::IconSize.lookup})).
+      [GitHub#544] [Reported by Masafumi Yokoyama]
+    * Supported size name as argument of (({Gtk::Widget#render_icon_pixbuf})).
+      [GitHub#544] [Reported by Masafumi Yokoyama]
+    * Supported (({Gio::Icon})) in (({Gtk::IconTheme#lookup_icon})).
+      [GitHub#544] [Reported by Masafumi Yokoyama]
+    * Supported (({Gtk::TreeModel#iter_parent})).
+    * Supported (({Gtk::TreeIter#parent})).
+    * Updated examples.
+      [GitHub#548] [Patch by cedlemo]
+
+  * Fixes
+    * Fixed a bug that (({Gtk::Widget.bind_template_child})) is
+      required. [GitHub#549] [Reported by cedlemo]
+    * Fixed a bug that default (({x_option})) and (({y_option}))
+      values of (({Gtk::Table#attach})) is wrong.
+      [GitHub#546] [Reported by Abby Archer]
+    * Windows: Fixed a bug that Ruby/RSVG2 isn't required
+      automatically.
+      [GitHub#546] [Reported by Abby Archer]
+
+=== Thanks
+
+  * Masafumi Yokoyama
+  * cedlemo
+  * Abby Archer
+
+== Ruby-GNOME2 3.0.2: 2015-09-13
+
+It is a compatibility improvement release of 3.0.1.
+
+=== Changes
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Supported void pointer.
+      [GitHub#540] [Reported by Abby Archer]
+    * Added (({GObjectIntrospection::Loader.instantiate_gobject_pointer})).
+
+==== Ruby/GDK3
+
+  * Improvements
+    * Supported (({Gdk::Window#user_data})).
+      [GitHub#540] [Reported by Abby Archer]
+    * compatibility: (({Cairo::Context#set_source_rgba})) accepts
+      (({nil})) as alpha value.
+      [GitHub#540] [Reported by Abby Archer]
+    * compatibility: Added fallback feature for deprecated
+      (({Gdk::EventScroll::Direction})).
+    * Windows: Added hicolor-icon-theme as fallback theme.
+
+==== Ruby/GTK3
+
+  * Improvements
+    * compatibility: (({Gtk::Window#icon=})) accepts icon file name.
+      [GitHub#540] [Reported by Abby Archer]
+    * compatibility: (({Gtk::Dialog#add_button})) accepts (({Symbol}))
+      as response ID.
+      [GitHub#540] [Reported by Abby Archer]
+    * Deprecated (({Gtk::ColorSelectionDialog})).
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::TextTag::WrapMode})).
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::TextBuffer#insert(iter, target, *tags)})) usage.
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::ButtonBox::Style})).
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::MessageDialog::ButtonsType})).
+    * compatibility: Supported creating an empty image by
+      (({Gtk::Image.new})).
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::ImageMenuItem.new})) usage.
+    * Supported (({Gtk::TreeIter#next!})).
+    * Supported (({Gtk::TreeModel#get_value})).
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::Alignment::Align})).
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::Widget#get_size_request})).
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::Table.new})).
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::Table#column_spaces})).
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::Table#column_spaces=})).
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::Table#attach})).
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::ToggleButton.new})).
+    * Windows: Added missing Ruby/RSVG2 dependency.
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::Container#each_forall})).
+    * Supported (({nil})) as (({size})) for (({Gtk::Image.new})).
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::Image.new(pixbuf)})).
+    * compatibility: Added fallback feature for deprecated
+      (({Gtk::Toolbar::Style})).
+    * Supported Rubyish (({Gtk::CheckMenuItem.new})).
+  * Fixes
+    * Fixed samples.
+      [GitHub#536][GitHub#541] [Patch by cedlemo]
+      [GitHub#540] [Reported by Abby Archer]
+    * Fixed a bug that (({Gtk::Calendar#date})) returns (({0-11}))
+      range month value.
+
+==== Ruby/RSVG2
+
+  * Improvements
+    * Windows: Added missing Ruby/Pango dependency.
+    * Windows: Updated loaders.cache for gdk-pixbuf automatically.
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * compatibility: (({Gst::TypeFindFactory#extensions})) always
+      returns (({Array})).
+
+=== Thanks
+
+  * cedlemo
+  * Abby Archer
+
+== Ruby-GNOME2 3.0.1: 2015-09-11
+
+It is a bug fix release of 3.0.0.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Fixes
+    * Windows: Fixed a bug that large number flag value isn't usable.
+      [GitHub#538] [Reported by Abby Archer]
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Updated tutorials.
+      [GitHub#534][GitHub#537] [Patch by cedlemo]
+
+==== Ruby/VTE3
+
+  * Improvements
+    * Added (({Vte::Version.or_later?})).
+      [GitHub#535] [Patch by cedlemo]
+
+=== Thanks
+
+  * cedlemo
+  * Abby Archer
+
+== Ruby-GNOME2 3.0.0: 2015-09-10
+
+It is a GTK+ 3.16 support release.
+
+To GTK+ 3.16 support, many people helped us. Especially, cedlemo did
+great works. Very thanks all!!!
+
+=== Changes
+
+==== All
+
+  * Improvements
+    * Added install instruction for GitHub master branch.
+      [GitHub#425][Patch by Hiroyuki Sato]
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Added new APIs:
+      * (({RVAL2GOBJGLIST}))
+      * (({RVAL2GOBJGSLIST}))
+      * (({rbg_rval2glist}))
+      * (({rbg_rval2gslist}))
+      * (({RVAL2CSTR_PTR}))
+      * (({rbg_name_to_nick}))
+      * (({rbgobj_class_init_func}))
+      * (({rbgobj_register_type}))
+    * Changed (({RVAL2CSTR})) to return (({NULL})) terminated string.
+      If you want to get raw string that may not be terminated by (({NULL})),
+      use (({RVAL2CSTR_PTR})).
+    * Supported (({Symbol})) as flag value.
+    * Added (({windows_platform?}))
+    * Supported (({GLib::Value.new})) without value.
+    * Supported array of flag value as (({GLib::Flags.new})) input.
+    * Supported name, nick and (({GLib::Enum})) as
+      (({GLib::Enum.new})) input.
+    * Migrated to Markdown for README markup.
+      [GitHub#484][Patch by prpr_man]
+    * Supported (({GVariantType})).
+    * Supported (({GVariant})).
+    * Supported (({GBinding})).
+      [GitHub#524][Reported by cedlemo]
+
+  * Fixes
+    * Fixed a bug that (({GLib.format_size})) doesn't work 32bit over
+      integer value.
+      [GitHub#413][Reported by eumario]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Supported non GObject struct as return value.
+      [GitHub#286][Reported by Christopher L. Ramsey]
+    * Supported (({list_XXX})) method name.
+    * Supported freeing (({GList<GObjet *>})).
+    * Supported array of struct as input argument.
+    * Supported auto native package install on CentOS 7.
+    * Supported (({can_XXX?})) predicate.
+    * Supported the number of array as input argument.
+      [Suggested by John Cupitt]
+    * Supported array of (({GValue})) as input argument.
+    * Supported array as return value.
+    * Supported (({GClosure})) as input argument.
+    * Supported (({GSList<GObject *>})) as input argument.
+    * Supported (({GSList<GObject *>})) as output argument.
+      [GitHub#324][Reported by cedlemo]
+    * Supported union as input argument.
+    * Supported array of (({guint8})) as input argument.
+    * Supported array of (({gint32})) as input argument.
+    * Supported class methods defined in (({XXXClass})).
+    * Supported (({GList<GBoxed *>})) as output argument.
+      [GitHub#389][Reported by eumario]
+    * Supported (({GList<GInterface *>})) as return value.
+      [GitHub#501][Reported by Christopher L. Ramsey]
+    * Supported (({GVariant})) as return value.
+      [GitHub#502][Reported by kitone]
+
+  * Fixes
+    * Fixed a bug that (({GList<GObjet *>})) return type method always
+      returns nil.
+    * Fixed a bug that not predicate is treated as predicate.
+    * Fixed a bug that (({self})) is different.
+
+==== Ruby/GIO2
+
+  * Improvements
+    * Supported (({GAsyncReadyCallback})).
+      [GitHub#302][Reported by Christopher L. Ramsey]
+    * Added (({ActionMap#add_actions})).
+
+==== Ruby/Pango
+
+  * Improvements
+    * Added (({Pango::Language#sample_string})).
+
+==== Ruby/GDK3
+
+  * Improvements
+    * Added backward compatibility APIs.
+      [GitHub#284][Reported by Christopher L. Ramsey]
+    * Added constants in (({Gdk::Selection})).
+      [GitHub#254][Patch by Masafumi Yokoyama]
+    * Added missing deprecations.
+      [GitHub#291][Reported by Michel Boaventura]
+    * Added (({RGBA.parse})).
+      [GitHub#295][Reported by carlosjhr64]
+    * Supported (({Gdk::Rectangle})).
+      [GitHub#319][Reported by cedlemo]
+    * Supported (({Gdk::Screen#get_setting})).
+      [GitHub#376][Reported by cedlemo]
+    * Added (({Gdk::Screen#get_monitor})).
+
+  * Fixes
+    * Fixed a bug that (({GDK_KEY_XXX})) raises an error.
+      [ruby-gnome2-devel-en][Reported by Detlef Reichl]
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Migrated to GObject Introspection based bindings from hand
+      writing bindings. Now, all the latest API in GTK+ are supported.
+      [Hiroshi Hatake][Detlef Reichl][cedlemo][John Cupitt]
+      [Masafumi Yokoyama][eumario][PeterWAWood][Daiki Ueno]
+    * Updated samples. [Patch by cedlemo]
+
+==== Ruby/GtkSourceView3
+
+  * Improvements
+    * Migrated to GObject Introspection based bindings from hand
+      writing bindings. Now, all the latest API in GtkSourceView are
+      supported.
+
+==== Ruby/VTE3
+
+  * Improvements
+    * Migrated to GObject Introspection based bindings from hand
+      writing bindings. Now, all the latest API in VTE are supported.
+      [cedlemo]
+
+==== Ruby/GStreamer
+
+  * Fixes
+    * Fixed native package name on CentOS and Fedora.
+    * Fixed shebang.
+      [GitHub#507][Patch by Dmitry Marakasov]
+
+==== Ruby/RSVG2
+
+  * Improvements
+    * Added (({:file_name})), (({:data})) and (({:flags})) option to
+      (({RSVG::Handle.new})).
+    * Updated a sample.
+      [GitHub#518][Patch by Robert A. Heiler].
+
+  * Fixes
+    * Fixed a memory leak of (({RSVG::Handle.new_from_data})) and
+      (({RSVG::Handle.new_from_file})).
+      [GitHub#318][Reported by Kagetsuki]
+
+==== Ruby/Clutter
+
+  * Improvements
+    * Added (({Clutter::Version.or_later?})).
+
+==== Ruby/WebKit2GTK
+
+  * Improvements
+    * Added.
+
+=== Thanks
+
+  * Hiroshi Hatake
+  * Christopher L. Ramsey
+  * Masafumi Yokoyama
+  * cedlemo
+  * Detlef Reichl
+  * Kagetsuki
+  * eumario
+  * PeterWAWood
+  * Hiroyuki Sato
+  * Daiki Ueno
+  * prpr_mann
+  * Dmitry Marakasov
+
+== Ruby-GNOME2 2.2.5: 2015-04-24
+
+It is a GLib 2.44 support release.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Supported GLib 2.44.
+      [GitHub#361][Reported by Benjamin Maisano]
+
+=== Thanks
+
+  * Benjamin Maisano
+
+== Ruby-GNOME2 2.2.4: 2014-12-23
+
+It is a x64 Windows support release.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Stopped to call g_thread_init() for GLib 2.32.0 or later because
+      g_thread_init() is called automatically.
+    * Added GLib.format_size.
+    * Added GLib::Source#name.
+    * Added GLib::Source#name=.
+    * Added GLib::Source#ready_time.
+    * Added GLib::Source#ready_time=.
+    * Added GLib::Source#destroy.
+  * Fixes
+    * Fixed a bug that wrong converter is used on bigendian
+      environment.
+      [GitHub#270][Reported by mtasaka]
+
+==== Ruby/GIO2
+
+  * Improvements
+    * Added Gio::DBus.
+  * Fixes
+    * Fixed a bug that Gio::ContentType#executable? isn't defined by
+      correct name.
+
+==== Ruby/GTK2
+
+  * Improvements
+    * Gtk::AboutDialog#show: Supported license_type option.
+      [ruby-gnome2-devel-ja][Patch by Hiroyuki Ito]
+  * Fixes
+    * Gtk::AboutDialog#show: Fixed a bug that wrap_license option
+      doesn't work.
+      [ruby-gnome2-devel-ja][Patch by Hiroyuki Ito]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Supported prefix removing from method name.
+    * Supported GList of UTF-8.
+      [ruby-gnome2-devel-en][Reported by Detlef Reichl]
+    * Added documentation.
+      [GitHub#267][Patch by Detlef Reichl]
+  * Fixes
+    * Fixed a bug that out only argument is required.
+      [GitHub#268][Reported by mtasaka]
+
+==== Ruby/GDK3
+
+  * Improvements
+    * Gdk::Window: Added deprecated constants for backward compatibility.
+    * Supported Gdk::Keyval module functions.
+      [GitHub#265][Reported by Detlef Reichl]
+    * Cairo::Context#set_source_rgba: Re-supported
+      (({set_source_rgba(r, g, b, a)})) style.
+      [GitHub#272][Patch by Detlef Reichl]
+    * [windows] Bundled the new default GNOME icon theme.
+      [GitHub#276][Reported by glurp]
+  * Fixes
+    * Gdk::Color.parse: Fixed unexpected API change.
+      [GitHub#276][Reported by glurp]
+    * Fixed a bug that Gdk::Event::Mask fallback doesn't work.
+      [GitHub#276][Reported by glurp]
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Gtk::AboutDialog#show: Supported license_type option.
+      [ruby-gnome2-devel-ja][Patch by Hiroyuki Ito]
+    * Gtk::ActionBar: Added.
+      [GitHub#282][Suggested by Christopher L. Ramsey]
+  * Fixes
+    * Gtk::AboutDialog#show: Fixed a bug that wrap_license option
+      doesn't work.
+      [ruby-gnome2-devel-ja][Patch by Hiroyuki Ito]
+
+==== Ruby/RSVG2
+
+  * Improvements
+    * RSVG::Handle.new_from_file: Supported flags. You can open a
+      large file with (({:flags => :unlimited})).
+      [GitHub#263][Patch by Taro Matsuzawa]
+
+==== Ruby/Clutter
+
+  * Improvements
+    * Added Clutter::Feature.
+  * Fixes
+    * Added missing require for Ruby/Pango.
+    * Fixed initializing order.
+      [GitHub#274][Reported by mtasaka]
+
+=== Thanks
+
+  * Detlef Reichl
+  * Hiroyuki Ito
+  * mtasaka
+  * glurp
+  * Taro Matsuzawa
+  * Christopher L. Ramsey
+
+== Ruby-GNOME2 2.2.3: 2014-10-26
+
+It is a bug fix release.
+
+It's recommended that you upgrade if your application uses thread and
+runs on Ruby 2.0 or later.
+
+=== Changes
+
+==== All
+
+  * Improvements
+    * Supported auto native package install on SuSE.
+
+==== Ruby/GLib2
+
+  * Fixes
+    * Fixed infinite loop bug on Ruby 2.0 or later.
+      [ruby-gnome2-devel-ja] [Reported by Toshi Hatsune]
+
+==== Ruby/GDK3
+
+  * Fixes
+    * Added missing dependencies.
+      [GitHub#258] [Reported by Luis Daniel Gonzalez Orozco]
+
+==== Ruby/CairoGObject
+
+  * Improvements
+    * Supported auto required native package install by Homebrew.
+
+  * Fixes
+    * Fixed wrong package name on Debian.
+
+==== Ruby/VTE3
+
+  * Improvements
+    * Supported auto required native package install by Homebrew.
+
+==== Ruby/Clutter
+
+  * Improvements
+    * Added Clutter.check_version?.
+
+=== Thanks
+
+  * Luis Daniel Gonzalez Orozco
+  * Toshi Hatsune
+
+== Ruby-GNOME2 2.2.2: 2014-10-12
+
+It is a Windows package fix release.
+
+== Ruby-GNOME2 2.2.1: 2014-10-12
+
+It is a release that Ruby/GDK3 is migrated to
+Ruby/GObjectIntrospection based bindings.
+
+Some API changes in Ruby/GDK3 are expected but unexpected API
+changes may exist. If you find API change, please report it. If the
+API change provides non Rubyish API, it will be a bug.
+
+Ruby/GooCanvas is removed because we can't maintain it.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Added GObject#unref to free large object immediately.
+
+  * Fixes
+    * [windows] Added a missing exported symbol. ((({rbg_inspect})))
+    * Fixed a bug that signal handler doesn't work on Ruby 2.1.
+      [ruby-gnome2-devel-en] [Reported by Carlo E. Prelz]
+    * Fixed free function (free -> xfree).
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Supported instantiating union.
+    * Accepted 5 or more the number of signals.
+      It may be increased for later GIO version.
+      [GitHub#229] [Reported by cosmo0920]
+    * Added "?" to boolean field value reader.
+    * Supported mapping function info to method.
+    * Don't handle MethodInfo as FunctionInfo.
+    * Accepted not GType struct as an input argument.
+    * Accepted getting a field value from not GType but
+      GType descendant sruct.
+    * Added Loader.register_constant_rename_map.
+    * Supported in GType array.
+    * Don't require needless array length argument.
+    * Supported finding suitable method that has optional argument.
+
+  * Fixes
+    * Fixed wrong argument index for Ruby objects.
+    * Fixed a bug that ArgInfo isn't passed.
+
+==== Ruby/CairoGObject
+
+  * Improvements
+    * Suppressed a warning that instance variable gboxed not initialized.
+
+==== Ruby/GIO2
+
+  * Improvements
+    * Supported GLib 2.42.0. Annotation for GObject Introspection is added
+      to g_pollable_input_stream_read_nonblocking() since GLib 2.42.0.
+      See also: https://bugzilla.gnome.org/show_bug.cgi?id=730493
+    * Supported GLib <= 2.36.0.
+
+  * Fixes
+    * Fixed a bug that .pc isn't installed. [Reported by OBATA Akio]
+
+==== Ruby/GDK3
+
+  * Improvements
+    * Migrated to Ruby/GObjectIntrospection based bindings.
+    * Gdk::Keyval::GDK_KEY_x style is deprecated. Use
+      Gdk::Keyval::KEY_x style instead.
+    * Accepted Gdk::RGBA for Cairo::Context#set_source_rgba.
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Added Gtk::StackSwitcher.
+    * Supported interrupt in Gtk.main.
+    * Supported interrupt in Gtk::Dialog#run.
+      [Reported by Carlo E. Prelz]
+    * Added initialization with Gdk::RGBA value.
+      [GitHub#231] [Patch by Detlef Reichl]
+    * Added Gtk::Window#set_titlebar (enable the use of Gtk::HeaderBar).
+      [GitHub#236] [Patch by tescorg]
+    * Updated sample scripts.
+      [Patch by kitachro]
+
+  * Fixes
+    * Fixed memory leak of Gtk::Image.
+      [GitHub#252] [Reported by Michel Boaventura]
+
+==== Ruby/GTK2
+
+  * Improvements
+    * Fixed wrong property value on ppc64 and s390x.
+      [GitHub#256] [Reported by mtasaka]
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * Added gstreamer.rb for Bundler's autoload.
+      [GitHub#232] [Reported by saepia]
+    * Added Caps.any and Caps.empty.
+    * Supported property for Gst::ChildProxy.
+      [GitHub#233] [Reported by saepia]
+
+  * Fixes
+    * Fixed a bug that Gst.init is failed.
+      [GitHub#232] [Reported by saepia]
+
+==== Ruby/Poppler
+
+  * Improvements
+    * Install Poppler with --with-glib option for Homebrew.
+      [GitHub#237] [Reported by Colin Dean]
+    * Removed needless `--with-glib` option. Now, it is the default.
+      [rabbit-shocker/rabbit#24] [Reported by Kazuhiro NISHIYAMA]
+
+==== Ruby/ClutterGStreamer
+
+  * Improvements
+    * Added clutter-gstreamer.rb to support Bundler's autoload.
+
+==== Ruby/GooCanvas
+
+  * Removed.
+
+=== Thanks
+
+  * OBATA Akio
+  * Carlo E. Prelz
+  * cosmo0920
+  * Detlef Reichl
+  * saepia
+  * tescorg
+  * Colin Dean
+  * Kazuhiro NISHIYAMA
+  * kitachro
+  * Michel Boaventura
+  * mtasaka
+
+== Ruby-GNOME2 2.2.0: 2014-03-09
+
+It is a release that Ruby/GIO2 is migrated to
+Ruby/GObjectIntrospection based bindings.
+
+Some API changes in Ruby/GIO2 are expected but unexpected API changes
+may exist. If you find API change, please report it. If the API change
+provides non Rubyish API, it will be a bug.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Stopped to use deprecated API internally in G_REPLACE_SET_PROPERTY.
+    * Added RG_REPLACE_SET_PROPERTY.
+    * Reduced locking on object creation.
+    * Exported rbg_inspect().
+    * Created code level error.
+    * Raised code level error instead of domain level error.
+
+  * Fixes
+    * Fixed a bug that wrong error code may be used.
+
+==== Ruby/GTK2
+
+  * Improvements
+    * Suppressed warnings on startup.
+
+  * Fixes
+    * [windows] Suppressed IME related warnings.
+      [Reported by OBATA Akio]
+    * [GitHub#222] Fixed a bug that Gdk::EventAny related methods
+      aren't used by other Gdk::Event classes.
+      [Reported by mtasaka]
+
+==== Ruby/GDK3
+
+  * Improvements
+    * Added Gdk::Display#device_manager.
+    * Added Gdk::Window#display.
+    * Suppressed warnings on startup.
+    * Added Gdk::Event::PROPAGATE.
+    * Added Gdk::Event::STOP.
+
+  * Fixes
+    * [windows] Suppressed IME related warnings.
+    * Fixed a bug that Gdk::DeviceManager is wrong object.
+    * [GitHub#222] Fixed a bug that Gdk::EventAny related methods
+      aren't used by other Gdk::Event classes.
+      [Reported by mtasaka]
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Added Gtk::MenuButton.
+    * [GitHub#219] Added Gtk::LevelBar. [Patch by cosmo0920]
+    * Added Gtk::IconView.
+    * [GitHub#206] Added Gtk::HeaderBar. [Reported by dark-yux]
+    * [GitHub#223] Added Gtk::Stack. [Patch by cosmo0920]
+    * Suppressed warnings on startup.
+    * Added Gtk::Revealer.
+    * Updated sample scripts.
+    * [GitHub#227] Added Gtk::SearchBar. [patch by cosmo0920]
+
+==== Ruby/GIO2
+
+  * Improvements
+    * Migrated to Ruby/GObjectIntrospection based bindings.
+    * [SF.net#187] Supported Gio::ContentType.guess.
+      [Reported by neversleep1911]
+    * Added Gio::Resources.lookup_data.
+    * Added Gio::Resources.open_stream.
+    * Added Gio::Resources.enumerate_children.
+    * Added Gio::Resources.get_info.
+    * Added Gio::Resources.register.
+    * Added Gio::Resources.unregister.
+
+  * Changes
+    * Removed Gio::Socket#create_source. Use
+      Gio::InputStream#create_source or
+      Gio::OutputStream#create_source instead.
+    * Removed Gio::InetAddress.new_from_string. Use
+      Gio::InetAddress.new instead.
+    * Removed Gio::InetAddress.new_any. Use
+      Gio::InetAddress.any instead.
+    * Removed Gio::InetAddress.new_l. Use
+      Gio::InetAddress.any instead.
+
+  * Fixes
+    * [SF.net#186] Fixed a bug that Gio::ContentType module functions
+      raises "no implicit conversion" error.
+      [Reported by neversleep1911]
+
+==== Ruby/Pango
+
+  * Improvements
+    * [ruby-gnome2-devel-en] Re-supported build on CentOS 5.
+      [Reported by Grant Schoep]
+
+==== Ruby/Poppler
+
+  * Improvements
+    * Suppressed a warning on startup.
+
+==== Ruby/GtkSourceView2
+
+  * Improvements
+    * [GitHub#226] Suppressed warnings.
+      [Patch by cosmo0920]
+
+  * Fixes
+    * [GitHub#215] Fixed a return value for
+      GtkSource#get_mark_category_background.
+      [Reported by mtasaka]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * [GitHub#216] Suppressed warnings on armv7hl.
+      [Reported by mtasaka]
+    * Supported freeing interface.
+    * Supported freeing struct.
+    * Supported String as void * value for value.
+    * Supported freeing array of int8.
+    * Supported freeing array of uint8.
+    * Supported defining errors.
+    * Improved guessing target method for overloaded method.
+    * Supported array length.
+    * Supported inout array.
+    * Converted GBytes to String instead of wrapped GBytes.
+    * Supported all exception types rather than GLib::Error.
+
+  * Changes
+    * Changed returned value of inout array to an array from an array
+      and array length.
+
+  * Fixes
+    * [GitHub#216] Fixed test failures on i686 environment.
+      [Reported by mtasaka]
+
+==== Ruby/ClutterGTK
+
+  * Improvements
+    * Added duplicated Clutter.init check.
+
+=== Thanks
+
+  * OBATA Akio
+  * mtasaka
+  * cosmo0920
+  * Grant Schoep
+  * dark-yux
+  * neversleep1911
+
+== Ruby-GNOME2 2.1.0: 2013-12-29
+
+Ruby 2.1.0 support release!
+
+=== Changes
+
+==== All
+
+  * Improvements
+    * Set license information to gem.
+  * Fixes
+    * [windows] Added missing binaries for Ruby 2.1.0.
+      [GitHub#123] [Patch by Masafumi Yokoyama]
+
+==== Ruby/GDK3
+
+  * Improvements
+    * [windows] Bundled hicolor-icon-theme. It may fix a problem that
+      Windows theme is not applied.
+      [ruby-gnome2-devel-en] [Reported by Regis d'Aubarede]
+
+=== Thanks
+
+  * Masafumi Yokoyama
+  * Regis d'Aubarede
+
+== Ruby-GNOME2 2.0.3: 2013-12-29
+
+It is RC release for 2.1.0.
+
+=== Changes
+
+==== All
+
+  * Improvements
+    * Removed Ruby 1.8 from supported Ruby in READMEs.
+      [GitHub#166] [Reported by Markus Heiler] [Patch by Masafumi Yokoyama]
+    * Supported Ruby 2.1.0. [GitHub#181] [cosmo0920][Masafumi Yokoyama]
+    * Made rcairo optional to required because we dropped old GTK+ that
+      doesn't use cairo. (Cairo isn't used library such as GLib doesn't
+      require rcairo. But Ruby/GLib2 requires rcairo on Windows because
+      it uses zlib bundled in rcairo.) [GitHub#193] [cosmo0920]
+    * Updated LGPL 2.1 files. [GitHub#196] [Reported by ktdreyer]
+    * Supported tests on Travis CI. [Masafumi Yokoyama][cosmo0920]
+    * Supported rake-compiler 0.9.1.
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Set UTF-8 encoding to exception message.
+    * Added GLib::GetText.bindtextdomain.
+    * Dropped GLib < 2.12 because CentOS 5 has GLib 2.12.3.
+      [GitHub#190] [cosmo0920]
+    * Added GValue#to_s.
+    * [windows] Updated bundled GLib to 2.38.2 from 2.36.2.
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Supported GList return type.
+    * Supported freeing UTF-8 return type.
+    * Supported freeing array return type.
+    * Supported NULL as array return value.
+    * Supported freeing GObject return value.
+    * Supported freeing structure return value.
+    * Supported NULL character for gint8 array.
+  * Fixes
+    * Fixed type conversion from VALUE to GType.
+      [GitHub#186] [Patch by Hiroyuki Tanaka]
+
+==== Ruby/ATK
+
+  * Improvements
+    * Dropped ATK < 1.12 support because CentOS 5 has GTK+ 1.12.2.
+      [GitHub#191] [cosmo0920]
+    * [windows] Updated bundled ATK to 2.10.0 from 2.8.0.
+
+==== Ruby/Pango
+
+  * Improvements
+    * Supported cairo 1.6.
+      [GitHub#172] [Patch by Grant Schoep]
+    * Dropped Pango < 1.14 support because CentOS 5 has GTK+ 1.14.9.
+      [GitHub#192] [cosmo0920]
+    * Added Pango::Layout#height=.
+      [GitHub#210] [Patch by Vasily Fedoseyev]
+    * Added Pango::Layout#ellipsized?.
+      [GitHub#210] [Patch by Vasily Fedoseyev]
+    * [windows] Updated bundled Pango to 1.36.1 from 1.34.1.
+
+==== Ruby/GdkPixbuf2
+
+  * Improvements
+    * [windows] Added rcairo dependency on Windows for using libpng and zlib
+      bundled in rcairo.
+    * [windows] Updated bundled gdk-pixbuf to 2.30.2 from 2.28.1.
+
+==== Ruby/GTK2
+
+  * Improvements
+    * Dropped GTK+ < 2.10 support because CentOS 5 has GTK+ 2.10.4.
+      [GitHub#182] [Patch by cosmo0920]
+    * [windows] Updated bundled GTK+ to 2.24.22 from 2.24.18.
+
+==== Ruby/GDK3
+
+  * Improvements
+    * [test] Made more stable. [GitHub#178] [Reported by mtasaka]
+    * Added Gdk::Device#ungrab. [cosmo0920]
+    * Added Gdk::DeviceManager. [cosmo0920]
+    * Added Gdk::Device#get_position. [cosmo0920]
+    * Added Gdk::Device#warp. [cosmo0920]
+    * Added Gdk::Device#grab. [cosmo0920]
+    * Added Gdk::Window#get_device_position. [cosmo0920]
+    * [windows] Updated bundled GTK+ to 3.10.6 from 3.8.2.
+
+==== Ruby/GTK3
+
+  * Improvements
+    * [sample] Updated for GTK+ 3. [Masafumi Yokoyama]
+    * Removed Gtk::BindingSet#add_path.
+    * Added Gtk.show_uri.
+  * Fixes
+    * Fixed a bug that Gtk::ActionGroup#add_radio_actions always fails.
+      [ruby-gnome2-devel-ja] [Reported by S. Kitagawa]
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * Supported calling module functions of Gst module such as
+      Gst.version before calling Gst.init.
+    * Added Gst::Registry#plugins.
+    * Added Gst::Registry#get_features.
+    * Added Gst::ElementFactory#long_name.
+    * Added Gst::ElementFactory#klass.
+    * Added Gst::ElementFactory#author.
+    * Added Gst::ElementFactory#static_pad_templates.
+    * Added Gst::Caps#structures.
+    * Added Gst::Structure#fields.
+    * Gst::Element#flags returns flag object instead of raw integer value.
+      Use Gst::Element#flags_raw for raw integer value.
+    * Gst::PluginFeature#rank returns Gst::Rank instead of raw integer value.
+      Use Gst::PluginFeature#rank for raw integer value.
+    * Supported GstValueList.
+    * [windows] Updated bundled GStreamer to 1.2.1 from 1.0.7.
+
+==== Ruby/Clutter
+
+  * Improvements
+    * [sample] Updated for Clutter 1.12 or later.
+      [Patch by Kentaro Fukuchi]
+    * [windows] Updated bundled Clutter to 1.16.2 from 1.14.4.
+
+==== Ruby/ClutterGStreamer
+
+  * Improvements
+    * [sample] Added.
+      [Masafumi Yokoyama]
+    * Fixed a typo in sample.
+      [Reported by Toyo Abe]
+    * [windows] Updated bundled Clutter-GStreamer to 2.0.8 from 2.0.2.
+
+==== Ruby/Poppler
+
+  * Improvements
+    * Dropped Popper < 0.12 because CentOS has Poppler 0.12.4.
+      [GitHub#212] [cosmo0920]
+    * [windows] Bundled Poppler 0.24.4.
+
+==== Ruby/RSVG
+
+  * Improvements
+    * [windows] Bundled librsvg 2.40.1.
+
+==== Ruby/GtkSourceView3
+
+  * Improvements
+    * Supported auto GtkSourceView install on OS X.
+      [GitHub#177] [Masafumi Yokoyama]
+    * [windows] Updated bundled GtkSourceView to 3.10.1 from 3.8.1.
+
+==== Ruby/GooCanvas
+
+  * Improvements
+    * [sample] Followed changes caused by migrating to
+      Ruby/GObjectIntrospection.
+      [Masafumi Yokoyama]
+    * Updated FSF address.
+      [GitHub#201] [Reported by ktdreyer]
+  * Fixes
+    * Fixed wrong dependency.
+      [ruby-gnomde2-devel-ja] [Reported by Masafumi Yokoyama]
+
+=== Thanks
+
+  * Kentaro Fukuchi
+  * S. Kitagawa
+  * Markus Heiler
+  * Masafumi Yokoyama
+  * Grant Schoep
+  * Toyo Abe
+  * mtasaka
+  * cosmo0920
+  * Hiroyuki Tanaka
+  * ktdreyer
+
+== Ruby-GNOME2 2.0.2: 2013-05-26
+
+Windows XP re-supportted release!
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Added rbgutil_key_equal() convenient function.
+      It is used for comparing key that may be String or Symbol.
+
+==== Ruby/Pango
+
+  * Improvements
+    * [windows] Forced to disable uniscribe backend of HarfBuzz.
+      [ruby-list:49412] [Reported by Masafumi Yokoyama]
+    * Don't define Pango::CairoFcFontMap and Pango::CairoWin32FontMap
+      because they may cause crash on OS X.
+      [shocker-ja:1119] [Reported by znz]
+    * Updated samples.
+      [GitHub#164] [Patch by Kentaro Fukuchi]
+  * Fixes
+    * Fixed wrong index access in Pango::GlyphString#glyphs.
+      [ruby-gnome2-devel-ja] [Reported by Kentaro Fukuchi]
+
+=== Thanks
+
+  * Kentaro Fukuchi
+  * Masafumi Yokoyama
+  * znz
+
+== Ruby-GNOME2 2.0.1: 2013-05-25
+
+Ruby 1.8 support is dropped release!
+
+=== Changes
+
+==== All
+
+  * Improvements
+    * Dropped Ruby 1.8 support.
+    * Updated bundled binaries versions for Windows.
+
+==== Ruby/Pango
+
+  * Improvements
+    * Added Pango::CairoFontMap.set_default.
+    * Enabled fontconfig font on Windows.
+    * Defined Pango::CairoFcFontMap on init if it is available.
+    * Defined Pango::CairoWin32FontMap on init if it is available.
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Added Gtk::Image#set_from_icon_set.
+      [GitHub#150] [Patch by Detlef Reichl]
+    * Added Gtk::Image#set_from_stock.
+      [GitHub#150] [Patch by Detlef Reichl]
+    * Added Gtk::Image#set_from_gicon.
+      [GitHub#150] [Patch by Detlef Reichl]
+    * Updated samples.
+      [GitHUb#151] [Patch by Detlef Reichl]
+  * Fixes
+    * Fixed a GC related crash bug.
+      [ruby-gnome2-devel-en] [Reported by Detlef Reichl]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Supported ownership transfer for some input argument types.
+      (Struct and Object)
+    * Supported "(out caller-allocates)" for boxed object.
+      [ruby-gnome2-devel-ja] [Reported by Kentaro Fukuchi]
+    * Supported gpointer in/out.
+      [ruby-gnome2-devel-ja] [Reported by NAKAJIMA Takashi]
+  * Fixes
+    * Fixed missing argument.
+      [GitHub#154] [Reported by Masafumi Yokoyama]
+
+==== RubyGStreamer
+
+  * Improvements
+    * Supported methods that call callback
+      [ruby-gnome2-devel-ja] [Reported by NAKAJIMA Takashi]
+    * Updated samples.
+      [GitHub#156][GitHub#159][GitHub#160][GitHub#161]
+      [Patch by NAKAJIMA Takashi]
+    * Supported Gst::Bus#set_handler.
+      [ruby-gnome2-devel-ja] [Reported by NAKAJIMA Takashi]
+    * Supported Gst::Controller
+      [ruby-gnome2-devel-ja] [Suggested by NAKAJIMA Takashi]
+    * Stopped to require Gst.init.
+  * Fixes
+    * Fixed out of index access bug.
+
+==== Ruby/GooCanvas
+
+  * Improvements
+    * Migrated to Ruby/GObjectIntrospection based bindings.
+    * Stopped to require Goo.init.
+  * Fixes
+    * Updated samples.
+      [GitHub#152][GitHub#153][GitHub#155][GitHub#157]
+      [Patch by Masafumi Yokoyama]
+
+==== Ruby/Clutter
+
+  * Improvements
+    * Stopped to require Clutter.init.
+  * Fixes
+    * Fixed broken samples.
+      [ruby-gnome2-devel-ja] [Patch by Kentaro Fukuchi]
+
+==== Ruby/ClutterGtk
+
+  * Improvements
+    * Stopped to require ClutterGtk.init.
+
+==== Ruby/ClutterGStreamer
+
+  * Added.
+
+==== Ruby/WebKitGtk
+
+  * Improvements
+    * Stopped to require WebKitGtk.init.
+
+==== Ruby/WebKitGtk2
+
+  * Improvements
+    * Stopped to require WebKitGtk2.init.
+
+=== Thanks
+
+  * Detlef Reichl
+  * NAKAJIMA Takashi
+  * Masafumi Yokoyama
+  * Kentaro Fukuchi
+
+== Ruby-GNOME2 2.0.0: 2013-04-29
+
+GObject Introspection based bindings on Windows support release!
+
+=== Changes
+
+==== NEWS
+
+  * Fixes
+    * Fixed a typo. [Reported by Masafumi Yokoyama]
+    * FIxed a typo. [Reported by Toyo Abe]
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Moved lib/gnome2-*.rb files to lib/gnome2/ directory.
+    * Supported GLib 2.34. [Reported by OBATA Akio]
+
+==== Ruby/GdkPixbuf2
+
+  * Fixes
+    * [windows] Fixed PNG can't be handled problem.
+      [ruby-gnoem2-devel-ja] [Reported by Masafumi Yokoyama]
+
+==== Ruby/GDK3
+
+  * Improvements
+    * [windows] Removed needless Greybird theme.
+      [ruby-gnome2-devel-en] [Reported by Regis d'Aubarede]
+    * Added Gdk::Window#create_cairo_context
+      [ruby-gnome2-devel-en] [Reported by Detlef Reichl]
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Updated samples.
+      [GitHub #140][GitHub #141][GitHub #144]
+      [Patch by Simon Arnaud]
+      [GitHub #142][GitHub #143][GitHub #145][GitHub #146][GitHub #148]
+      [Patch by Detlef Reichl]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * [windows] Supported!
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * Supported GStreamer 1.0!
+    * Migrated to GObject Introspection bindings!
+    * Dropped GStreamer 0.10 support.
+
+==== Ruby/Clutter
+
+  * Improvements
+    * [windows] Supported!
+
+==== Ruby/ClutterGTK
+
+  * Improvements
+    * [windows] Supported!
+
+=== Thanks
+
+  * Masafumi Yokoyama
+  * Toyo Abe
+  * OBATA Akio
+  * Regis d'Aubarede
+  * Detlef Reichl
+  * Simon Arnaud
+
+== Ruby-GNOME2 1.2.6: 2013-04-02
+
+Broken Ruby/Poppler fix release!
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Removed deprecated GLib::Completion.
+    * Removed deprecated g_source_get_current_time() use.
+    * [windows] Updated bundled GLib to 3.8.0.
+    * [windows] Updated bundled glib-networking to 3.8.0.
+    * [windows] Updated bundled GnuTLS to 3.1.10.
+
+==== Ruby/ATK
+
+  * Improvements
+    * [windows] Updated bundled ATK to 2.8.0.
+
+==== Ruby/GdkPixbuf2
+
+  * Improvements
+    * [windows] Updated bundled gdk-pixbuf to 2.28.0.
+
+==== Ruby/Pango
+
+  * Improvements
+    * [windows] Updated bundled Pango to 1.34.0.
+
+==== Ruby/GDK3
+
+  * Improvements
+    * [windows] Updated bundled GTK+ to 3.8.0.
+
+==== Ruby/Poppler
+
+  * Fixes
+    * Fixed a bug that Poppler::Page#render is broken.
+      [SF.net#184] [Reported by HARUYAMA Seigo]
+
+==== Ruby/GooCanvas
+
+  * Improvements
+    * Added a Ruby/GObjectIntrospection based sample.
+      [GitHub #139] [Patch by Masafumi Yokoyama]
+
+=== Thanks
+
+  * Masafumi Yokoyama
+  * HARUYAMA Seigo
+
+== Ruby-GNOME2 1.2.5: 2013-03-28
+
+Crash bug fix release!
+
+=== Changes
+
+==== All
+
+  * Fixes
+    * Fixed crash bugs.
+      [GitHub #138] [Reported by Takuma Nakajima]
+
+=== Thanks
+
+  * Takuma Nakajima
+
+== Ruby-GNOME2 1.2.4: 2013-03-24
+
+Ruby/WebKitGtk2 addition release!
+
+=== Changes
+
+==== All
+
+  * Improvements
+    * Start mswin64 support. (But it is not completed yet.)
+      [GitHub #135] [Patch by usa]
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Reduce needless GBoxed object copy.
+
+==== Ruby/GdkPixbuf2
+
+  * Fixes
+    * Fix build error by a typo.
+
+==== Ruby/GtkSourceView2
+
+  * Improvements
+    * Support auto RPM install on CentOS 6.
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Add method name to arguments validation failure message.
+    * Support specific version loading.
+
+==== Ruby/GTK3
+
+  * Improvements
+    * [windows] Add gschemas.compiled.
+      [ruby-talk:406026] [Reported by Regis d'Aubarede]
+
+==== Ruby/WebKitGtk2
+
+  * New!
+    [GitHub #136] [Patch by eumario]
+
+=== Thanks
+
+  * usa
+  * Regis d'Aubarede
+  * eumario
+
+== Ruby-GNOME2 1.2.3: 2013-03-17
+
+Clean up release!
+
+=== Changes
+
+==== Ruby/GTK2
+
+  * Remove needless signale handlers restore.
+
+==== Ruby/GTK3
+
+  * Remove needless signale handlers restore.
+
+== Ruby-GNOME2 1.2.2: 2013-03-11
+
+Ruby 2.0.0 support release!
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Supported test on Ruby 2.0.0.
+      [GitHub #134] [Reported by mtasaka]
+
+==== Ruby/Poppler
+
+  * Improvements
+    * Removed deprecated GDK support.
+
+==== Ruby/GDK3
+
+  * Improvements
+    * Supported Ruby 2.0.0.
+      [GitHub#129] [Reported by TOMITA Masahiro]
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Supported not GType based flags.
+    * Supported not GType based enum.
+    * Supported custom callback function.
+    * Supported .h install.
+    * Supported .pc install.
+    * More Rubyish method names are used.
+    * Stopped to raise exception when there are two or more out
+      parameters.
+    * Added Loader.start_callback_dispatch_thread().
+    * Supported arguments validation.
+    * Stopped to use array for just one return value.
+    * Supported Enumerator.
+    * Hide constructor methods.
+
+==== Ruby/GtkSourceView3
+
+  * Fixes
+    * Fixed wrong deb package name.
+
+==== Ruby/Clutter
+
+  * Fixes
+    * Fixed wrong initialized check.
+    * Stopped to override Clutter.init unexpectedly.
+
+==== Ruby/ClutterGTK
+
+  * Fixes
+    * Fixed wrong initialized check.
+
+==== Ruby/WebKitGTK
+
+  * Fixes
+    * Fixed wrong initialized check.
+
+=== Thanks
+
+  * Vincent Carmona
+    (for unreleased GObjectIntrospection based GStreamer bindings)
+  * TOMITA Masahiro
+  * NAKAJIMA Takashi
+    (for unreleased GObjectIntrospection based GStreamer bindings)
+  * mtasaka
+
+== Ruby-GNOME2 1.2.1: 2013-01-30
+
+GTK+ 3 support on Mac OS X release!
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Supported custom sudo prompt on auto native package install.
+      [GitHub:126] [Suggested by Yorick Peterse]
+    * Started to support JRuby. (It is not completed yet.)
+      [GitHub:125] [Reported by vpereira]
+    * Accepted unsigned long int size GType.
+    * Removed DL support.
+    * Don't call deprecated g_type_init() for GLib >= 2.35.1.
+
+==== Ruby/GTK2
+
+  * Fixes
+    * Fixed a memory leak related Gtk::TreeIter.
+      [GitHub:128] [Patch by Toshiaki Asai]
+
+==== Ruby/GTK3
+
+  * Fixes
+    * Fixed a memory leak related Gtk::TreeIter.
+      [GitHub:128] [Patch by Toshiaki Asai]
+    * Fixed a crash bug caused by symbol conflict with Ruby/GDK3 on
+      Mac OS X.
+      [GitHub:127] [Reported by Sergio Campama] [Helped by Watson]
+
+==== Ruby/GDK3
+
+  * Improvements
+    * [windows] Bundled Greybird theme.
+      [Suggested by Regis d'Aubarede]
+
+==== Ruby/GooCanvas
+
+  * Improvements
+    * Added Goo::Canvas#get_items_at [GitHub:124] [Patch by David Maciejak]
+
+==== Ruby/WebKitGTK
+
+  * Added
+
+==== Ruby/GtkSourceView3
+
+  * Improvements
+    * Supported Windows.
+
+=== Thanks
+
+  * David Maciejak
+  * Yorick Peterse
+  * vpereira
+  * Toshiaki Asai
+  * Sergio Campama
+  * Watson
+  * Regis d'Aubarede
+
+== Ruby-GNOME2 1.2.0: 2013-01-24
+
+GTK+ 3 support release!
+
+=== Changes
+
+==== All
+
+  * Added ruby-gtk3 package. Here is a list:
+    * Ruby/GLib2
+    * Ruby/ATK
+    * Ruby/Pango
+    * Ruby/GdkPixbuf2
+    * Ruby/GDK3
+    * Ruby/GTK3
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Supported custom VALUE <-> GBoxed conversion
+    * Supported VALUE <-> GBoxed conversion by RVAL2GOBJ
+    * Added GLib::Source::REMOVE
+    * Added GLib::Source::CONTINUE
+    * Added rbgobj_make_boxed_raw()
+    * Added GLib::Value for internal use
+    * [windows] Updated to the latest GLib: 2.28.8-1 -> 2.34.3
+  * Changes
+    * Removed deprecated GLib::Win32.get_package_installation_directory
+    * Removed deprecated GLib::Win32.get_package_installation_subdirectory
+    * Added user_data to RGConvertTable callbacks
+    * rbgobj_convert_define() copies passed RGConvertTable
+    * Removed deprecated G_DEF_FUNDAMENTAL. Use RG_DEF_CONVERSION instead
+
+==== Ruby/GIO2
+
+  * Improvements
+    * Installed headers
+
+==== Ruby/ATK
+
+  * Improvements
+    * [windows] Updated to the latest ATK: 1.32.0 -> 2.6.0
+
+==== Ruby/Pango
+
+  * Improvements
+    * [windows] Updated to the latest Pango: 1.28.3 -> 1.32.6
+
+==== Ruby/GdkPixbuf2
+
+  * Improvements
+    * [windows] Updated to the latest gdk-pixbuf: 2.24.0 -> 2.26.5
+
+==== Ruby/GTK2
+
+  * Improvements
+    * Removed needless not copy flag from Allocation
+    * [windows] Updated to the latest GTK+ 2: 2.24.8 -> 2.24.14
+
+==== Ruby/GDK3
+
+  * Improvements
+    * [windows] Supported: 3.6.4
+
+==== Ruby/GTK3
+
+  * Improvements
+    * Removed needless not copy flag from Allocation
+    * [windows] Supported: 3.6.4
+
+==== Ruby/GObjectIntrospection
+
+  * Improvements
+    * Supported over loaded method
+    * Supported over loaded constructor
+    * Supported GBoxed object
+    * Supported char *
+    * Supported GInterface
+    * Supported CallableInfo
+    * Supported may be null
+    * Supported union object
+    * Supported not GBoxed struct
+    * Supported out parameter
+    * Supported C array
+    * Added "?" suffix to predicate method name
+    * Supported SourceFunc callback
+    * Supported GValue
+    * Added GObjectIntrospection::Loader.register_boxed_class_converter
+    * Supported inout parameter
+    * Supported binary data array
+  * Changes
+    * ArgInfo#[] -> ArgInfo#get_arg
+
+==== Ruby/CairoGObject
+
+  * Added
+
+==== Ruby/Clutter
+
+  * Added
+
+==== Ruby/ClutterGtk
+
+  * Added
+
+== Ruby-GNOME2 1.1.9: 2012-12-29
+
+This is a experimental GObjectIntrospection support release.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Renamed G_DEF_CLASS4 to G_DEF_CLASS_WITH_PARENT.
+      G_DEF_CLASS4 is still usable but it is deprecated.
+
+==== Ruby/GObjectIntrospection
+
+  * Added. It is still experimental.
+
+== Ruby-GNOME2 1.1.8: 2012-12-19
+
+This is a bug fix release for Ruby 2.0.0.
+
+=== Changes
+
+==== All
+
+  * Fixes
+    * Fixed a bug that *.so isn't installed with Ruby 2.0.0.
+
+== Ruby-GNOME2 1.1.7: 2012-12-10
+
+This is a package for Windows fix release.
+
+=== Changes
+
+==== Ruby/GTK2
+
+  * Fixes
+    * Bundled GTK+ 2.24.8-1 instead of GTK+ 2.24.10-1.
+      [Reported by Mahoro Shimura]
+
+=== Thanks
+
+  * Mahoro Shimura
+
+== Ruby-GNOME2 1.1.6: 2012-12-02
+
+This is Ruby 2.0.0 support release!
+
+=== Changes
+
+==== All
+
+  * Fixes
+    * Fixed install error on Ruby 2.0.0.
+      [ruby-gnome2-devel-en] Recent Ruby: 'depend' files must be changed
+      [Reported by Carlo E. Prelz]
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Improved portability a bit. '$,' is used instead of rb_output_fs.
+      [GktHub:#117] [Reported by Marvin Gülker]
+
+==== Ruby/GIO2
+
+  * Fixes
+    * Fixed a crash bug on i386. [Reported by TAKATSU Tomonari]
+
+==== Ruby/GTK2
+
+  * Improvements
+    * Added Gtk::TreeModel#iter_root. [GitHub:121] [Patch by dmaciejak]
+    * Added Gtk::TreeModel#iter_next. [GitHub:121] [Patch by dmaciejak]
+
+==== Ruby/GdkPixbuf2
+
+  * Fixes
+    * Fixed build errors with old gdk-pixbuf.
+
+==== Ruby/Poppler
+
+  * Improvements
+    * Added missing required Poppler version.
+      [Suggested by Grant Schoep]
+      [ruby-gnome2-devel-en] poppler, build fails, incorrect
+      required_pkg_config_package?
+
+  * Fixes
+    * Fixed a wrong package name on Red Hat and Fedora.
+      [Reported by Grant Schoep]
+      [ruby-gnome2-devel-en] poppler, build fails, incorrect
+      required_pkg_config_package?
+
+  * Changes
+    * Disabled auto Poppler install for Homebrew. It requires
+      --with-glib option but auto install with --with-glib option
+      isn't supported yet.
+
+==== Ruby/GooCanvas
+
+  * Improvements
+    * Added Goo::Canvas#update. [GitHub:119] [Patch by dmaciejak]
+    * Added Goo::Canvas#request_update. [GitHub:119] [Patch by dmaciejak]
+    * Added Goo::Canvas#convert_from_pixels. [GitHub:123] [Patch by dmaciejak]
+    * Added Goo::Canvas#convert_to_pixels. [GitHub:123] [Patch by dmaciejak]
+    * Added Goo::Canvas#get_item_at. [GitHub:123] [Patch by dmaciejak]
+    * Added Goo::Canvas#bounds. [GitHub:123] [Patch by dmaciejak]
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * Don't pass -h and --help to GStreamer.
+      [GitHub:#118] [Reported by dmaciejak]
+
+=== Thanks
+
+  * TAKATSU Tomonari
+  * dmaciejak
+  * Grant Schoep
+  * Carlo E. Prelz
+  * Marvin Gülker
+
+== Ruby-GNOME2 1.1.5: 2012-08-29
+
+This is a network support improvement release!
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * windows: Bundled glib-networking.
+
+==== Ruby/GIO2
+
+  * Improvements
+    * Added Gio::TlsCertificate.
+    * Added Gio::TlsCertificateFlags.
+
+==== Ruby/GTK2
+
+  * Improvements
+    * Added Gtk.show_uri.
+
+  * Fixes
+    * Gtk::TreeStore#reorder:
+      Fixed wrong the number of reorder values check.
+      [SF.net#3561748] [Reported by Nounou]
+
+=== Thanks
+
+  * Nounou
+
+== Ruby-GNOME2 1.1.4: 2012-07-21
+
+This is a easy to install release!
+
+=== Changes
+
+==== All
+
+  * Improvements
+    * Supported automatic required native packages install.
+
+==== Ruby/GLib2
+
+  * Improvements
+    * mkenums: Supported "/* < flags > */" tag.
+    * mkenums: Supported two or more upper case characters such as "IO".
+      * Before: GIOStatus -> g_iostatus
+      * After:  GIOStatus -> g_io_status
+    * GIOCondition: Changed to GLib::Boxed object from integer.
+    * GLib::Source#attach doesn't require context.
+
+  * Fixes
+    * Fixed wrong type conversion for GIOCondition.
+
+==== Ruby/GIO2
+
+  * Improvements
+    * Gio::Socket#create_source: Supported callback.
+
+  * Fixes
+    * Fixed return values.
+    * Fixed wrong type conversions.
+
+==== Ruby/GTK2
+
+  * Improvements
+    * Re-supported GTK+ 2.10.0. [GitHub:115] [Patch by Grant Schoep]
+
+  * Fixes
+    * Fixed a typo in test script.
+      [GitHub:109] [Reported by kimura wataru]
+
+==== Ruby/GStreamer
+
+  * Fixes
+    * Fixed a test failure with GStreamer 0.10.36.
+      [GitHub:111] [Reported by mtasaka]
+
+=== Thanks
+
+  * kimura wataru
+  * mtasaka
+  * Grant Schoep
+
+== Ruby-GNOME2 1.1.3: 2012-04-08
+
+This is a bug fix release of 1.1.2.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Added required Ruby version into gemspec.
+    * [GitHub#106] glib-mkenums.rb supported macro lines in header.
+      This change is required for building with GLib 2.31.20.
+      [Reported by mtasaka]
+    * [GitHub#107] Supported tests on PPC.
+      [Reported by mtasaka]
+  * Fixes
+    * Fixed handler_id type.
+
+==== Ruby/GTK2
+
+  * Improvements
+    * Added Gtk::TreeViewColumn#set_sort_column_id and
+      Gtk::TreeViewColumn#sort_column_id= for GTK+ < 2.18.
+      [ruby-gnome2-devel-en] Gtk::TreeViewColumn
+      [Reported by grant schoep]
+    * Added Gtk::InfoBar.
+    * Added Gtk::MessageType.
+    * Added Gtk::ResponseType.
+  * Fixes
+    * Fixed build failure with GTK+ < 2.12.
+      [ruby-gnome2-devel-en] compile problems gtk2, ruby-gnome2-all-1.1.2
+      [Reported by grant schoep]
+    * Fixed require failure with GTK+ < 2.14.
+      [ruby-gnome2-devel-en] NameError: undefined method
+      `color_selection' for class `Gtk::ColorSelectionDialog'
+      [Reported by grant schoep]
+
+==== Ruby/Poppler
+
+  * Improvements
+    * [GitHub#97] Added Poppler::Page#text_layout.
+      [Patch by Andrey Kutejko]
+    * [SF.net#3495948] Removed needless poppler-cairo check.
+      [Reported by Pino Toscano]
+  * Fixes
+    * [GitHub#96] Fixed valid state of child index iterator.
+      [Patch by Andrey Kutejko]
+    * [GitHub#97] Fixed parameter check of Poppler::Page#get_text.
+      [Patch by Andrey Kutejko]
+
+==== Ruby/VTE
+
+  * Fixes
+    * Fixed build failure with VTE < 0.24.
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * Added Gst::Element#seek_simple.
+  * Fixes
+    * [GitHub#95] Fixed async test.
+      [Reported by mtasaka]
+
+=== Thanks
+
+  * mtasaka
+  * grant schoep
+  * Andrey Kutejko
+  * Pino Toscano
+
+== Ruby-GNOME2 1.1.2: 2012-01-15
+
+This is a bug fix release of 1.1.1.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Fixes
+    * [GitHub#94] install missing header files.
+      [Reported by mtasaka]
+
+==== Ruby/Pango
+
+  * Fixes
+    * [GitHub#94] install a missing header file.
+      [Reported by mtasaka]
+
+==== Ruby/GdkPixbuf2
+
+  * Fixes
+    * [GitHub#94] install missing header files.
+      [Reported by mtasaka]
+
+=== Thanks
+
+  * mtasaka
+
+== Ruby-GNOME2 1.1.1: 2012-01-14
+
+This is a bug fix release of 1.1.0.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Fixes
+    * [ruby-list:48587] Re: [ANN] Ruby-GNOME2 1.1.0
+      fix wrong parent class for GLib::IOChannelWin32Socket.
+      [Reported by ashbb]
+
+==== Ruby/GTK2
+
+  * Fixes
+    * Fixed a bug that Gtk::ActionGroup#add_radio_actions always fail.
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * [win32] Supported FLAC.
+
+=== Thanks
+
+  * ashbb
+
+== Ruby-GNOME2 1.1.0: 2012-01-05
+
+This is a source cleanup release.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * [GitHub#65] Supported GLib 2.31. [Reported by mtasaka]
+    * Supported comparing between GLib::Enum/GLib::Flags and Symbol.
+  * Fixes
+    * [GitHub#1] Fix GLib::Spawn regression.
+      [Patch by Geoff Youngs]
+    * Plugged memory leaks.
+    * Fixed a crash by GC on Ruby 1.9.
+  * Changes
+    * Remove optional Ruby-GetText-Package dependency.
+
+==== Ruby/GTK2
+
+  * Improvements
+    * [ruby-gnome2-devel-en] FileChooserDialog raising warnings on Windows:
+      Added hicolor-icon-theme into gem on Windows.
+      [Suggested by Nikolai Weibull]
+  * Fixes
+    * Fixed a crash by GC.
+    * Plugged memory leaks.
+    * Fixed Gdk::GC#colormap= uses wrong value.
+    * Fixed Gtk::TextBuffer#serialize uses wrong value.
+
+==== Ruby/Pango
+
+  * Fixes
+    * Plugged memory leaks.
+
+==== Ruby/GdkPixbuf
+
+  * Improvements
+    * Gdk::Pixbuf.new supports hash argument.
+  * Fixes
+    * Plugged memory leaks.
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * Supported Windows gem.
+    * Improved memory management.
+  * Fixes
+    * [GitHub#86] Gstreamer: test_caps test fails. [Reported by mtasaka]
+    * [GitHub#87] GStreamer: test_span test fails. [Reported by mtasaka]
+    * [GitHub#87] GStreamer: test_create_clock test fails.
+      [Reported by mtasaka]
+    * [GitHub#89] GStreamer: test_fraction_range_new test fails.
+      [Reported by mtasaka]
+    * [GitHub#91] GStreamer: test_state "sometimes" fails.
+      [Reported by mtasaka]
+
+==== Ruby/Poppler
+
+  * Fixes
+    * Fixed a wrong conversion in Poppler::Document#find_dest.
+      [Reported by Chloé Desoutter]
+
+=== Thanks
+
+  * Geoff Youngs
+  * mtasaka
+  * Chloé Desoutter
+  * Nikolai Weibull
+
+== Ruby-GNOME2 1.0.3: 2011-09-19
+
+This is a bug fix release of 1.0.2.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Fixes
+    * [#3411234] Supported RubyGems 1.8.6.
+      [Tobias Pfeiffer, Kouhei Sutou]
+
+=== Thanks
+
+  * Tobias Pfeiffer
+
+== Ruby-GNOME2 1.0.2: 2011-09-18
+
+This is a bug fix release of 1.0.1.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Fixes
+    * [#3411204] Supported RubyGems 1.8.6.
+      [Tobias Pfeiffer, Kouhei Sutou]
+
+==== Ruby/GTK2
+
+  * Fixes
+    * Fixed the default theme on Windows.
+      [ashbb, Kouhei Sutou]
+
+=== Thanks
+
+  * Tobias Pfeiffer
+  * ashbb
+
+== Ruby-GNOME2 1.0.1: 2011-09-18
+
+This is a bug fix release of 1.0.0.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * GLib::IOChannel.open supports Windows.
+      [OBATA Akio, Kouhei Sutou]
+    * Added RVAL2STRV_FREE(), CSTRFILENAME2RVAL(),
+      RVAL2STRV, STRV2RVAL(), G_REPLACE_SET_PROPERTY(),
+      G_REPLACE_GET_PROPERTY() and G_REPLACE_ACTION().
+      [Nikolai Weibull]
+  * Fixes
+    * GLib::IOChannelWin32Socket.new uses raw socket handle
+      not file descriptor.
+      [NAKAMURA Usaku, Kouhei Sutou]
+
+==== Ruby/GTK2
+
+  * Fixes
+    * [#3383158] removed non LANG=C characters to be
+      buildable on LANG=C environment.
+      [Antonio Terceiro, Kouhei Sutou]
+    * Fixed Gtk::FileFilter#add_custom crash.
+      [Jeff Moore, Kouhei Sutou]
+    * Fixed initialization order.
+      [ashbb, Kouhei Sutou]
+
+==== Ruby/GooCanvas
+
+  * Improvements
+    * Supported binary bundled gem.
+      [HAYASHI Kentaro]
+
+==== Ruby/GtkSourceView2
+
+  * Fixes
+    * Fixed bundled binary directory path on Windows.
+      [HAYASHI Kentaro]
+
+==== Ruby/GtkMozEmbed
+
+  * Deprecated.
+
+=== Thanks
+
+  * Antonio Terceiro
+  * OBATA Akio
+  * NAKAMURA Usaku
+  * HAYASHI Kentaro
+  * Jeff Moore
+  * ashbb
+  * Nikolai Weibull
+
+== Ruby-GNOME2 1.0.0: 2011-07-13
+
+This is the first major release!!!
+
+=== Changes
+
+==== Document
+
+  * Fixes
+    * updated deprecated list in README.
+      [Michal Suchanek, Kouhei Sutou]
+
+==== Ruby/GLib2
+
+  * Improvements
+    * bind g_io_channel_win32_new_socket() as GLib::IOChannelWin32Socket.
+      [Kouhei Sutou]
+
+  * Fixes
+    * [#3312572] added missing parentheses.
+      [Evan Phoenix]
+
+=== Thanks
+
+  * Evan Phoenix
+  * Michal Suchanek
+
+== Ruby-GNOME2 0.90.9: 2011-06-11
+
+NOTE: 0.90.x releases are for 1.0.0 major release.
+
+This is the last release of 0.90.x series. The next release
+will be 1.0.0!
+
+=== Changes
+
+==== All
+
+  * Fixes
+    * Fix a bug in version numbers.
+      [Grant Schoep, Vincent Carmona]
+    * Support 'bundle install' .
+
+==== Ruby/GLib2
+
+  * Improvements
+    * Support GLib::IOChannel.new(fd) and GLib::IOChannel#fd on Windows.
+    * GLib::IOChannel#write returns written byte not self.
+      [backward incompatible]
+
+==== Ruby/GTK2
+
+  * Fixes
+    * fix misc/bindings.rb sample (ruby 1.9).
+      [Vincent Carmona]
+    * [#3305589] fix Gtk::Window#add_accel_group misses
+      a reference to accel group.
+      [Piotr Korzuszek, Kouhei Sutou]
+    * Support cairo related samples in Ruby 1.9.
+      [Jon, Kouhei Sutou]
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * add Gst::Registry.update method.
+      [Vincent Carmona]
+
+==== Ruby/VTE
+
+  * Fixes
+    * [#3199587] fix pc install.
+      [OBATA Akio, Kouhei Sutou]
+
+==== Ruby/Poppler
+
+  * Fixes
+    * [#3292118] don't run needless tests.
+      [Mamoru Tasaka, Kouhei Sutou]
+
+==== Ruby/GtkSourceView2
+
+  * Improvements
+    * support Windows.
+      [S.Kitagawa]
+
+=== Thanks
+
+  * OBATA Akio
+  * Grant Schoep
+  * Mamoru Tasaka
+  * Piotr Korzuszek
+  * S.Kitagawa
+  * Jon
+
+== Ruby-GNOME2 0.90.8: 2011-03-04
+
+NOTE: 0.90.x releases are for 1.0.0 major release.
+
+A bug fix release of 0.90.7.
+
+=== Changes
+
+==== All
+
+  * Fixes
+    * 'make distclean' does not removed pkg-config files.
+
+==== Ruby/GLib2
+
+  * Fixes
+    * fix non-gem rcairo detection. [#3178228]
+      [OBATA Akio, Kouhei Sutou]
+
+==== Ruby/Atk
+
+  * Fixes
+    * fix 'make distclean' cleans needed a file.
+      [Vincent Carmona]
+
+==== Ruby/Pango
+
+  * Fixes
+    * fix 'make distclean' cleans needed a file.
+      [Vincent Carmona]
+
+==== Ruby/GTK2
+
+  * Fixes
+    * fix require order.
+      [id:kenhys]
+    * [#3046538] fix crash by GC at exit.
+      [Vincent Carmona, Kouhei Sutou]
+    * gtk-demo samples with ruby 1.9 (excepted cairo ones).
+      [Vincent Carmona]
+
+==== Ruby/GooCanvas
+
+  * Fixes
+    * fix pc install. [#3178294]
+      [OBATA Akio, Kouhei Sutou]
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * improve missing message.
+      [Vincent Carmona]
+    * add Gst::InstallPlugins.
+      [Vincent Carmona, Kouhei Sutou]
+
+  * Fixes
+    * fix pc install. [#3178294]
+      [OBATA Akio, Kouhei Sutou]
+    * don't use rbgprivate.h. [#3188442]
+      [Mamoru Tasaka, Kouhei Sutou]
+
+==== Ruby/GtkMozEmbed
+
+  * Fixes
+    * fix pc install. [#3178294]
+      [OBATA Akio, Kouhei Sutou]
+
+==== Ruby/GtkSourceView2
+
+  * Fixes
+    * fix pc install. [#3178294]
+      [OBATA Akio, Kouhei Sutou]
+
+=== Thanks
+
+  * OBATA Akio
+  * Vincent Carmona
+  * id:kenhys
+  * Mamoru Tasaka
+
+== Ruby-GNOME2 0.90.7: 2011-02-02
+
+NOTE: 0.90.x releases are for 1.0.0 major release.
+
+A package fix release of 0.90.6.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Improvements
+    * force remove "-Wl,--no-undefined" linker option because
+      Ruby-GNOME2 packages doesn't support the option.
+      [Dobai-Pataky Bálint, Kouhei Sutou]
+
+==== Ruby/GTK2
+
+  * Improvements
+    * use "MS-Windows" GTK+ theme by default on Windows.
+      [ashbb, Kouhei Sutou]
+
+=== Thanks
+
+  * ashbb
+  * Dobai-Pataky Bálint
+
+== Ruby-GNOME2 0.90.6: 2011-01-29
+
+NOTE: 0.90.x releases are for 1.0.0 major release.
+
+Removed deprecated packages. All supported packages support
+RubyGems. All supported packages except Ruby/VTE,
+Ruby/GStreamer and Ruby/GtkMozEmbed support also Windows
+binary bundled gem.
+
+=== Changes
+
+==== All
+
+  * remove all deprecated packages.
+    [Masaaki Aoyagi]
+  * all supported packages support RubyGems.
+    [Masaaki Aoyagi]
+
+==== Ruby/GLib2
+
+  * Imrpovements
+    * add gnome2-raketask.rb that is a utility library to
+      define Rake tasks for Ruby-GNOME2 packages.
+      [Masaaki Aoyagi, Kouhei Sutou]
+
+  * Fixes
+    * fix GType conversion.
+      [Kouhei Sutou]
+    * fix rcairo installed by RubyGems detection.
+      [Masaaki Aoyagi]
+
+==== Ruby/GIO2
+
+  * Improvements
+    * support GIO 2.26.
+      [Nikolai Weibull]
+
+==== Ruby/GStreamer
+
+  * Improvements
+    * add Gst::MissingURISourceMessage.
+      [Vincent Carmona, Kouhei Sutou]
+    * support RubyGems.
+      [Masaaki Aoyagi]
+
+==== Ruby/Pango
+
+  * Fixes
+    * rename Pango::LayoutIter#at_last_line! to
+      at_last_line? because at_last_line is a predicate
+      method. (at_last_line! still exists for backward compatibility.)
+      [mrkn, Kouhei Sutou]
+
+==== Ruby/GtkMozEmbed
+
+  * Improvements
+    * support RubyGems.
+      [Masaaki Aoyagi]
+  * Fixes
+    * support "2.0b7" style module version. #3141244
+      [reandr, Kouhei Sutou]
+
+==== Ruby/GooCanvas
+
+  * Improvements
+    * support RubyGems.
+      [Masaaki Aoyagi]
+
+==== Ruby/GtkSourceView2
+
+  * Improvements
+    * support RubyGems.
+      [Masaaki Aoyagi]
+
+==== Ruby/VTE
+
+  * Improvements
+    * support RubyGems.
+      [Masaaki Aoyagi]
+
+=== Thanks
+
+  * Vincent Carmona
+  * mrkn
+  * reandr
+  * Nikolai Weibull
+  * Masaaki Aoyagi
+
+== Ruby-GNOME2 0.90.5: 2010-10-28
+
+NOTE: 0.90.x releases are for 1.0.0 major release.
+
+A build system improvements release.
+
+=== Changes
+
+==== All
+
+  * Improvements
+    * add --with-pkg-config-dir option to extconf.rb for *.pc.
+
+==== Ruby/GLib2
+
+  * Improvements
+    * glib-mkenums.rb can work with Ruby 1.9 on LANG=C.
+      [Kouhei Sutou]
+
+  * Bug fixes
+    * fix pkg-config gem dependency.
+      [Kouhei Sutou]
+
+== Ruby-GNOME2 0.90.4: 2010-10-24
+
+NOTE: 0.90.x releases are for 1.0.0 major release.
+
+A bug fix release of 0.90.3.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Bug fixes
+    * add missing '*' for String type conversion. [#3093789]
+      [tmtms, Kouhei Sutou]
+
+==== Ruby/GIO2
+
+  * Bug fixes
+    * Remove needless cairo dependency.
+      [OBATA Akio, Kouhei Sutou]
+
+==== Ruby/Libglade2
+
+  * Improvements
+    * Don't install *.pc by default.
+      [OBATA Akio, Kouhei Sutou]
+
+=== Thanks
+
+  * OBATA Akio
+  * tmtms
+
+== Ruby-GNOME2 0.90.3: 2010-10-23
+
+NOTE: 0.90.x releases are for 1.0.0 major release.
+
+  * Support String encoding in Ruby 1.9.
+  * RVAL2CSTR2 and CSTR2RVAL2 are deprecated.
+  * Ruby/GIO2 is imported as an experimental library.
+
+=== Changes
+
+==== All
+
+  * Support String encoding.
+    [Guillaume Cottenceau, Neil Roberts, Kouhei Sutou]
+  * Don't install *.pc by default. Set pkgconfigdir make
+    varialbe like 'make pkgconfigdir=/usr/lib/pkgconfig'.
+
+==== Ruby/GLib2
+
+  * Improvements:
+    * declare argument types.
+      [Nobuyoshi Nakada, Kouhei Sutou]
+
+==== Ruby/GIO2
+
+  * Imported as an experimental library.
+    [Nikolai Weibull]
+
+==== Ruby/GTK2
+
+  * Improvements:
+    * keep backward compatibility around GDK key
+      symbols introduced at GTK+ 2.20.
+      "[ruby-gnome2-devel-en] Constants names change in Gdk::KeyVal"
+      [Vincent Carmona]
+    * move gdk-pixbuf and cairo related methods from Ruby/GdkPixbuf2.
+      "[ruby-gnome2-devel-en] gtk2 dependency to gdkpixbuf2"
+      [Andrea Dallera, Kouhei Sutou]
+  * Bug fixes:
+    * fix GType conversion in Gtk::ItemFactory.new on 64bit
+      platform.
+      [Grant McLean, Steve Wills, Kouhei Sutou]
+
+==== Ruby/GdkPixbuf2
+
+  * Improvements:
+    * move gdk-pixbuf and cairo related methods to Ruby/GTK2.
+      "[ruby-gnome2-devel-en] gtk2 dependency to gdkpixbuf2"
+      [Andrea Dallera, Kouhei Sutou]
+    * change .pc filename from ruby-gdkpixbuf2 to
+      ruby-gdk-pixbuf2.
+
+==== Ruby/RSVG2
+
+  * Bug fixes:
+    * add missing libcroco dependency on Windows.
+      [U.Nakamura, Kouhei Sutou]
+
+==== Ruby/Poppler
+
+  * Improvements:
+    * support Popper 0.15.0. [#3079667]
+      [Mamoru Tasaka, Kouhei Sutou]
+
+  * Bug fixes:
+    * add missing libjpeg dependency on Windows.
+      [U.Nakamura, Kouhei Sutou]
+    * fix installed Ruby/GLib2 gem can't be detected.
+      [kdmsnr, Kouhei Sutou]
+
+=== Thanks
+
+  * U.Nakamura
+  * kdmsnr
+  * Mamoru Tasaka
+  * Guillaume Cottenceau
+  * Vincent Carmona
+  * Grant McLean
+  * Steve Wills
+  * Andrea Dallera
+  * Nobuyoshi Nakada
+  * Neil Roberts
+
+== Ruby-GNOME2 0.90.2: 2010-09-26
+
+NOTE: 0.90.x releases are for 1.0.0 major release.
+
+A RubyGems package fix release.
+
+=== Changes
+
+==== All
+
+  * fix path.
+    [kimura wataru, Kouhei Sutou]
+
+==== Ruby/GTK2
+
+  * Bug fixes:
+    * fix gtk2/base.rb is missing in gem.
+      [S.Kitagawa, Kouhei Sutou]
+
+==== Ruby/GIO2
+
+  * Bug fixes:
+    * fix a typo in .pc name. [#3075619]
+      [O01eg, Kouhei Sutou]
+
+==== Ruby/RSVG2
+
+  * Bug fixes:
+    * also check rb_cairo.h availability. [#3075617]
+      [O01eg, Kouhei Sutou]
+
+=== Thanks
+
+  * S.Kitagawa
+  * O01eg
+  * kimura wataru
+
+== Ruby-GNOME2 0.90.1: 2010-09-23
+
+NOTE: 0.90.x releases are for 1.0.0 major release.
+
+A install bug fix release of 0.90.0.
+
+=== Changes
+
+==== Ruby/ATK
+
+  * Bug fixes:
+    * fix .pc install path.
+      [OBATA Akio, Kouhei Sutou]
+
+==== Ruby/GTK2
+
+  * Bug fixes:
+    * fix .pc install path.
+      [OBATA Akio, Kouhei Sutou]
+
+==== Ruby/Pango
+
+  * Bug fixes:
+    * fix .pc install path.
+      [OBATA Akio, Kouhei Sutou]
+
+==== Ruby/Poppler
+
+  * Bug fixes:
+    * fix .pc install path.
+      [OBATA Akio, Kouhei Sutou]
+
+==== Ruby/RSVG
+
+  * Bug fixes:
+    * fix .pc install path.
+      [OBATA Akio, Kouhei Sutou]
+
+=== Thanks
+
+  * OBATA Akio
+
+== Ruby-GNOME2 0.90.0: 2010-09-23
+
+NOTE: 0.90.x releases are for 1.0.0 major release.
+
+RubyGems support!
+
+=== Changes
+
+==== Ruby/GTK2
+
+  * Bug fixes:
+    * [ruby-gnome2-devel-en] Gtk 2.20, Gtk::Builder and 'name'
+      add Gtk::Buildable#builder_name/set_builder_name.
+      [Simon Arnaud, Kouhei Sutou]
+
+=== Thanks
+
+  * Simon Arnaud
+
+== Ruby-GNOME2 0.19.4: 2011-04-17
+
+NOTE: 0.19.x releases are development series.
+
+This release has many bug fixes and some improvements. The
+fixed bugs include a memory leak bug on GC. If your
+application live long time, you should upgrade.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Bug fixes:
+    * fixed type_register on Ruby 1.9.
+      [Simon Arnaud, Kouhei Sutou]
+    * fixed memory leak in GC.
+      [Kouhei Sutou]
+
+==== Ruby/GTK2
+
+  * Bug fixes:
+    * [#2865895] support GdkWindow's cursor property.
+      NOTE: GTK+ 2.18.0 is unsupported version.
+      [Guillaume Cottenceau, Mamoru Tasaka]
+    * Gtk::MenuItem.new accepts nil as a label.
+      [Kazuhiro NISHIYAMA, Kouhei Sutou]
+    * fixed wrong conversion in Gtk::TreePath#<=>.
+      [Takeuchi Yusuke, Kouhei Sutou]
+    * fix Gtk::RecentInfo#application_info's double free bug.
+      [Kouhei Sutou]
+  * Improvements:
+    * Gdk::Window#invalidate accepts nil as 'area'
+      argument. It means 'invalidates whole window'.
+      [Hiroyuki Ito]
+    * Gtk::Clipbord#request_text sets UTF-8 encoding in Ruby
+      1.9.
+      [Rg Rg, Kouhei Sutou]
+    * add Gtk::TreePath#==.
+      [Takeuchi Yusuke, Kouhei Sutou]
+
+==== Ruby/Pango
+
+  * Improvements:
+    * add Pango::Gravity.
+      [Hiroyuki Ito, Kouhei Sutou]
+
+==== Ruby/GdkPixbuf
+
+  * add Gdk::Pixbuf#pixels=.
+    [Michal Suchanek]
+
+==== Ruby/GStreamer
+
+  * Bug fixes:
+    * [#2920997] fix argument type. [Johan Kiviniemi]
+  * [#2924886] implement Gst::MessageTag#parse. [Vincent Carmona]
+
+==== Ruby/GtkMozEmbed
+
+  * Bug Fixes:
+    * [#2924766] fix -Wl,-rpath syntax. [OBATA Akio]
+    * [#2925285] Gtk::MozEmbed#chrome_mask fails.
+      [tobi, Kouhei Sutou]
+    * support XULRunner 1.9.2. [OBATA Akio]
+
+=== Thanks
+
+  * Guillaume Cottenceau
+  * Mamoru Tasaka
+  * Michal Suchanek
+  * Simon Arnaud
+  * Kazuhiro NISHIYAMA
+  * Johan Kiviniemi
+  * OBATA Akio
+  * Hiroyuki Ito
+  * Rg Rg
+  * Vincent Carmona
+  * tobi
+  * Takeuchi Yusuke
+
+== Ruby-GNOME2 0.19.3: 2009-09-24
+
+NOTE: 0.19.x releases are development series.
+
+This release is a bug fix release of 0.19.2.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Bug fix:
+    * really fix
+      'empty $(vendorarchdir) related build problem on CentOS 5.3 x86_64.'
+      [Simon Arnaud, Kouhei Sutou]
+
+=== Thanks
+
+  * Simon Arnaud
+
+== Ruby-GNOME2 0.19.2: 2009-09-23
+
+NOTE: 0.19.x releases are development series.
+
+This release is a bug fix release of 0.19.1.
+
+=== Changes
+
+==== Ruby/GLib2
+
+  * Bug fixes:
+    * empty $(vendorarchdir) related build problem on CentOS 5.3 x86_64.
+      [Toshiyuki Suzumura, Kouhei Sutou]
+    * [#2862022] fix multi thread blocking with Ruby
+      1.8.6-p368 or later and 1.8.7-p173 or later.
+      [Roy Wright, Andrea Dallera, Kouhei Sutou]
+    * [Debian #502262] work Ruby thread with GTK+.
+      [Johan Walles, Kouhei Sutou]
+
+==== Ruby/GTK2
+
+  * Bug fixes:
+    * [#2679744] fix a typo:
+      Gtk::Widget#set_scroll_adjustment ->
+      Gtk::Widget#set_scroll_adjustments.
+      [Kentaro Fukuchi, Kouhei Sutou]
+
+==== Ruby/GtkMozEmbed
+
+  * Bug fixes:
+    * fix .pc detection.
+      [OBATA Akio, Kouhei Sutou]
+
+=== Thanks
+
+  * OBATA Akio
+  * Toshiyuki Suzumura
+  * Roy Wright
+  * Andrea Dallera
+  * Johan Walles
+  * Kentaro Fukuchi
+
+== Ruby-GNOME2 0.19.1: 2009-07-26
+
+NOTE: 0.19.x releases are development series.
+
+This release is a bug fix release of 0.19.0.
+
+=== Changes
+
+==== Ruby/GTK2
+
+  * use RUBYARCHDIR
+    [OBATA Akio]
+  * #2814953: install missing headers
+    [Mamoru Tasaka]
+
+==== Ruby/GLib2
+
+  * Bug fixes:
+    * avoid object allocation while GC
+      [OBATA Akio, Kouhei Sutou]
+  * use RUBYARCHDIR
+    [OBATA Akio]
+  * mkmf-gnome2.rb add "-I$(vendorarchdir)" to $CPPFLAGS.
+    [OBATA Akio, Kouhei Sutou]
+
+==== Ruby/ATK
+
+  * use RUBYARCHDIR
+    [OBATA Akio]
+
+==== Ruby/Pango
+
+  * use RUBYARCHDIR
+    [OBATA Akio]
+  * use gem version rcairo as fallback
+    [OBATA Akio]
+
+==== Ruby/Libart
+
+  * use RUBYARCHDIR
+    [OBATA Akio]
+
+==== Ruby/GdkPixbuf
+
+  * use gem version rcairo as fallback
+    [OBATA Akio]
+
+==== Ruby/GnomePrint
+
+  * install rblibgnomeprintversion.h
+    [OBATA Akio, Kouhei Sutou]
+
+==== Ruby/GtkMozEmbeded
+
+  * fix header generation error caused by missing file
+    [OBATA Akio]
+
+==== Ruby/VTE
+
+  * support VTE 0.20
+    [Kouhei Sutou]
+
+==== Ruby/PanelApplet
+
+  * #2815036: re-support Ruby 1.8.6.
+    [Mamoru Tasaka, Kouhei Sutou]
+
+==== Ruby/Libglade2
+
+  * Debian#519786: fix GC related SEGV when a widget in
+    glade is removed by hand.
+    [Arnaud Cornet, Kouhei Sutou]
+
+=== Thanks
+
+  * OBATA Akio
+  * Mamoru Tasaka
+  * Arnaud Cornet
+
+== Ruby-GNOME2 0.19.0: 2009-05-29
+
+NOTE: 0.19.x releases are development series.
+
+This release supports new versions of panel-applet and xulrunner
+and fixes various bugs including some GC issues
+
+=== Changes
+
+Ruby/GLib2:
+  * add 'const' to name argument of rbgerr_define_gerror()
+    [Nikolai Weibull, Kouhei Sutou]
+  * Bug fixes:
+    * #2420281: Failed to build
+      [troels knak-nielsen, Kouhei Sutou]
+    * #2493874: glib/rbglib_maincontext.c error in "RUBY_UBF_IO"
+      [boo, Kouhei Sutou]
+    * wrong priority conversion in GLib::Timeout.add and
+      GLib::Timeout.add_seconds.
+      [Nikolai Weibull]
+    * fixed limits of basic types
+      [Pascal Terjan]
+
+Ruby/GTK2:
+  * Bug fixes:
+    * fixed initialize function is deleted.
+      [kimura wataru, Kouhei Sutou]
+    * checked GTK_FILE_SYSTEM_ERROR availability. GTK+ 2.15.x
+      doesn't have it.
+      [Kouhei Sutou]
+    * fixed GC problems.
+      [Kouhei Sutou]
+    * #2195432: Gtk::RCStyle.set_color_flags wrong conversion
+      [Jesse van den Kieboom, Kouhei Sutou]
+    * #2318481: gtkselectiondata_set Drag and Drop API problem
+      [dave foster, Kouhei Sutou]
+    * #2420281: Failed to build
+      [troels knak-nielsen, Kouhei Sutou]
+
+Ruby/Pango:
+  * added Pango::Attribute#start_index= and Pango::Attribute#end_index=.
+    [Geoff Youngs, Kouhei Sutou]
+
+Ruby/Poppler:
+  * removed 0.6.x support. 0.8.0 or later is required.
+    [Kouhei Sutou]
+
+Ruby/RSVG2:
+  * fixed broken cairo integration.
+    [James Healy, Kouhei Sutou]
+
+Ruby/PanelApplet:
+  * #2466921: fixed build failure with libpanel-applet >= 2.25
+    [Mamoru Tasaka, Kouhei Sutou]
+  * fixed incomplete install.
+    [Pascal Terjan, Kouhei Sutou]
+
+Ruby/GtkMozEmbed:
+  * supported XULRunner 1.9.0.
+    [Arnaud Cornet, Kouhei Sutou]
+
+Ruby/GNOME2:
+  * supported MinGW.
+    [id:luna_8bit, Kouhei Sutou]
+
+Ruby/Bonobo2:
+  * moved Bonobo.setup_x_error_handler to Ruby/BonoboUI2.
+    [id:luna_8bit, Kouhei Sutou]
+
+Ruby/BonoboUI2:
+  * moved Bonobo.setup_x_error_handler from Ruby/Bonobo2.
+    [id:luna_8bit, Kouhei Sutou]
+
+Ruby/GnomeVFS:
+  * format security error.
+    [Pascal Terjan]
+
+=== Thanks
+
+  * kimura wataru
+  * Philipp Götzinger
+  * Andrew S. Townley
+  * Jesse van den Kieboom
+  * James Healy
+  * dave foster
+  * troels knak-nielsen
+  * boo
+  * Geoff Youngs
+  * Arnaud Cornet
+  * id:luna_8bit
+
+== Ruby-GNOME2 0.18.0: 2008-09-30
+
+This release fixes some memory leak bugs and has new
+experimental packages.
+
+=== Changes
+
+Ruby/GLib2:
+  * mkmf-gnome2.rb: add check_cairo. [Kouhei Sutou]
+  * fixed memory leaks. [Kouhei Sutou]
+    * [#2110165] Gdk::Pixbuf memory leak
+  * install glib-enum-types.h. [Andy Spencer]
+    * [#2106938] Install glib-enum-types.h
+
+Ruby/GTK2:
+  * add GTK+ 2.12 related bindings. [Guillaume Cottenceau]
+  * fixed initialize order. [Kouhei Sutou]
+    * [#2113491] Incorrect initialize order (compiling with mingw)
+
+Ruby/GooCanvas [NEW][EXPERIMENTAL]:
+  * added. [Kouhei Sutou]
+
+Ruby/Pango:
+  * fixed memory leaks. [Kouhei Sutou]
+
+Ruby/GtkSourceView2 [NEW][EXPERIMENTAL]:
+  * add. [yselkowitz]
+
+=== Thanks
+
+  * OBATA Akio
+  * James Healy
+  * Ricky Zheng
+  * Guillaume Cottenceau
+  * Ricky Zheng
+
+== Ruby-GNOME2 0.17.0: 2008-09-07
+
+=== Release notes
+
+  * This Release supports Ruby 1.8.7 and has many bug fixes and
+    new bound functions.
+
+=== Main changes
+
+Ruby/GLib:
+  * [#2060606] Crash when removing ruby applet from gnome panel with 0.7rc1
+    [Kouhei Sutou]
+
+Ruby/GTK:
+  * [#2025651] FTBFS with gtk+ 2.13.5 [Cesare Tirabassi, Kouhei Sutou]
+  * [#2043970] Segfaults on 64-bit Linux [Neil Roberts, Kouhei Sutou]
+
+Ruby/Pango:
+  * [#2043970] Pango::FontDescription#weight= seg fault [Kouhei Sutou]
+
+Many other changes, GC bugs, Segfault fixes. See
+corresponding ChangeLog for detailed information on changes
+and contributors.
+
+=== Thanks
+
+Special thanks for your contributions to: (list in no particular order)
+
+  * Neil Roberts
+  * Cesare Tirabassi
+  * Arnaud Cornet
+
+== Ruby-GNOME2 0.17.0-rc1: 2008-06-06
+
+=== Release notes
+
+  * This Release Candidate seems to be pretty stable. Please give us
+    feedback if you encounter any problems.
+  * The win32 bindings will be released later and will be
+    considered as EXPERIMENTAL The changes marked with 2
+    stars (**) may currently not work on win32 platforms.
+
+=== Main changes
+
+Ruby/GLib:
+  * Bound functions defined since 2.14 and 2.16.
+  * Improved main loop polling. **
+  * Improved callback handling from non Ruby thread. **
+
+    This changes breaks API. Sjoerd, you need to call
+    rbgutil_start_callback_dispatch_thread() in your
+    GStreamer bindings. Sorry.
+
+  * Supported convenience GEnum and GFlags notation. e.g.:
+      GLib::UTF8.normalize(utf8, GLib::NormalizeMode::NFD)
+      ->
+      GLib::UTF8.normalize(utf8, :nfd)
+
+      key_file.load_from_data(data,
+                              GLib::KeyFile::KEEP_COMMENTS |
+                              GLib::KeyFile::KEEP_TRANSLATIONS)
+      ->
+      key_file.load_from_data(data, [:keep_contents, :keep_translations])
+
+  * Fixed locale dependent constant name computation. [#1901843]
+    [Kouhei Sutou]
+
+Ruby/GTK:
+
+  * partially support new symbols in 2.12
+    (Gtk::RecentAction, Gtk::TextBuffer, Gdk::Display,
+    Gtk::TreeViewColumn, Gtk::Stock, Gtk::Widget,
+    Gtk::ScaleButton, Gtk::TreeView, Gtk::VolumneButton,
+    Gtk::Tooptip and Gtk::TextMark only).
+
+  * [#2025651] FTBFS with gtk+ 2.13.5 [Cesare Tirabassi, Kouhei Sutou]
+
+  * [#2043970] Segfaults on 64-bit Linux [Neil Roberts, Kouhei Sutou]
+
+Ruby/GStreamer:
+
+  *  Worked with GStreamer >= 0.10.x but isn't completed yet.
+
+Ruby/Poppler:
+
+  * Supported poppler-glib 0.6.x and 0.8.0. [Kouhei Sutou]
+
+Ruby-GNOME2:
+  * Ruby-GNOME2 can be built with ruby 1.9.0 but doesn't
+    work well without [ruby-dev:34104] patch.
+
+  * Some extconf.rb improvements
+
+Many other changes, GC bugs, Segfault fixes. See
+corresponding ChangeLog for detailed information on changes
+and contributors.
+
+=== Thanks
+
+Special thanks for your contributions to: (list in no particular order)
+  * Kazuhiro NISHIYAMA
+  * Kouhei Sutou
+  * Kero van Gelder
+  * Masahiro Sakai
+  * Detlef Reichl
+  * Guillaume Cottenceau
+  * Masahiro Sakai
+  * Mikael Hallendal
+  * Carlo E. Prelz
+  * Sjoerd Simons
+  * Juergen Mangler
+  * Dirk von Schmieden
+  * Mathieu Blondel
+  * Joseph Method
+  * Masayuki Yamaguchi
+
+And also special thanks to all other contributors not listed
+above!
+
+== Ruby-GNOME2 0.16.0: 2006-12-30
+
+Ruby-GNOME2:
+  * Fixed serious bugs (depends on GC)
+  * Support GTK+-2.10 and the latest version of each libraries.
+  * Don't include Ruby/GStreamer and Ruby/Libgda. We cancel to
+    support Ruby/GStreamer and Ruby/Libgda.
+  * Cancel to support ruby-1.6.x and GTK+-2.4 or earlier.
+
+Ruby/GLib:
+  * Support GLib+-2.10 APIs. [Kouhei Sutou, Masao Mutoh]
+  * Fix segfaults related GC with signal handlers. [Guillaume Cottenceau, Kouhei Sutou]
+  * Add functions for Unicode Manipulation [Kouhei Sutou]
+    GLib::Unicode, GLib::UTF8, GLib::UTF16, GLib::UCS4, GLib::UniChar
+  * Add Key-value file parser [Masao Mutoh]
+    GLib::KeyFile
+  * Add Bookmark file parser [Masao Mutoh]
+    GLib::BookmarkFile
+  * Add Win32 compatibility functions [Masao Mutoh]
+    GLib::Win32
+  * Add glib-mkenums.rb [Kouhei Sutou, Masao Mutoh]
+  * Other improvement and fix bugs.[Kouhei Sutou, Masao Mutoh]
+
+Ruby/ATK:
+  * Support ATK-1.12 APIs. [Masao Mutoh]
+
+Ruby/Pango:
+  * Support Pango-1.2, 1.4 APIs [Masao Mutoh]
+  * Fix some bugs. [Masao Mutoh]
+
+Ruby/GdkPixbuf:
+  * Move Cairo::Context#set_source_pixbuf from Ruby/GTK.[Kouhei Sutou]
+    You can use the methods unless X server.
+
+Ruby/GTK:
+  * Support GTK+-2.10. [Pascal Terjan, Kouhei Sutou, Masao Mutoh]
+    Gtk::PrintUnixDialog, Gtk::PageSetupUnixDialog, Gtk::Print*, Gtk::PageSet
+    Gtk::LinkButton, Gtk::Recent*, Gtk::Assistant, Gtk::StatusIcon
+  * Other improvement and fix bugs [Sjoerd Simons, Kouhei Sutou, Masao Mutoh]
+
+Ruby/GNOME:
+  * None.
+
+Ruby/GnomeCanvas:
+  * Fixed a bug and trivial improvement. [Masao Mutoh]
+
+Ruby/Libglade:
+  * Fixed some bugs and trivial improvement. [Kouhei Sutou, Masao Mutoh]
+
+Ruby/Libart:
+  * a trivial improvement. [Kouhei Sutou]
+
+Ruby/GConf:
+  * Sample code cleanup. [Masao Mutoh]
+
+Ruby/GnomeVFS:
+  * None.
+
+Ruby/GtkHtml2:
+  * None.
+
+Ruby/GtkGLExt:
+  * None.
+
+Ruby/PanelApplet:
+  * None. Deprecated (Use Gtk::StatusIcon in Ruby/GTK+)
+
+Ruby/GtkSourceView:
+  * Support gtksourceview-1.8. Some improvements. [Kouhei Sutou, Masao Mutoh]
+
+Ruby/GnomePrint:
+  * None.
+
+Ruby/GnomePrintUI:
+  * a trivial improvement. [Kouhei Sutou]
+
+Ruby/RSVG:
+  * Added a sample [Kouhei Sutou]
+  * Improved, fixed bugs [Kouhei Sutou]
+
+Ruby/GtkMozEmbed:
+  * a trivial improvement. [Masao Mutoh]
+
+Ruby/Poppler:
+  * Improved, fixed bugs [Kouhei Sutou]
+
+Ruby/VTE:
+  * None.
+
+Ruby/GStreamer:
+  * Canceled.
+
+Ruby/Libgda:
+  * Canceled.
+
+== Ruby-GNOME2-0.15.0: 2006-07-01
+
+Ruby/GLib:
+  * Improve signal handlers with pthread ruby(--enable-pthread). [Sjoerd Simons]
+  * Added new fundamental object for other bindings. [Sjoerd Simons]
+  * GLib::Source#remove -> GLib::Source.remove [Kouhei Sutou]
+  * Added new macros (GLIST2ARYF, GLIST2ARY2F, GSLIST2ARYF, GLIST2ARY2F,
+    G_PROTECT_CALLBACK) [Masao Mutoh]
+  * Added GLib.win32_locale, GLib, win32_locale_filename_from_utf8 [Kouhei Sutou]
+  * Improve memory management [Kouhei Sutou, Sjoerd Simons, Masahiro Sakai, Masao Mutoh]
+  * Other improvement and fix bugs.
+    [Sjoerd Simons, Joao Pedrosa, Kouhei Sutou, Masahiro Sakai, Masao Mutoh]
+
+Ruby/ATK:
+  * Improved cygwin support. [Masao Mutoh]
+  * Fix a bug. [Masahiro Sakai]
+
+Ruby/Pango:
+  * Fix some bugs. [Laurent Sansonetti, Masao Mutoh]
+  * Added Pango::Layout#markup=, Pango::AttrAbsoluteSize [Masao Mutoh]
+
+Ruby/GdkPixbuf:
+  * Fix a bug. [NISHI Takao]
+  * Code cleanup [Masao Mutoh]
+
+Ruby/GTK:
+  * Improve signal handlers. [Masahiro Sakai]
+  * Added Gtk::Widget#set_widget, #set_requisition. [Daniel Chokola]
+  * Added Gtk::Dialog#get_response. [Masao Mutoh]
+  * Other improvement and fix bugs [Mario Steele, Tilman Sauerbeck, Geoff Youngs,
+    Masahiro Sakai, Kouhei Sutou, Masao Mutoh]
+
+Ruby/GNOME:
+  * Follow Ruby/GLib2 change(GRClosure). [Kouhei Sutou]
+
+Ruby/GnomeCanvas:
+  * Code cleanup [Kouhei Sutou, Masao Mutoh]
+
+Ruby/Libglade:
+  * Fixed some bugs and trivial improvement. [Masao Mutoh]
+
+Ruby/Libart:
+  * None.
+
+Ruby/GConf:
+  * Sample code cleanup. [Masao Mutoh]
+
+Ruby/GStreamer:
+  * Sample code cleanup. [Masao Mutoh]
+
+Ruby/GnomeVFS:
+  * Improved and fixed bugs. [Masahiro Sakai, Masao Mutoh]
+
+Ruby/GtkHtml2:
+  * Sample code cleanup. [Masao Mutoh]
+
+Ruby/GtkGLExt:
+  * Improved and fixed bugs. [Kouhei Sutou, Masao Mutoh]
+
+Ruby/Libgda:
+  * Fix build against 1.3.x branch (libgda-2.x). [Laurent Sansonetti]
+
+Ruby/PanelApplet:
+  * Fixed a bug [Patch #1431855]
+
+Ruby/GtkSourceView:
+  * Sample code cleanup. [Masao Mutoh]
+
+Ruby/GnomePrint:
+  * Added Gnome::Print::BINDING_VERSION. Code cleanup [Kouhei Sutou]
+
+Ruby/GnomePrintUI:
+  * Added Gnome::PrintUI::BINDING_VERSION. [Kouhei Sutou]
+  * Sample code cleanup. [Masao Mutoh]
+
+Ruby/RSVG:
+  * Added RSVG::BINDING_VERSION, RBRSVG_MAJOR_VERSION,
+    RBRSVG_MINOR_VERSION, RBRSVG_MICRO_VERSION. [Kouhei Sutou]
+  * Supported 2.14.
+  * Improved, fixed bugs [Kouhei Sutou, Masao Mutoh]
+
+Ruby/GtkMozEmbed:
+  * Improved, fixed bugs [Mirko Maischberger, Masao Mutoh]
+
+Ruby/Poppler [NEW] [EXPERIMENTAL]:
+  * Added [Kouhei Sutou]
+
+Ruby/VTE [NEW]:
+  * Added [Kouhei Sutou]
+
+== Ruby-GNOME2 0.14.1: 2005-11-06
+
+Ruby/GLib:
+  * Fix memory leaks. [Masao Mutoh]
+
+Ruby/ATK:
+  * None.
+
+Ruby/Pango:
+  * Fix some bugs. [Masao Mutoh]
+
+Ruby/GdkPixbuf:
+  * None.
+
+Ruby/GTK:
+  * Improve memory management. [Masao Mutoh]
+
+Ruby/GNOME:
+  * None.
+
+Ruby/GnomeCanvas:
+  * None.
+
+Ruby/Libglade:
+  * None.
+
+Ruby/Libart:
+  * None.
+
+Ruby/GConf:
+  * None.
+
+Ruby/GStreamer:
+  * None.
+
+Ruby/GnomeVFS:
+  * None.
+
+Ruby/GtkHtml2:
+  * None.
+
+Ruby/GtkGLExt:
+  * None.
+
+Ruby/Libgda:
+  * None.
+
+Ruby/PanelApplet:
+  * None.
+
+Ruby/GtkSourceView:
+  * None.
+
+Ruby/GnomePrint:
+  * None.
+
+Ruby/GnomePrintUI:
+  * None.
+
+Ruby/RSVG:
+  * None.
+
+Ruby/GtkMozEmbed:
+  * None.
+
+== Ruby-GNOME2 0.14.0: 2005-10-16
+
+Ruby/GLib:
+  * Fix segfault related on GC. [Masao Mutoh]
+  * Support Ruby-GetText-Pacakge(Include pseudo GetText module). [Masao Mutoh]
+  * Add and completed: [Masao Mutoh]
+    * Glib::Shell, GLib::Completion, GLib::Timer,
+      sample/shell.rb, completion.rb, timer.rb.
+  * Add some methods, improved, fixed bugs: [Pascal Terjan, Sven Herzberg, Masao Mutoh]
+    * GLib, GLib::Object, GLib::MetaInterface, GLib::Enum,
+      GLib::Flags, PKGConfig, extconf.rb, mkmf-gnome2.rb
+
+Ruby/ATK:
+  * Support ATK-1.10. [Masao Mutoh]
+  * Add Atk::BUILD_VERSION. [Masao Mutoh]
+  * Add some methods, improved, fixed bugs: [Masao Mutoh]
+    * Atk, Atk::Relation, Atk::RelationSet,
+      Atk::StreamableContent, Atk::Text::Attribute,
+      Atk::Util
+  * Add and completed: [Masao Mutoh]
+    * Atk::Util::KeyEventType
+
+Ruby/Pango:
+  * Support Pango-1.10 and cairo [Kouhei Sutou, Masao Mutoh]
+  * Add Pango::BUILD_VERSION. [Masao Mutoh]
+  * Add some methods, improved, fixed bugs: [Kouhei Sutou, Masao Mutoh]
+    * Pango, Pango::Layout, Pango::LayoutLine,
+      Pango::LayoutIter, Pango::Language, Pango::Font,
+      Pango::GlyphItem, Pango::GlyphString, Pango::Context,
+      Pango::Analysis, Pango::Item
+  * Add and completed: [Masao Mutoh]
+    * Pango::ScriptIter, Pango::Script, Pango::(.*)FontMap, Pango::(.*)Face,
+      Pango::(.*)Family, Pango::XFont, Pango::FT2Font,
+      sample/script.rb, break.rb, item.rb, layout.rb
+  * Add classes: [Kouhei Sutou, Masao Mutoh]
+    * Pango::Engine, Pango::EngineShape, Pango::EngineLang
+      Cairo::Context, Pango::CairoFcFont, Pango::CairoFont, Pango::CairoWin32Font,
+      Pango::CairoFontMap
+  * Rename class name: [Masao Mutoh]
+    * Pango::FontSet -> Pango::Fontset, Pango::FontSetSimple -> Pango::FontsetSimple.
+
+Ruby/GdkPixbuf:
+  * Support GTK+-2.8. [Guillaume Cottenceau]
+  * Add some methods, improved, fixed bugs: [Kouhei Sutou, Guillaume Cottenceau]
+    * Gdk::Pixbuf
+  * Add and completed: [Guillaume Cottenceau]
+    * Gdk::PixbufSimpleAnim, sample/simpleanim.rb
+
+Ruby/GTK:
+  * Support GTK+-2.8. [Guillaume Cottenceau, Masao Mutoh]
+  * Support cairo. [Kouhei Sutou, Masao Mutoh]
+  * Add Gtk::BUILD_VERSION. [Masao Mutoh]
+  * Add some methods, improve, fix bugs: [Guillaume Cottenceau, Masao Mutoh]
+    * Gdk, Gdk::Drawable, Gdk::Display, Gdk::Drawable,
+      Gdk::Cursor, Gdk::Window, Gdk::Screen, Gtk::Action,
+      Gtk::Dialog, Gtk::Drag, Gtk::EntryCompletion,
+      Gtk::FileChooser, Gtk::IconView, Gtk::Image,
+      Gtk::Menubar, Gtk::MenuShell, Gtk::ScrolledWindow,
+      Gtk::SizeGroup, Gtk::Stock, Gtk::TextBuffer,
+      Gtk::TextIter, Gtk::ToolButton, Gtk::TreeRowReference,
+      Gtk::TreeView, Gtk::TreeViewColumn, Gtk::Window,
+      sample/gtk-demo/*.rb
+  * Add: [Guillaume Cottenceau, Kouhei Sutou]
+    * Cairo::Context, Gdk::EventGrabBroken,
+      sample/gtk-demo/cairo_*.rb, sample/misc/rgtk+cairo.rb
+
+
+Ruby/GNOME [Masao Mutoh]:
+  * Support libgnome/libgnomeui-2.12.
+  * Add Gnome::BUILD_VERSION.
+  * Add some methods, improve, fix bugs:
+    * Gnome, Gnome::Util, Gnome::URL, Gnome::Help, Gnome::App, Gnome::Client
+  * Add: Gnome::GConf, Gnome::Sound, Gnome::Trigger
+    * sample/gnome-trigger.rb, sample/gnome-sound.rb
+
+Ruby/GnomeCanvas:
+  * Support libgnomecanvas-2.12. [Pascal Terjan, Masao Mutoh]
+  * Add Gnome::Canvas::BUILD_VERSION. [Masao Mutoh]
+  * Add some methods, improve, fix bugs: [Kouhei Sutoh, Pascal Terjan, Masao Mutoh]
+    * Gnome::CanvasItem, Gnome::CanvasPathDef, Gnome::Canvas.
+  * Add: Gnome::CanvasBuf. [Masao Mutoh]
+
+Ruby/Libglade [Masao Mutoh]:
+  * Support libglade-2.12.
+  * Add GladeXML::BUILD_VERSION.
+  * Add some methods, improve, fix bugs:
+    bin/ruby-glade-create-template, sample/l10n_*.rb, GladeXML
+
+Ruby/Libart [Masao Mutoh]:
+  * Add Art::BUILD_VERSION.
+  * Add: Art::Uta.
+
+Ruby/GConf:
+  * Support Cygwin. [Yaakov Selkowitz]
+  * Add GConf::BUILD_VERSION. [Masao Mutoh]
+
+Ruby/GStreamer:
+  * Support on Ruby-1.9. [Laurent Sansonetti]
+  * Add Gst::BUILD_VERSION. [Masao Mutoh]
+  * Fix bugs, improve, add some methods: [Masao Mutoh]
+    * Gst::Element
+
+Ruby/GnomeVFS:
+  * Support Cygwin. [Yaakov Selkowitz]
+  * Add GnomeVFS::BUILD_VERSION. [Masao Mutoh]
+  * Fix bugs, improve, add some methods: [Masao Mutoh]
+    * GnomeVFS
+
+Ruby/GtkHtml2 [Masao Mutoh]:
+  * Add Gtk::HtmlContext::BUILD_VERSION.
+
+Ruby/GtkGLExt:
+  * Added Gtk::GL::BUILD_VERSION. [Masao Mutoh]
+  * Fix bugs, improve, add some methods: [Kouhei Sutou]
+    * Gdk::Pixmap
+
+Ruby/Libgda:
+  * Support Cygwin. [Yaakov Selkowitz]
+  * Add Gda::BUILD_VERSION. [Masao Mutoh]
+
+Ruby/PanelApplet [Masao Mutoh]:
+  * Add PanelApplet::BUILD_VERSION.
+
+Ruby/GtkSourceView [Masao Mutoh]:
+  * Support GtkSourcView-1.4.
+  * Add Gtk::SourceView::BUILD_VERSION.
+  * Fix bugs, Improve, Add some methods:
+    * Gtk::SourceView, Gtk::SourceBuffer, Gtk::SourceTag, Gtk::SourceTagStyleMask
+  * Add and completed:
+    * Gtk::SourceStyleScheme, Gtk::SourcePrintJob
+
+Ruby/GnomePrint [Kouhei Sutou]:
+  * Support libgnomeprint-2.12.
+  * Add Gnome::Print::BUILD_VERSION
+  * Fix bugs, Improve, Add some methods:
+    * Gnome::PrintContext
+  * Add: sample/gp-pac.rb
+
+Ruby/GnomePrintUI [Kouhei Sutou]:
+  * Support libgnomeprintui-2.12.
+  * Add:
+    * Gnome::PrintUI::BUILD_VERSION, Gnome::FontSelection,
+      Gnome::FontPreview, Gnome::FontDialog,
+      Gnome::PrintContentSelector
+
+Ruby/RSVG [Kouhei Sutou]:
+  * Support rsvg-2.12.
+  * Add RSVG::BUILD_VERSION
+
+Ruby/GtkMozEmbed [NEW]:
+  * Merged. [Mirko Maischberber]
+  * Add Gtk::MozEmbed::BUILD_VERSION [Masao Mutoh]
+
+== Ruby-GNOME2 0.13.0: 2005-07-31
+
+Ruby/GLib:
+  * Fixed GCC 4.0 warnings [Masao Mutoh]
+  * Added and completed: [Masao Mutoh]
+    * GLib:PollFD, GLib::Source, GLib::MainLoop, GLib::IOChannel,
+      GLib::Idle, GLib::ChildWatch
+  * Added some methods, improved, fixed bugs: [Vincent Isambart, Masao Mutoh]
+    * PKGConfig, extconf.rb,
+  * Added: [Masao Mutoh]
+    * GLib::MainContext, sample/iochannel.rb, idle.rb, timeout.rb,
+      timeout2.rb, tests/test-iochannel.*, runner.rb,
+
+Ruby/ATK:
+  * None.
+
+Ruby/Pango:
+  * Fixed GCC 4.0 warnings [Masao Mutoh]
+  * Support x86_64 [Masao Mutoh]
+    * Pango::Layout
+  * Added some methods, improved, fixed bugs: [Mirko Maischberger,
+    Pascal Terjan, Masao Mutoh]
+    * sample/parse.rb, Pango::LayoutLine, Pango::Coverage, Pango::LayoutIter,
+      Pango::FontFamily, Pango::Attriterator
+
+Ruby/GdkPixbuf:
+  * Fixed GCC 4.0 warnings [Masao Mutoh]
+  * Fixed bugs, Improved: [Mirko Maischberger, Masao Mutoh]
+    * sample/*.rb
+
+Ruby/GTK:
+  * Support x86_64 [Kouhei Sutou, Masao Mutoh]
+    * Gdk::Atom, Gtk::ItemFactory, Gtk::Widget, Gtk::Drag, Gtk::SizeGroup
+  * Fixed GCC 4.0 warnings [Masao Mutoh]
+  * Fixed bugs, Improved, Added some methods: [Hiroyuki Ikezoe, KATO Kazuyoshi,
+    Pascal Terjan, Kouhei Sutou, Mirko Maischberger, Masao Mutoh]
+    * Gtk::ActionGroup, Gtk::IconTheme, Gtk::RC, Gtk::TreeModel, Gdk::TimeCoord,
+      Gdk::Window, Gtk::CellView, Gtk::ToolButton, Gtk::MenuToolButton, Gdk,
+      Gdk::Display, Gdk::GC, Gdk::PangoAttrEmbossed, Gdk::Drawable, Gtk::Window,
+      sample/gtk-demo/main.rb, sample/misc/*.rb, sample/testgtk/*.rb.
+  * Added: [KATO Kazuyoshi, Masao Mutoh]
+    * sample/gtk-demo/hypertext.rb, sample/misc/colorselection.rb
+
+Ruby/GNOME [Mirko Maischberger]:
+  * sh-bang (!#) normalization
+    * sample/test-gnome/*.rb
+
+Ruby/GnomeCanvas [Kouhei Sutou]:
+  * Support x86_64, Improved. [Kouhei Sutou]
+    * Gnome::CanvasPathDef
+
+Ruby/Libglade:
+  * None.
+
+Ruby/Libart:
+  * Added [Kouhei Sutou]
+    * Art::DRect, Art::IRect
+  * Fixed bugs, Improved, Added some methods: [Kouhei Sutou, Masao Mutoh]
+    * Art::Affine, Art::BPath. Art::Canvas
+
+Ruby/GConf:
+  * None.
+
+Ruby/GStreamer:
+  * Fixed GCC 4.0 warnings [Masao Mutoh]
+  * Added: [Laurent Sansonetti]
+    * Gst::XOverLay, sample/video-player.rb,
+  * Fixed bugs, Improved, Added some methods:
+    [Laurent Sansonetti]
+    * Gst::Caps, Gst::Pad, Gst::Element, Gst::TagSetter
+
+Ruby/GnomeVFS [Masao Mutoh]:
+  * Fixed bugs, Improved, Added some methods:
+    GnomeVFS::File
+
+Ruby/GtkHtml2:
+  * None.
+
+Ruby/GtkGLExt:
+  * None.
+
+Ruby/Libgda:
+  * None.
+
+Ruby/PanelApplet [Masao Mutoh]:
+  * Check libpanel-applet version(2.6 or later):
+    extconf.rb
+
+Ruby/GtkSourceView [Masao Mutoh]:
+  * None.
+
+Ruby/GnomePrint:
+  * Fixed GCC 4.0 warnings [Masao Mutoh]
+  * Fixed bugs, Improved, Added some methods. [Kouhei Sutou]
+    * Gnome::PrintContext, Gnome::PrintJob, Gnome::PrintConfig,
+      Gnome::PrintUnit, Gnome::PrintPaper, src/lib/gnomeprint2.rb,
+      sample/to_file.rb
+
+Ruby/GnomePrintUI:
+  * Fixed GCC 4.0 warnings [Masao Mutoh]
+  * Fixed bugs, Improved, Added some methods. [Kouhei Sutou]
+    * Gnome::PaperSelector, Gnome::PrintUnitSelector, Gnome::PrintPreview,
+      Gnome::PrintDialog, Gnome::PrintConfigDialog, sample/dialog.rb,
+
+Ruby/RSVG:
+  * Fixed GCC 4.0 warnings [Masao Mutoh]
+  * Fixed bugs, Improved, Added some methods. [Kouhei Sutou]
+
+== Ruby-GNOME2 0.12.0: 2005-03-06
+
+Ruby/GLib:
+  * Support GLib-2.6.x. [Masao, Mutoh]
+  * Support MS VC++. [Masao, Mutoh]
+  * Fix bugs, Improved, Added some methods. [KATO Kazuyoshi,
+    Masao Mutoh]
+    * PKGConfig, rbgobj_lookup_class().
+  * Added: [Masao, Mutoh]
+    * GLib::Threads, src/lib/pkg-config.rb, sample/spawn.rb.
+
+Ruby/ATK [Dafydd Harries, Vincent Isambart, Masao Mutoh]:
+  * Support MS VC++.
+  * Fix bugs, Improved, Added some methods.
+  * Follow Ruby/GLib changes.
+
+Ruby/Pango [Masao Mutoh]:
+  * Support Pango-1.8.x.
+  * Support MS VC++.
+  * Follow Ruby/GLib changes.
+  * Added and completed:
+    * Pango::Renderer, Pango::Matrix, Pango::AttrStrikethroughColor,
+      Pango::AttrUnderlineColor, Pango::GlyphItem
+  * Added some methods, improved, fixed bugs: [Matthew Berg]
+    * Pango::Context, Pango::AttList, Pango::Attribute,
+      Pango::Layout, Pango, Pango::AttrSize, Pango::LogAttr,
+      Pango::Item, Pango::Analysis, Pango::Font,
+      Pango::FontDescription, Pango::FontFace,
+      Pango::FontSet, Pango::AttrList, Pango::AttrIterator,
+      Pango::Rectangle, Pango::Layout, Pango::LayoutLine,
+      Pango::LayoutIter, Pango::GlyphInfo
+  * Added
+    * Pango::FcFont, Pango::XftFont, Pango::FontFcFontMap,
+      Pango::XftFontMap.
+  * Renamed, Moved
+    * Pango::FontFamily#list_faces -> #faces.
+
+Ruby/GdkPixbuf [leon breedt, Masao Mutoh]:
+  * Support GTK+-2.6.x.
+  * Follow Ruby/GLib changes.
+  * Fixed bugs, Improved, Added some methods for GTK+-2.6.x:
+    * Gdk::PixbufAnimationIter, Gdk::Pixbuf,
+      Gdk::PixbufLoader, Gdk::PixbufFormat
+
+Ruby/GTK:
+  * Support Ruby-1.9.x.
+  * Support Pango-1.8.x.
+  * Support GTK+-2.6.x.
+  * Support MS VC++.
+  * Follow Ruby/GLib changes.
+  * Improve to support gthread.
+  * Added and completed for GTK+-2.6.x: [Darren Willis,
+    * Gtk::CellRendererProgress, Gtk::ScrollStep,
+      Gtk::IconView, Gtk::CellRendererCombo,
+      Gtk::AboutDialog, Gdk::PangoRenderer, Gtk::CellView,
+      Gtk::MenuToolButton, Gtk::FileChooserButton,
+      Gdk::EventChange, Gdk::X11
+  * Fixed bugs, Improved, Added some methods for GTK+-2.6.x:
+    [Mirko Maischberger, Joao Pedrosa, KATO Kazuyoshi, Masao Mutoh]
+    * Gtk, Gtk::CellLayout, Gtk::RadioToolButton,
+      Gtk::ToggleToolButton, Gtk::Stock, Gtk::Image,
+      Gtk::Label, Gtk::Progressbar, Gtk::EntryCompletion,
+      Gtk::TextBuffer, Gtk::FileFilter, Gtk::FileChooser,
+      Gtk::Menu, Gtk::CellRenderer, Gtk::TreeView,
+      Gtk::TextView, Gtk::TextBuffer, Gtk::Drag,
+      Gtk::ToolItem, Gtk::ActionGroup, Gtk::Action,
+      Gtk::ComboBox, Gtk::Combo, Gtk::IconTheme,
+      Gtk::SelectionData, Gtk::TargetList, Gtk::ListStore,
+      Gtk::Window, Gtk::ToggleAction, Gtk::MessageDialog,
+      Gdk::Region, Gdk::Window, Gtk::Clipboard,
+      Gtk::Settings, Gtk::TreeModel, Gtk::ModelFilter,
+      Gtk::TreeViewColumn, Gtk::Widget, Gdk::Pango,
+      Gdk::Display, Gdk::Drawable, Gtk::RadioAction,
+      Gdk::Screen, Gtk::TextBuffer, Gdk::Threads,
+      sample/gtk-demo/*.rb, sample/misc/threads.rb,
+      pangorenderer.rb
+  * Added: [KATO Kazuyoshi, Darren Willis, Masao, Mutoh]
+    * sample/misc/tree_progress.rb, misc_button.rb,
+      aboutdialog.rb, aboutdialog2.rb,
+      sample/gtk-demo/clipboard.rb, entry_completion.rb,
+      expander.rb, iconview.rb
+
+Ruby/GNOME [Masao Mutoh]:
+  * Follow Ruby/GLib changes.
+
+Ruby/GnomeCanvas [Masao Mutoh]:
+  * Follow Ruby/GLib changes.
+
+Ruby/Libglade [Masao Mutoh]:
+  * Follow Ruby/GLib changes.
+  * Support MS VC++.
+  * Improved.
+
+Ruby/Libart [KATO Kazuyoshi, Masao Mutoh]:
+  * Follow Ruby/GLib changes.
+
+Ruby/GConf [Masao Mutoh]:
+  * Follow Ruby/GLib changes.
+  * Fixed bugs, Improved.
+  * Deprecated:
+    * GConf::Client.new
+
+Ruby/GStreamer:
+  * Follow Ruby/GLib changes. [Masao Mutoh]
+  * Added and completed: [Jack Paul, Masao Mutoh, Laurent Sansonetti]
+    * Gst::TypeFindFactory, Gst::MediaInfoError, Gst::Tag,
+      Gst::RegistryPool, Gst::TagSetter
+  * Fixed bugs, Improved, Added some methods:
+    [Jack Paul, Max Nickel, Masao Mutoh, Laurent Sansonetti]
+    * Gst::Plugin, Gst::PluginFeature, Gst::Caps, Gst::Structure,
+      Gst::Xml, Gst::Thread, Gst::Scheduler, Gst::SchedulerFactory,
+      Gst::MediaInfo,
+      sample/gst-inspect.rb
+
+Ruby/GnomeVFS [Masao Mutoh]:
+  * Follow Ruby/GLib changes.
+  * Fixed bugs, Improved.
+
+Ruby/GtkHtml2 [Masao Mutoh]:
+  * Follow Ruby/GLib changes.
+
+Ruby/GtkGLExt [Masao Mutoh]:
+  * Follow Ruby/GLib changes.
+
+Ruby/Libgda:
+  * Support 1.1.99
+  * Follow Ruby/GLib changes. [Masao Mutoh]
+  * Fixed bugs, Improved, Added some methods: [Laurent Sansonetti]
+    Gda::DataModel, Gda::Provider, Gda::Quarklist, Gda::Connection
+  * Renamed, Moved [Laurent Sansonetti]
+    * Gda::DataModel#editable? => #updatable?
+    * #editing? => changed?
+    * #begin_edit => #begin_update
+    * #cancel_edit => #cancel_update
+    * #end_edit => #end_update
+
+Ruby/PanelApplet [Neil Stevens, Masao Mutoh]:
+  * Follow Ruby/GLib changes.
+  * Added some methods
+
+Ruby/GtkSourceView [Masao Mutoh]:
+  * Follow Ruby/GLib changes.
+  * Added some methods
+
+Ruby/GnomePrint:
+  * Follow Ruby/GLib changes. [Masao Mutoh, Kouhei Sutou]
+  * Fixed bugs, Improved, Added some methods. [Kouhei Sutou]
+
+Ruby/GnomePrintUI:
+  * Follow Ruby/GLib changes. [Masao Mutoh, Kouhei Sutou]
+  * Fixed bugs, Improved, Added some methods. [Kouhei Sutou]
+
+Ruby/RSVG:
+  * Follow Ruby/GLib changes. [Masao Mutoh, Kouhei Sutou]
+  * Fixed bugs, Improved, Added some methods. [Kouhei Sutou]
+
+== Ruby-GNOME2 0.11.0: 2004-11-14
+
+Ruby/GLib [Kouhei Sutou, Vincent Isambart, Masao Mutoh]:
+  * Fix bugs, Improved, Added some methods.
+
+Ruby/ATK [Vincent Isambart, Masao Mutoh]:
+  * Support ATK+-1.7.x.
+  * Fixed bugs, Improved, Added some methods.
+
+Ruby/Pango [Geoff Youngs, Vincent Isambart, Masao Mutoh]:
+  * Improved, Fix bugs.
+
+Ruby/GdkPixbuf [Geoff Youngs, Masao Mutoh]:
+  * Support GTK+-2.4.x.
+  * Fixed bugs, Improved, Added some methods.
+
+Ruby/GTK [Geoff Youngs, Vincent Isambart, Masao Mutoh]:
+  * Fixed bugs, Improved, Added some methods.
+
+Ruby/GNOME [Masao Mutoh]:
+  * Improved.
+
+Ruby/GnomeCanvas [Masao Mutoh]:
+  * Fixed bugs, Improved, Added some methods.
+
+Ruby/Libglade [Masao Mutoh]:
+  * Improved.
+
+Ruby/Libart [Vincent Isambart, Masao Mutoh]:
+  * Improved to support ruby-1.7.x or later.
+  * Changed: [Masao Mutoh]
+    * Art::Canvas::Color.new -> Art::Canvas.color.
+    * Art::Vpath::Dash -> Art::VpathDash.
+
+Ruby/GConf [Masao Mutoh]:
+  * Improved.
+
+Ruby/GStreamer [Masao Mutoh]:
+  * Improved.
+
+Ruby/GnomeVFS [Masao Mutoh]:
+  * Improved.
+
+Ruby/GtkHtml2 [Masao Mutoh]:
+  * Improved.
+
+Ruby/GtkGLExt [Vincent Isambart]:
+  * Improved.
+
+Ruby/Libgda:
+  * None.
+
+Ruby/PanelApplet:
+  * None.
+
+Ruby/GtkSourceView [Vincent Isambart, Masao Mutoh]:
+  * Fixed bugs.
+
+Ruby/GnomePrint [NEW]:
+  * Added. [Kouhei Sutou]
+
+Ruby/GnomePrintUI [NEW: Alpha release]:
+  * Added. [Kouhei Sutou]
+
+Ruby/RSVG [NEW: Alpha release]:
+  * Added. [Kouhei Sutou]
+
+== Ruby-GNOME2 0.10.1: 2004-08-16
+
+Ruby/GdkPixbuf [Masao Mutoh]:
+ - Fix bugs.
+
+Ruby/GTK [Masao Mutoh]:
+ - Support GTK+-2.0.x again.
+
+Ruby/GtkSourceView [Masao Mutoh]:
+ - Fix bugs.
+
+== Ruby-GNOME2 0.10.0: 2004-08-09
+
+Ruby/GLib [Masao Mutoh]:
+  * Added: [Kazuhiro NISHIYAMA, Masao, Mutoh]
+    * GLib::Spawn, sample/utils.rb, sample/type-register2.rb
+  * Added some methods, improved, fixed bugs: [Laurent Sansonetti,
+    Pascal Terjan, Masao Mutoh]
+    * GLib, GLib::Object, GLib::Log, glib2.rb,
+
+Ruby/ATK [Masao Mutoh]:
+  * None.
+
+Ruby/Pango [Masao Mutoh]:
+  * Fix bugs.
+
+Ruby/GdkPixbuf [Masao Mutoh]:
+  * Removed version information.
+
+Ruby/GTK:
+  * Support GTK+-2.4.x.
+  * Added: [Seiya Nishizawa, Masao, Mutoh]
+    * Gtk::ToolButton, Gtk::ToolItem, Gtk::ToggleToolButton,
+      Gtk::SeperatorToolItem, Gtk::ComboBox, Gtk::ComboBoxEntry,
+      Gtk::Expander, Gtk::ColorButton, Gtk::FontButton, Gtk::FileChooserWidget,
+      Gtk::FileChooser, Gtk::FileFilter, Gtk::FileChooserDialog, Gtk::Action,
+      Gtk::ToggleAction, Gtk::IconInfo, Gtk::IconTheme, Gtk::UIManager,
+      Gtk::RadioAction, Gtk::CellLayout, Gtk::ActionGroup,
+      sample/misc/entrycompletion.c, filechooser.rb, combobox.rb, expander.rb,
+      color_font_button.rb, uimanager.rb, uimanager2.rb, uimanager2.xml
+  * Improved, fixed bugs: [Geoff Youngs, Vincent Isambart,
+    Kazuhiro NISHIYAMA, Masao Mutoh]
+    * Gtk::Style, Gtk::Widget, Gtk::TextView, Gtk::Container, Gdk::EventClient,
+      Gtk::Dialog, Gtk::Entry, Gdk::Selection, Gtk::Drag, Gdk, Gdk::Atom,
+      Gtk::Editable, Gtk::Stock, Gtk::TextIter, Gtk::TextMark, Gtk::Style,
+      sample/misc/dialog2.rb, entry.rb, settings.rb,
+  * Renamed, Moved: [Masao Mutoh]
+    * Gtk::EventCrossing::CrossingMode to Gtk::EventCrossing::Mode,
+      Gdk::SettingAction to Gdk::EventSetting::Action
+      Gdk::Input.set_extension_events to Gdk::Device.
+  * Deperecated: [Masao Mutoh]
+    * Gtk::Combo, Gtk::OptionMenu since GTK+-2.4.
+
+Ruby/GNOME:
+  * None.
+
+Ruby/GnomeCanvas:
+  * None.
+
+Ruby/Libglade:
+  * Added: [Masao Mutoh]
+    * sample/l10n*, makemo.rb, sample/po/*.
+  * Added methods: [Masao Mutoh]
+    * GladeXML#get_tooltips.
+  * Improved, fixed bugs: [Masao Mutoh]
+    * GladeXML, bin/ruby-glade-create-template
+
+Ruby/Libart:
+  * None.
+
+Ruby/GConf:
+  * Added some methods, Improved, fixed bugs: [Giovanni Corriga, Pascal Terjan,
+    Kazuhiro NISHIYAMA, Masao Mutoh]
+    * GConf::Client
+  * Deprecated: [Masao Mutoh]
+    * GConf::Client.new. Use GConf::Client.default instead.
+
+Ruby/GStreamer:
+  * Requires GStreamer-0.8.x or later.
+  * Added: [Laurent Sansonetti]
+    * Gst::Clock, Gst::Scheduler
+  * Added methods, improved, Fixed bugs: [Laurent Sansonetti]
+    * Gst::Element, Gst::Bin, Gst::Caps, Gst::Structure,
+  * Removed: [Laurent Sansonetti]
+    * Gst::Autoplug, Gst::AutoplugFactory, Gst::Type,
+      Gst::TypeFactory, Gst::TypeFind
+      Gst.set_debug,
+
+Ruby/GnomeVFS:
+  * Fixed bugs: [Pascal Terjan, Giovanni Corriga, Masao Mutoh]
+
+Ruby/GtkHtml2:
+  * None.
+
+Ruby/GtkGLExt:
+  * Fixed bugs: [Vincent Isambart]
+
+Ruby/Libgda:
+  * Added methods, fixed bugs: [Laurent Sansonetti]
+    * Gda::Command, Gda::Connection
+  * Removed: [Laurent Sansonetti]
+    * Gda::Export
+
+Ruby/PanelApplet [NEW]:
+  * Added. [Jamis Buck, Masao Mutoh]
+
+Ruby/GtkSourceView [NEW]:
+ - Added. [Laurent Sansonetti]
+
+= GNOME2 0.9.1: 2004-03-14
+
+Ruby/GLib [Masao Mutoh]:
+  * Fix a compilation problem on MinGW.
+
+Ruby/ATK [Masao Mutoh]:
+  * Fix a compilation problem on MinGW.
+  * Improved extconf.rb
+
+Ruby/Pango [Masao Mutoh]:
+  * Improved extconf.rb
+
+Ruby/GTK [Masao Mutoh]:
+  * Fix a compilation problem on MinGW.
+  * Fix a bug of Gtk::Combo.
+  * Improved extconf.rb
+
+Ruby/GConf [Kazuhiro NISHIYAMA]:
+  * Fix bugs.
+
+Ruby/Libgda [Laurent Sansonetti]:
+  * Support libgda-1.0.3(stable branch).
+
+= Ruby-GNOME2 0.9.0: 2004-03-07
+
+Ruby/GLib:
+  * Improved, fixed bugs: [Kenichi Komiya, Vincent Isambart, Masao Mutoh]
+    * GLib::Object, GLib::Param::Flags, mkmf-gnome2.rb, sample/type-register.rb
+  * Added new macros: [Masao Mutoh]
+    * G_DEF_CLASS3()
+
+Ruby/ATK [NEW]:
+  * Added and compeleted: [Masao Mutoh]
+    * Atk::Action, Atk::Document, Atk::GObjectAccessible, Atk::NoOpObject,
+      Atk::NoOpObjectFactory, Atk::Value, Atk::Component, Atk::Image,
+      Atk::HyperText, Atk::HyperLink, Atk::EditableText, Atk::Implementor,
+      Atk::Object, Atk::Relation, Atk::Registry, Atk::ObjectFactory,
+      Atk::State, Atk::StateSet, Atk::EditableText, Atk::Table
+  * Added: [Masao Mutoh]
+    * Atk::Util, Atk::Component, Atk::Selection, Atk::Text
+
+Ruby/GdkPixbuf:
+  * None.
+
+Ruby/Pango:
+  * None.
+
+Ruby/GTK:
+  * Completed: [Masao Mutoh]
+  * Added and completed: [Masao Mutoh]
+  * Added: [Kenichi Komiya, Masao, Mutoh]
+    * Gtk::TextAppearance, sample/misc/bindings.rb, properties.rb,
+      style_property.rb, settings.rb
+  * Added some methods, improved, fixed bugs: [Kenichi Komiya, Masahiro Sakai,
+     Vincent Isambart, Dafydd Harries, Masao Mutoh]
+     * Gdk::Window, Gtk::SizeGroup, Gtk::Object, Gtk::BindingSet,
+       Gtk::TextTagTable, Gtk::TextTag, Gdk::Colormap, Gtk::TreeViewColumn,
+       Gtk::TextIter, Gtk::SpinButton, Gtk::Allocation, Gtk::TextView,
+       Gtk::TextBuffer, Gtk::Widget, Gtk::Container, Gtk::Setting, Gtk::TreePath,
+       Gtk::TreeIter, Gdk::Display, Gtk::TextAttributes, Gdk::Property,
+       Gdk::Keymap, Gdk::Pixmap, Gdk::Drawable, Gdk::Screen, Gdk::Event,
+       Gdk::EventExpose, Gdk::Selection, Gdk::GC,
+       sample/gtk-demo/main.rb, stock_browser.rb, list_store.rb, tree_store.rb,
+       sample/testgtk/notebook.rb,
+       sample/misc/label.rb, toolbar.rb,
+       extconf.rb
+  * Removed: [Masao Mutoh]
+     * Gtk::Object#activate_binding
+       * Use Gtk::Object#bindings_activate insted.
+     * Gtk::TextAttribute#copy
+       * Use GLib::Boxed#copy instead.
+     * Gdk::EventKey#string, #length.
+     * makedefconst.rb
+  * Deperecated: [Masao Mutoh]
+    * Gtk::TextBuffer#insert_with_tags, #insert_pixbuf, #insert_child_anchor.
+    They will be removed until 1.0.0.
+    Use Gtk::TextBuffer#insert instead.
+
+Ruby/GNOME:
+  * Fixed bugs: [Masao Mutoh]
+    * Gnome::Program
+
+Ruby/GnomeCanvas:
+  * Added: [Masao Mutoh]
+    * Gnome::CanvasShape, Gnome::CanvasRE, Gnome::CanvasClipgroup
+  * Fixed bugs: [Vincent Isambart, Masao Mutoh]
+    * extconf.rb, sample/canvas-curve.rb
+
+Ruby/Libglade:
+  * Added: [Masao Mutoh]
+    * sample/custom.[rb|glade]
+  * Added methods: [Archit Baweja, Masao Mutoh]
+    * GladeXML#widget_names, #filename, #[], #require, #provide
+  * Improved, fixed bugs: [Masao Mutoh]
+    * bin/ruby-glade-create-template
+
+Ruby/Libart:
+  * Improved: [Masao Mutoh]
+    * extconf.rb
+
+Ruby/GConf:
+  * None.
+
+Ruby/GStreamer:
+  * Added some methods, improved, fixed bugs: [Laurent Sansonetti]
+    * Gst, Gst::Bin, Gst::Pad, Gst::PadTemplate, Gst::Type, Gst::Element
+      sample/gst-inspect.rb, media-type2.rb
+
+Ruby/GnomeVFS:
+  * Added some methods, improved, fixed bugs: [Masahiro Sakai, Masao Mutoh]
+    * GnomeVFS::FileInfo, Gnome::VFS::File, GnomeVFS::ProtocolError,
+      GnomeVFS::NoMasterBrowserError
+
+Ruby/GtkHtml2:
+  * Added some methods, fixed bugs: [Vincent Isambart, Masao Mutoh]
+    * Gtk::HtmlView, Gtk::HtmlStream, extconf.rb
+
+Ruby/GtkGLExt:
+  * Added some methods, improved, fixed bugs: [Vincent Isambart, Masao Mutoh]
+    * Gdk::GLDrawable, sample/*.rb
+
+Ruby/Libgda:
+  * Added: [Laurent Sansonetti]
+    GeometricPoint, Gda::Money, Gdak::Time
+  * Added some methods, improved, fixed bugs: [Nikolai Weibull, Laurent Sansonetti]
+    * Gda::Error, Gda::ParameterList, Gda::Provider, Gda::DataSource,
+      Gda::Connection, Gda::Parameter, Gda::Command, Gda::Row, Gda::Value,
+      Gda::DataModel, Gda::ModelList, Gda::FieldAttributes
+      tests/*.rb, src/lib/libgda.rb
+
+== Ruby-GNOME2 0.8.1: 2003-11-23
+
+Ruby/GTK:
+  * Fixed compilation problems for GTK+-2.0.x. [Masao Mutoh]
+  * Fixed some bugs. [Masahiro Sakai, Masao Mutoh]
+  * Added Gtk::Tree* methods for GTK+-2.2.x. [Matthew Berg]
+
+Ruby/GtkHtml2:
+  * Fixed compilation problems for libgtkhtml-2.4.1 [Masahiro Sakai]
+
+Ruby/Libgda:
+  * Fixed a bug [Laurent Sansonetti]
+    *Notice* Ruby/Libgda needs libgda-1.0.2(not released yet) or later.
+
+== Ruby-GNOME2 0.8.0: 2003-11-16
+
+Ruby/GLib:
+  * Provide methods for creating GObject from ruby side. Now you can create
+    your own signals and properties: [Masahiro, Sakai]
+    * GLib::MetaInterface, GLib::Instantiatable, GLib::Signal
+  * Added some methods, improved and Fixed some bugs:
+    [Masahiro Sakai, Masao Mutoh]
+    * GLib::Closure, GLib, GLib::Instantiatable, GLib::Object, mkmf-gnome2.rb
+  * Added new macros: [Masao Mutoh]
+    * G_RENAME_NICK()
+  * Added: [Masahiro, Sakai]
+    * sample/type-register.rb, tests/*.rb
+
+Ruby/GdkPixbuf:
+  * Added some methods, improved and Fixed some bugs:
+    [KATO Kazuyoshi, Masao Mutoh]
+    * Gdk::Pixbuf
+
+Ruby/Pango:
+  * rbpango.h is installed with glib/gtk2 headers.
+  * Added new methods: [Masao Mutoh]
+    * Pango::Layout
+  * Added: [Masao Mutoh]
+    * PangoLogAttr, PangoAnalysis
+
+Ruby/GTK:
+  * Completed: [Masao Mutoh]
+    * Gdk::Geometry, Gdk::Event*, Gdk::Pixbuf, Gdk::Drawable,
+      Gdk::DragContext, Gdk::Selection, Gdk::RGB, Gdk::GC, Gdk::Atom,
+      Gdk::Image, Gdk::Colormap, Gdk::Keyval, Gdk::Screen, Gdk::Visual,
+      Gdk::Window, Gdk::Display, Gdk
+  * Added and completed: [Masao Mutoh]
+    * Gdk::Property, Gdk::Keymap, Gdk::TimeCoord,
+  * Added some methods, improved, fixed bugs: [Matthew Berg,
+    Martin Povolny, KATO Kazuyoshi, Laurent Sansonetti, Masahiro Sakai,
+    Masao Mutoh]
+    * Gtk::AccelGroup, Gtk::Accelmap, Gtk::Clipboard, Gtk::Notebook,
+      Gtk::Drag, Gtk::Menu, Gtk::Stock, Gtk::Style, Gtk::ListStore,
+      Gtk::TreeStore, Gtk::Widget, Gtk::TextBuffer, Gtk::TreePath,
+      Gtk::TreeRowReference
+  * Added: [KATO Kazuyoshi]
+    * sample/gtk-demo/changedisplay.rb, sample/gtk-demo/pixbufs.rb.
+  * Removed: [Masao Mutoh]
+    * Gtk::Clipboard#owner
+    * Gdk::Span
+    * Gdk::Region#eql?, #&, #-, #|
+
+Ruby/GNOME:
+  * Added some methods, improved, fixed bugs: [Masao Mutoh]
+    * Gnome::AppHelper, Gnome::DruidPageStandard
+  * Apply Enum/Flags. [Masao Mutoh]
+
+Ruby/GnomeCanvas:
+  * None.
+
+Ruby/Libglade:
+  * None.
+
+Ruby/Libart:
+  * None.
+
+Ruby/GConf:
+  * None.
+
+Ruby/GStreamer:
+  * Update maintainer's e-mail address [Laurent Sansonetti]
+
+Ruby/GnomeVFS:
+  * None.
+
+Ruby/GtkHtml2:
+  * Added and completed: [Masao Mutoh]
+    * Gtk::HtmlContext, Gtk::HtmlBoxTable,
+      Gtk::HtmlBoxTableRowGroup,
+  * Completed: [Masao Mutoh]
+    * Gtk::HtmlView
+  * Added: [Masao Mutoh]
+    * Gtk::HtmlBox, Gtk::HtmlBoxBlock, Gtk::HtmlBoxTableCaption,
+      Gtk::HtmlBoxText, Gtk::BoxRoot, Gtk::BoxForm,
+      Gtk::HtmlParser, Gtk::HtmlEmbedded, Gtk::HtmlBoxEmbedded
+
+Ruby/GtkGLExt:
+  * None.
+
+Ruby/Libgda [NEW]:
+  * Added and compeleted: [Laurent Sansonetti]
+    * Gda, Gda::Client, Gda::Command, Gda::Provider,
+      Gda::DataSource, Gda::Connection, Gda::DataModelArray,
+      Gda::DataModelHash, Gda::DataModelList, Gda::Error,
+      Gda::Export, Gda::FieldAttributes, Gda::Parameter,
+      Gda::ParameterList, Gda::QuarkList, Gda::Row,
+      Gda::Select, Gda::Table, Gda::Transaction
+  * Added
+    * Gda::DataModel
+      sample/*.rb, tests/*.rb
+
+== Ruby-GNOME2 0.7.0: 2003-09-07
+
+The whole Ruby-GNOME2:
+  * Enum/Flags support. Enum/Flags constants are defined as classes.
+    [Masahiro Sakai, Vincent Isambart, Masao Mutoh]
+  * Improve extconf.rb. [Masao Mutoh]
+    If the libraries are not found, they're ignored.
+    And you can specify to target libraries.
+
+Ruby/GLib:
+  * Improved and Fixed some bugs. [Masahiro Sakai, Masao Mutoh]
+    * GLib::Type, GLib::Boxed, mkmf_gnome2.rb
+  * Added lib/glib2.rb and improve to support Win32 platform.
+    [TAMURA.KENICHI, Masahiro Sakai]
+  * Added new class: [Masahiro Sakai]
+    * GLib::Enum, GLib::Flags
+  * Added new macros: [Masahiro Sakai]
+    * RVAL2GENUM(), RVAL2GFLAGS(), GENUM2RVAL(), GFLAGS2RVAL().
+  * Removed some methods. [Masahiro Sakai]
+    * GLib::Param#value_defaults?
+  * Define GLib::BINDING_VERSION
+  * Apply Enum/Flags. [Masahiro Sakai]
+  * Follow extconf.rb changes. [Masao Mutoh]
+
+Ruby/GdkPixbuf:
+  * Apply Enum/Flags. [Masahiro Sakai, Masao Mutoh]
+  * Follow extconf.rb changes. [Masao Mutoh]
+
+Ruby/Pango:
+  * Improved and Fixed some bugs:
+    [Vincent Isambart, Masahiro Sakai, Masao Mutoh]
+    * Pango::Font, sample/*.rb, extconf.rb
+  * Added new methods: [Masahiro Sakai]
+    * Pango::Language, Pango::FontMap, Pango::FontFamily, Pango::Context,
+      Pango::FontDescription,
+  * Apply Enum/Flags. [Masahiro Sakai, Masao Mutoh]
+  * Follow extconf.rb changes. [Masao Mutoh]
+
+Ruby/GTK:
+  * Follow Ruby/GLib changes. [Masahiro Sakai, Masao Mutoh]
+  * Added some methods, improved, fixed bugs: [Martin Povoln,
+    KATO Kazuyoshi, Masahiro Sakai, Masao Mutoh]
+    * Gdk::Atom, Gdk::Input, Gdk::DragContext, Gdk::Event, Gdk::GC, Gdk,
+      Gtk::Label, Gtk::TreeIter, Gtk::TreeView, Gtk::IconSize,
+      gdk-demo/*.rb, extconf.rb
+  * Added: [KATO Kazuyoshi]
+    * Gdk::DisplayManager, gtk-demo.rb
+  * Apply Enum/Flags. [Masahiro Sakai, Masao Mutoh]
+  * Follow extconf.rb changes. [Masao Mutoh]
+
+Ruby/GNOME:
+  * Follow extconf.rb changes. [Masao Mutoh]
+  * Fix bugs. [Masahiro Sakai]
+
+Ruby/GnomeCanvas:
+  * Follow extconf.rb changes. [Masao Mutoh]
+  * Improve extconf.rb. [Masahiro Sakai]
+  * Fix a sample. [Vincent Isambart]
+
+Ruby/Libglade:
+  * Add a 'after' parameter to GladeXML.connect.
+    It allows to connect signal_connect_after(). [Soila Jani]
+  * Fix bugs: [Masao Mutoh]
+
+Ruby/Libart:
+  * Follow extconf.rb changes. [Masao Mutoh]
+
+Ruby/GConf:
+  * Apply Enum/Flags. [Masao Mutoh]
+  * Follow extconf.rb changes. [Masao Mutoh]
+
+Ruby/GStreamer:
+  * Improved and Fixed some bugs. [Laurent Sansonetti]
+    * Gst, Gst::MediaInfo, Gst::Second, Gst::MediaType, sample/media-type.rb
+  * Added some methods: [Laurent Sansonetti]
+    * Gst::Bin, Gst::Registry, Gst::MediaInfoTrack
+  * Added: [Laurent Sansonetti]
+    * Gst::XML, Gst::ClockEntry, sample/xml-ogg-player.rb
+  * Win32 support. [Masahiro Sakai]
+  * Follow extconf.rb changes. [Masao Mutoh]
+
+Ruby/GnomeVFS:
+  * Follow extconf.rb changes. [Masao Mutoh]
+
+Ruby/GtkHtml2:
+  * Added: [Martin Povoln, Masao Mutoh]
+    * Gtk::HtmlStream, lib/gtkhtml2.rb
+  * Removed methods: [Martin Povoln]
+    * Gtk::HtmlView#set_html
+  * Follow extconf.rb changes. [Masao Mutoh]
+
+Ruby/GtkGLExt [NEW]:
+  * Added and completed. [Vincent Isambart]
+    * Gdk::GLConfig, Gdk::GLContext, Gdk::GLDrawable, Gdk::GLPixmap,
+     Gdk::GLWindow, Gdk::Window, Gdk::Pixmap, Gtk::GL, Gtk::Widget
+  * Added. [Vincent Isambart]
+    * Gdk::GL, sample/*.rb
+  * Follow extconf.rb changes. [Masao Mutoh]
+  * Win32 support. [Masahiro Sakai]
+
+== Ruby-GNOME2 0.6.0: 2003-08-09
+
+Ruby/GLib:
+  * mkmf-gnome2.rb,rbglib.h, rbgobject.h, rbgutil.h are installed
+    to site-ruby directories.
+    The other libraries which depends on Ruby/GLib can compile
+    in any directotires. [Masahiro Sakai, Masao Mutoh]
+  * Support ruby-1.8.0 [Masao Mutoh]
+  * Added new macros: [Geoff Youngs, Masao Mutoh]
+    * CBOOL2RVAL/RVAL2CBOOL, G_DEF_CONSTANTS, G_RENAME_CONSTANT
+  * Improved and Fixed some bugs. [Masahiro Sakai]
+    * GLib::Object, GLib::Type, GLib::Closure, GLib::Signal,
+  * Added some methods: [Masahiro Sakai]
+    * GLib::Param, GLib::Param::*, GLib::Boxed, GLib::Signal, GLib::Pointer
+  * Removed some methods. [Masahiro Sakai]
+    * GLib::Param::*#default, #default_value
+
+Ruby/GdkPixbuf:
+  * Follow Ruby/GLib changes. [Masao Mutoh]
+  * Separate Gdk::Pixbuf#scale to #scale and #scale!,
+    #composite to #composite and #composite!. [Masao Mutoh]
+
+Ruby/Pango:
+  * Follow Ruby/GLib changes. [Masao Mutoh]
+
+Ruby/GTK:
+  * Follow Ruby/GLib changes. [Sakai, Masahiro, Masao Mutoh]
+  * rbgtk.h are installed to site-ruby directories.
+    The other libraries which depends on Ruby/GTK can compile
+    in any directotires. [Masao Mutoh]
+  * Completed: [Geoff Youngs, Masao Mutoh]
+    * Gtk::Clipboard, Gtk::Menu, Gtk::Notebook, Gtk::Socket, Gtk::Plug,
+      Gtk::FileSelection, Gtk::ListStore, Gtk::TreeStore, Gtk::TreeModel,
+      Gtk::TextView, Gtk::Notebook, Gtk::ColorSelection, Gtk::Style,
+      Gtk::ItemFactory, Gtk::Invisible, Gtk::TreeSortable, Gtk::TreeView,
+      Gtk::TreeSelection, Gtk::TreePath, Gtk::TreeViewColumn, Gtk::Drag,
+      Gtk::TextTag, Gtk module
+  * Added and completed.
+    * Gtk::TreeDragSource, Gtk::TreeDragDest,
+  * Added some methods, improved, fixed bugs: [Geoff Youngs,
+    Masahiro Sakai, Masao Mutoh]
+    * Gdk::Window, Gdk::Drawable, Gdk::EventProperty, Gdk module,
+      Gtk::Object, Gtk::Editable, Gtk::TreeModel,
+      Gtk module, Gtk::TextBuffer, Gtk::IMContext, Gtk::Menu
+  * Added: [Geoff Youngs, Masao Mutoh]
+    * Gtk::BingindSet, Gdk::Display, Gdk::Screen
+  * Removed: [Masao Mutoh]
+    * Gtk::Socket#xwindow, Gtk::Menu#set_path,
+      Gtk::Notebook#popup_disable/enable, Gtk::ItemFactory.add_foreign
+      Gtk::TreeSortable#sort_func=, Gtk::TreePath#to_s
+
+Ruby/GNOME:
+  * Follow Ruby/GLib changes. [Masao Mutoh]
+  * Add Gnome::PixmapEntry#set_preview. [Masao Mutoh]
+
+Ruby/GnomeCanvas:
+  * Follow Ruby/GLib changes. [Masao Mutoh]
+
+Ruby/Libglade:
+  * Follow Ruby/GLib changes. [Masao Mutoh]
+
+Ruby/Libart:
+  * Follow Ruby/GLib changes. [Masao Mutoh]
+
+Ruby/GConf:
+  * Fix a bug [744158] [Masao Mutoh]
+
+Ruby/GStreamer [NEW]:
+  * Merged with Ruby-GStreamer project. [Laurent Sansonetti]
+  * Version informations are also merged.
+  * Completed: [Laurent Sansonetti]
+    * Gst, Gst::Autoplug, Gst::Cpu,  Gst::Format,
+      Gst::Object, Gst::PadTemplate, Gst::Pipeline,
+      Gst::PluginFeature, Gst::QueryType,
+      Gst::Type
+  * Added and completed. [Laurent Sansonetti]
+    * Gst::AutoplugFactory, Gst::EventMask, Gsk::EventSeek,
+      Gst::EventSegmentSeek, Gst::EventSize, Gst::Parse,
+      Gst::SystemClock, Gst::Thread,Gst::MediaInfo,
+      Gst::MediaInfoStream, Gst::MediaInfoTrack
+  * Added some methods, improved, fixed bugs: [Laurent Sansonetti]
+    * Gst::Caps, Gst::Clock, Gst::Plugin, Gst::Pad, Gst::Element,
+  * Added: [Nikolai :: lone-star :: Weibull, Laurent Sansonetti]
+    * sample/media-type.rb, gst-inspect.rb, mediap-type2.rb
+
+Ruby/GnomeVFS [NEW]:
+  * Initial release. [Nikolai :: lone-star :: Weibull]
+  * Completed: [Nikolai :: lone-star :: Weibull]
+    * GnomeVFS module, GnomeVFS::Directory, GnomeVFS::Monitor,
+      GnomeVFS::FileInfo, GnomeVFS::Error
+  * Added: [Nikolai :: lone-star :: Weibull]
+    * GnomeVFS::File, GnomeVFS::URI
+
+Ruby/GtkHtml2 [NEW]:
+  * Initial release. [Martin Povoln]
+  * Added: [Martin Povoln]
+    * Gtk::HtmlDocument, Gtk::HtmlView
+
+== Ruby-GNOME2 0.5.0: 2003-05-24
+
+Ruby/GLib:
+  * Fixed warning for ruby-1.8.1. [Masao Mutoh]
+  * Fixed some bugs, Added methods and improved: [Masahiro Sakai]
+    * GLib::Object, GLib::ParamSpec, GLib::Signal, GLib::Type,
+      GLib::Instantiatable, GLib::MetaInterface, GLib::Param::String
+  * Added: [Geoff Youngs, Masao Mutoh]
+
+Ruby/GdkPixbuf:
+  * Fixed a bug. [Geoff Youngs]
+
+Ruby/Pango:
+  * Some constants were moved. [Masao Mutoh]
+    * Moved Pango::Attribute::UNDERLINE_* to Pango::AttrUnderline::*.
+    * Moved Pango::Attribute::SCALE_* to Pango::AttrScale::*.
+
+Ruby/GTK:
+  * Completed: [Masao Mutoh]
+    Gtk::AccelGroup, Gtk::Style, Gtk::Selection
+  * Added some methods, improved: [Stephen Lewis, Masahiro Sakai, Masao Mutoh]
+    * Gtk::TextBuffer, Gtk::TextIter, Gtk::TreeIter, Gtk::ListStore,
+      Gtk::TreeStore, Gtk, Gtk::HandleBox, Gtk::Frame, Gtk::Container,
+      Gtk::Table, Gdk::Input, Gtk::Widget, Gtk::Allocation, Gtk::RC,
+      Gtk::ItemFactory, Gtk::Toolbar, Gtk::Window, Gtk::CellEditable,
+      Gtk::Accessible, sample/misc/*.rb
+  * Added and completed. [Nikolai :: lone-star :: Weibull, Masao Mutoh]
+    * Gtk::RcStyle, Gtk::TargetList, Gtk::TreeSortable, Gtk::TreeModelSort,
+      Gtk::IMContext, Gtk::IMContextSimple, Gtk::IMMulticontext
+  * Added: [Masao Mutoh]
+    * Gtk::Settings
+  * Renamed some methods. [Masao Mutoh]
+    * Gtk::Table, Gtk::Widget
+  * Removed: [Masao Mutoh]
+    * Gtk::Object#user_data, #user_data=, #set_user_data.
+      Deprecated properties of Gtk::ProgressBar.
+      Gtk::Requisition. Use [width, height] instead.
+      Gtk::Widget#set_requisition, *_event, Gtk::Widget::NO_PARENT.
+      Gtk::SelectionData.remove_all. Use Gtk::Selection.remove_all instead.
+
+Ruby/GNOME:
+  * Cygwin support [Masahiro Sakai]
+  * sample/test-gnome/color-picker.rb: Follow Ruby/GTK changes.[Masao Mutoh]
+
+Ruby/GnomeCanvas:
+  * sample/canvas-primitives.rb: Follow Ruby/GTK changes.[Masao Mutoh]
+
+Ruby/Libglade:
+  * Fix a bug of bin/ruby-glade-create-template. [Masao Mutoh]
+
+Ruby/Libart:
+  * None
+
+Ruby/GConf:
+   - Added GConf::MetaInfo. [Nikolai :: lone-star :: Weibull]
+   - Fixed a bug [Masao Mutoh]
+
+== Ruby-GNOME2 0.4.0: 2003-03-23
+
+The whole Ruby-GNOME2:
+  * Add mkmf-gnome2.rb for sub/optional libraries. [Masahiro Sakai]
+
+Ruby/GLib:
+  * Win32 platform support(Cygwin, Mingw32) [Masahiro Sakai]
+  * Support mkmf-gnome2.rb [Masahiro Sakai]
+  * Added some methods. [KUBO Takehiro, Masahiro Sakai]
+  * Fix some bugs and improvement. [Masahiro Sakai, Masao Mutoh]
+
+Ruby/GdkPixbuf:
+  * Win32 platform support(Cygwin, Mingw32) [Masahiro Sakai]
+  * Support mkmf-gnome2.rb [Masahiro Sakai]
+  * Fix some bugs and improvement. [Masahiro Sakai]
+
+Ruby/Pango:
+  * Win32 platform support(Cygwin, Mingw32) [Masahiro Sakai]
+  * Support mkmf-gnome2.rb [Masahiro Sakai]
+  * Added a method(Pango.pixels) [Masao Mutoh]
+  * Fix some bugs and improvement. [Masahiro Sakai]
+
+Ruby/GTK:
+  * Win32 platform support(Cygwin, Mingw32) [Masahiro Sakai]
+  * Support mkmf-gnome2.rb [Masahiro Sakai]
+  * Multi-threading support. [Masao Mutoh]
+  * Added some methods, improved: [Kazuo Saito, Geoff Youngs,
+    KATO Kazuyoshi, Masahiro Sakai, Masao Mutoh]
+    * Gtk::Toolbar, Gtk::ItemFactory, Gdk::Region, Gtk::AccelGroup,
+      Gtk::AccelMap, Gtk::TextIter, Gtk::TextTagTable, Gtk::TreeModel,
+      Gtk::TreeSelection, Gtk::Clipboard, Gtk::Box, Gdk::RGB,
+      Gtk::AccelGroupEntry, Gdk::Window, Gtk::SeparatorMenuItem,
+      Gtk::TreePath, Gtk::TreeView, Gtk::Combo, Gdk::Threads,
+      Gtk::TreeIter, Gdk::Event, Gtk::Drag,
+  * Added: [Kazuo Saito, KATO Kazuyoshi, Masao Mutoh]
+    * sample/gtk-demo/*.rb, sample/misc/threads.rb
+  * Removed: [Masao Mutoh]
+    * Gtk::Toolbar#insert_item/widget/element,
+      Gtk::Toolbar#prepend_item/widget/element,
+      Gtk::Toolbar#append_item/widget/element.
+  * Use Gtk::Toolbar#insert, prepend, append instead.
+    Gtk::Combo#list, button, popup, popwin, set_item_string,
+
+Ruby/GNOME:
+  * Support mkmf-gnome2.rb [Masahiro Sakai]
+
+Ruby/GnomeCanvas:
+  * Support mkmf-gnome2.rb [Masahiro Sakai]
+
+Ruby/Libglade:
+  * Support mkmf-gnome2.rb [Masahiro Sakai]
+  * Improved: [Masao Mutoh]
+    * bin/ruby-glade-create-template
+
+Ruby/Libart:
+  * Support mkmf-gnome2.rb [Masahiro Sakai]
+  * Fix some bugs and improvement. [Masahiro Sakai]
+
+Ruby/GConf:
+  * Support mkmf-gnome2.rb [Masahiro Sakai]
+
+Misc:
+  * Project website is moving from http://ruby-gnome2.sourceforge.net/
+    to http://ruby-gnome2.sourceforge.jp/.
+
+== Ruby-GNOME2 0.3.0: 2003-02-09
+
+Ruby/GLib:
+  * Miscellaneous bugfixes and some improvement internal.
+    [Masahiro Sakai, Masao Mutoh]
+
+Ruby/GTK:
+  * Miscellaneous bugfixes and some improvement internal.
+    [Masao Mutoh]
+  * Support GTK+-2.2.x. [KUBO Takehiro]
+  * DnD enhancement. [Geoff Youngs, Masao Mutoh]
+  * Require Ruby/Pango. [Masao Mutoh]
+
+  * Completed:
+    * Gdk::Drawable, Gdk::Rectangle, Gdk::Region, Gtk::AccelGroup,
+      Gtk::Accelerator, Gtk::AccelGroupEntry, Gtk::AccelKey
+  * Added and completed:
+    * Gdk::Pango::Embossed, Gdk::Pango::Stipple, Gdk::Span
+  * Added some methods, improved:
+    * Gtk::Widget, Gtk::Calender, Gdk::GC, Gtk::Drag, Gtk::SelectionData,
+      Gtk::RadioMenuItem,Gdk::Pixmap
+  * Added:
+    * sample/misc/dnd.rb, dndtreeview.rb, dnd.rb
+  * Removed:
+    * Gtk::AccelGroup#connect_by_path(use Gtk::AccelGroup#connect instead).
+
+Ruby/GdkPixbuf:
+  * Added GdkPixbufLoader. [Geoff Youngs]
+
+Ruby/GNOME:
+  * None.
+
+Ruby/GnomeCanvas:
+  * Warning fixes for samples. [Masao Mutoh]
+
+Ruby/Libglade:
+  * Added a sample(sample/treview.[glade|rb]). [Masao Mutoh]
+
+Ruby/Libart:
+  * Added Art::Affine, Art::Bpath, Art::Canvas, Art::SVP, Art::Vpath [Tom Payne]
+  * Added samples(sample/rose.rb, testlibart2.rb). [Tom Payne]
+
+Ruby/GConf:
+  * None.
+
+Ruby/Pango(NEW):
+  * Initial release. [Geoff Youngs, Masao Mutoh]
+
+  * Added and completed:
+    * Pango::Rectangle, Pango::FontDescription, Pango::FontMetrics,
+      Pango::FontFace, Pango::Fontset, Pango::FontsetSimple,
+      Pango::Attribute, Pango::AttrString, Pango::AttrLanguage,
+      Pango::AttrColor, Pango::AttrInt, Pango::AttrFloat, Pango::AttrBool
+      Pango::AttrFontDesc, Pango::AttrShape, Pango::AttrFamily,
+      Pango::AttrStyle, Pango::AttrVariant, Pango::AttrStretch,
+      Pango::AttrWeight, Pango::AttrSize, Pango::AttrForeground,
+      Pango::AttrBackground, Pango::AttrStrikethrough, Pango::AttrUnderline,
+      Pango::AttrScale, Pango::AttrRise, Pango::Color, Pango::Language,
+      Pango::AttrList, Pango::AttrIterator, Pango::TabArray
+  * Added:
+    * Pango::Context, Pango::Item, Pango::ClyphString, Pango::Font,
+      Pango::FontFamily, Pango::FontMap, Pango::Layout, Pango::LayoutIter,
+      Pango::LayoutLine,
+      sample/attribute.rb, gdk_layout.rb, label.rb, parse.rb.
+
+Misc
+  * Project website
+    http://ruby-gnome2.sourceforge.net/
+  * Ruby/GTK Tutorial
+    http://ruby-gnome2.sourceforge.net/tut/toc.htm
+  * Ruby-GNOME2 reference manual(This project has just started).
+    http://rwiki.jin.gr.jp/cgi-bin/rw-cgi.rb?cmd=view;name=Ruby-GNOME2
+
+
+== Ruby-GNOME2 0.2: 2002-12-28
+
+Ruby/GLib:
+  * Some bugfixes and some improvement internal.
+
+Ruby/GTK:
+  * Some bugfixes and some improvement internal.
+  * Require Ruby/GdkPixbuf.
+  * Completed:
+    * Gtk::TextIter, Gtk::Label, Gtk::Tooltips, Gtk::Viewport.
+  * Added and completed:
+    * Gtk::TextAttributes, Gtk::IconFactroy, Gtk::IconSet,
+      Gtk::IconSource, Gtk::IconSize, Gtk::Accelerator,
+      Gtk::AccelKey, Gtk::AccelGroupEntry, Gtk::SizeGroup,
+  * Added some methods, improved:
+    * Gtk module, Gtk::TextBuffer, Gtk::*MenuItem, Gtk::*Button,
+      Gtk::ItemFactory, Gtk::Widget, Gtk::TreeViewColumn,
+      Gtk::Notebook, Gtk::Image, Gtk::AccelLabel, Gtk::Invisible,
+      Gtk::Dialog, Gtk::TreePath, Gdk::Keyval
+      sample/misc/*button.rb, stock.rb
+      sample/testgtk/savedposition.rb
+  * Added:
+    * Gtk::Clipboard, Gtk::AccelGroup, Gtk::AccelMap
+      sample/misc/button2.rb, label.rb, dialog.rb, dialog2.rb,
+      treeview.rb
+  * Removed:
+    * Gdk::Bitmap(use Gdk::Pixmap(depth = 1) instead)
+
+Ruby/GdkPixbuf:
+  * Follow Ruby/GLib changes.
+  * Add Gdk::Pixdata.
+
+Ruby/GNOME:
+  * Follow Ruby/GLib changes.
+  * Fix problems which Ruby/GNOME can't work with Ruby/GdkPixbuf.
+  * Code cleanup.
+  * Remove Bonobo codes(Move to Ruby/Bonobo).
+
+Ruby/GnomeCanvas:
+  * Follow Ruby/GLib changes.
+  * Follow Ruby 1.8.0pre1, 1.6.8.
+
+Ruby/Libglade:
+  * Follow Ruby/GLib changes.
+  * Add bin/ruby-glade-create-template(Create .rb from .glade)
+  * Add sample/treeview*
+  * Improve the behavior to work when handlers aren't undefined not
+    to occur signal_proc.arity error.
+
+Ruby/Libart:
+  * Follow Ruby/GLib changes.
+
+Ruby/GConf:
+  * Follow Ruby/GLib changes.
+
+Misc:
+  * Project website:
+    http://ruby-gnome2.sourceforge.net/
+  * Ruby/GTK Tutorial:
+    http://ruby-gnome2.sourceforge.net/tut/toc.htm
+  * Ruby-GNOME2 reference manual(This project has just started).
+    http://rwiki.jin.gr.jp/cgi-bin/rw-cgi.rb?cmd=view;name=Ruby-GNOME2
+
+== Ruby-GNOME2 0.1: 2002-11-23
+
+Initial release.
+
+  * Ruby/GLib
+  * Ruby/GTK
+  * Ruby/GdkPixbuf
+  * Ruby/GNOME
+  * Ruby/GnomeCanvas
+  * Ruby/Libglade
+  * Ruby/Libart
+  * Ruby/GConf

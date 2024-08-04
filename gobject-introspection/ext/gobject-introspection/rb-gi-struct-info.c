@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2012-2019  Ruby-GNOME Project Team
+ *  Copyright (C) 2012-2022  Ruby-GNOME Project Team
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -84,7 +84,7 @@ rb_gi_struct_get_raw(VALUE rb_struct, GType gtype)
         if (rb_respond_to(rb_struct_class, rb_intern("gtype"))) {
             VALUE rb_gtype;
             rb_gtype = rb_funcall(rb_struct_class, rb_intern("gtype"), 0);
-            gtype = NUM2ULONG(rb_funcall(rb_gtype, rb_intern("to_i"), 0));
+            gtype = rbgobj_gtype_from_ruby(rb_gtype);
         }
     }
     if (gtype == G_TYPE_NONE) {
@@ -94,6 +94,8 @@ rb_gi_struct_get_raw(VALUE rb_struct, GType gtype)
                              &rb_gi_struct_type,
                              data);
         raw_struct = data->instance;
+    } else if (gtype == G_TYPE_VARIANT) {
+        raw_struct = rbg_variant_from_ruby(rb_struct);
     } else {
         raw_struct = RVAL2BOXED(rb_struct, gtype);
     }
@@ -144,7 +146,7 @@ rb_gi_struct_info_to_ruby(GIStructInfo *info,
         GType gtype;
 
         rb_gtype = rb_funcall(rb_class, rb_intern("gtype"), 0);
-        gtype = NUM2ULONG(rb_funcall(rb_gtype, rb_intern("to_i"), 0));
+        gtype = rbgobj_gtype_from_ruby(rb_gtype);
         return BOXED2RVAL(object, gtype);
     }
 
@@ -165,10 +167,10 @@ rb_gi_struct_info_to_ruby(GIStructInfo *info,
 gpointer
 rb_gi_struct_info_from_ruby(GIStructInfo *info, VALUE rb_object)
 {
-    GIRegisteredTypeInfo *registerd_type_info = (GIRegisteredTypeInfo *)info;
+    GIRegisteredTypeInfo *registered_type_info = (GIRegisteredTypeInfo *)info;
     GType gtype;
 
-    gtype = g_registered_type_info_get_g_type(registerd_type_info);
+    gtype = g_registered_type_info_get_g_type(registered_type_info);
     return rb_gi_struct_get_raw(rb_object, gtype);
 }
 
@@ -193,6 +195,17 @@ rg_get_field(VALUE self, VALUE rb_n)
 }
 
 static VALUE
+rg_find_field(VALUE self, VALUE rb_name)
+{
+    GIStructInfo *info;
+    const gchar *name;
+
+    info = SELF(self);
+    name = RVAL2CSTR(rb_name);
+    return GI_BASE_INFO2RVAL_WITH_UNREF(g_struct_info_find_field(info, name));
+}
+
+static VALUE
 rg_get_field_value(VALUE self, VALUE rb_struct, VALUE rb_n)
 {
     GIStructInfo *info;
@@ -205,7 +218,7 @@ rg_get_field_value(VALUE self, VALUE rb_struct, VALUE rb_n)
     raw_struct = rb_gi_struct_info_from_ruby(info, rb_struct);
     n = NUM2INT(rb_n);
     field_info = g_struct_info_get_field(info, n);
-    rb_value = rb_gi_field_info_get_field_raw(field_info, raw_struct);
+    rb_value = rb_gi_field_info_get_field_raw(field_info, info, raw_struct);
     g_base_info_unref(field_info);
 
     return rb_value;
@@ -223,7 +236,7 @@ rg_set_field_value(VALUE self, VALUE rb_struct, VALUE rb_n, VALUE rb_value)
     raw_struct = rb_gi_struct_info_from_ruby(info, rb_struct);
     n = NUM2INT(rb_n);
     field_info = g_struct_info_get_field(info, n);
-    rb_gi_field_info_set_field_raw(field_info, raw_struct, rb_value);
+    rb_gi_field_info_set_field_raw(field_info, info, raw_struct, rb_value);
     /* TODO: use rb_ensure() to unref field_info. */
     g_base_info_unref(field_info);
 
@@ -306,6 +319,7 @@ rb_gi_struct_info_init(VALUE rb_mGI, VALUE rb_cGIRegisteredTypeInfo)
 
     RG_DEF_METHOD(n_fields, 0);
     RG_DEF_METHOD(get_field, 1);
+    RG_DEF_METHOD(find_field, 1);
     RG_DEF_METHOD(get_field_value, 2);
     RG_DEF_METHOD(set_field_value, 3);
     RG_DEF_METHOD(n_methods, 0);

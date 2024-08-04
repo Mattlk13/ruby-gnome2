@@ -1,0 +1,76 @@
+name: Linux
+on:
+  - push
+  - pull_request
+jobs:
+  test:
+    name: Test
+    strategy:
+      fail-fast: false
+      matrix:
+        service:
+          - almalinux-8
+          - almalinux-9
+          - apache-arrow
+          - arch-linux
+          - centos-7
+          - conda
+          # - fedora-arm32v7-rawhide
+          - fedora-rawhide
+          - ruby-3.0
+          - ruby-3.1
+          - ruby-3.2
+          - ruby-3.3
+          - ubuntu-20.04
+          - ubuntu-22.04
+        include:
+          - service: apache-arrow
+            timeout-minutes: 60
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.timeout-minutes || 15 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        if: |
+          github.event_name == 'push'
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Workaround for Docker
+        # https://github.com/actions/virtual-environments/issues/5490#issuecomment-1118328567
+        run: |
+          sudo rm /etc/docker/daemon.json
+          sudo systemctl restart docker
+      - name: Pull Docker images
+        run: |
+          docker-compose pull --ignore-pull-failures ${{ matrix.service }}-base || :
+          docker-compose pull --ignore-pull-failures ${{ matrix.service }} || :
+      - name: Build Docker image
+        run: |
+          docker-compose build ${{ matrix.service }}
+      - name: Push Docker images
+        if: |
+          github.event_name == 'push'
+        run: |
+          docker-compose push --ignore-push-failures ${{ matrix.service }} || :
+      - name: Cache ccache
+        if: |
+          matrix.service == 'apache-arrow'
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: arrow-ccache-docker-${{ matrix.service }}-${{ github.sha }}
+          restore-keys: arrow-ccache-docker-${{ matrix.service }}-
+      - name: Adjust permission for cache
+        if: |
+          matrix.service == 'apache-arrow'
+        run: |
+          mkdir -p .ccache
+          chmod -R a+rwx .ccache
+      - name: Register problem matchers
+        run: |
+          echo ::add-matcher::dockerfiles/problem-matchers.json
+      - name: Run
+        run: |
+          docker-compose run --rm ${{ matrix.service }}

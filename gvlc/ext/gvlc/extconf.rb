@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (C) 2012-2019  Ruby-GNOME2 Project Team
+# Copyright (C) 2012-2023  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -23,37 +23,25 @@ top_dir = base_dir.parent
 top_build_dir = Pathname(".").parent.parent.parent.expand_path
 
 mkmf_gnome2_dir = top_dir + "glib2" + 'lib'
-version_suffix = ""
-unless mkmf_gnome2_dir.exist?
-  if /(-\d+\.\d+\.\d+)(?:\.\d+)?\z/ =~ base_dir.basename.to_s
-    version_suffix = $1
-    mkmf_gnome2_dir = top_dir + "glib2#{version_suffix}" + "lib"
-  end
-end
+$LOAD_PATH.unshift(mkmf_gnome2_dir.to_s) if mkmf_gnome2_dir.exist?
 
-$LOAD_PATH.unshift(mkmf_gnome2_dir.to_s)
 
 module_name = "gvlc"
 package_id = "libvlc"
 
-require "mkmf-gnome2"
+require "mkmf-gnome"
 
 ["glib2"].each do |package|
-  directory = "#{package}#{version_suffix}"
-  build_base_path = "#{directory}/tmp/#{RUBY_PLATFORM}"
-  package_library_name = package.gsub(/-/, "_")
-  build_dir = "#{build_base_path}/#{package_library_name}/#{RUBY_VERSION}"
-  add_depend_package(package, "#{directory}/ext/#{package}",
+  add_depend_package(package,
+                     "#{package}/ext/#{package}",
                      top_dir.to_s,
-                     :top_build_dir => top_build_dir.to_s,
-                     :target_build_dir => build_dir)
+                     top_build_dir: top_build_dir.to_s)
 end
 
 unless required_pkg_config_package([package_id, 2, 0, 0],
                                    :alt_linux => "libvlc-devel",
                                    :debian => "libvlc-dev",
-                                   :msys2 => "vlc",
-                                   :homebrew => "vlc")
+                                   :msys2 => "vlc")
   exit(false)
 end
 

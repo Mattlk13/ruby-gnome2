@@ -6,7 +6,7 @@ Ruby/GTK4 is a Ruby binding of GTK+ 4.
 
 * Ruby/GLib2, Ruby/ATK, Ruby/Pango, Ruby/GdkPixbuf2, Ruby/GIO2,
   Ruby/GDK4, Ruby/GObjectIntrospection and Ruby/GTK4 in
-  [Ruby-GNOME2](https://ruby-gnome2.osdn.jp/)
+  [Ruby-GNOME2](https://ruby-gnome.github.io/)
 * [rcairo](https://github.com/rcairo/rcairo)
 * [GTK+](http://www.gtk.org/)
 
@@ -16,8 +16,7 @@ Ruby/GTK4 is a Ruby binding of GTK+ 4.
 
 ## Tutorials, examples:
 
-* gtk4/sample/misc: a lot of simple examples.
-* gtk4/sample/gtk-demo: the ruby version of `gtk-demo`.
+* [sample](/gtk4/sample): a lot of simple examples.
 
 ## License
 
@@ -29,4 +28,4 @@ under the terms of the GNU LESSER GENERAL PUBLIC LICENSE Version 2.1.
 ## Project Websites
 
 * https://github.com/ruby-gnome/ruby-gnome
-* https://ruby-gnome2.osdn.jp/
+* https://ruby-gnome.github.io/

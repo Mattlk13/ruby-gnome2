@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2016  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2016-2022  Ruby-GNOME Project Team
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -53,7 +53,7 @@ is_timezone(VALUE rb_timezone)
 {
     VALUE rb_cTimeZone;
 
-    rb_cTimeZone = rb_const_get(mGLib, rb_intern("TimeZone"));
+    rb_cTimeZone = rb_const_get(rbg_mGLib(), rb_intern("TimeZone"));
     return RVAL2CBOOL(rb_obj_is_kind_of(rb_timezone, rb_cTimeZone));
 }
 
@@ -69,10 +69,8 @@ rg_s_now(int argc, VALUE *argv, G_GNUC_UNUSED VALUE self)
         date = g_date_time_new_now_local();
     } else if (is_utc_timezone(rb_timezone)) {
         date = g_date_time_new_now_utc();
-#if GLIB_CHECK_VERSION(2, 34, 0)
     } else if (is_timezone(rb_timezone)) {
         date = g_date_time_new_now(RVAL2GTIMEZONE(rb_timezone));
-#endif
     } else {
         rb_raise(rb_eArgError,
                  "timezone must be nil, :local, :utc or GLib::TimeZone: "
@@ -160,7 +158,6 @@ rg_initialize(int argc, VALUE *argv, VALUE self)
                                            hour,
                                            minute,
                                            second);
-#if GLIB_CHECK_VERSION(2, 34, 0)
         } else if (is_timezone(rb_timezone)) {
             GTimeZone *timezone = NULL;
 
@@ -172,7 +169,6 @@ rg_initialize(int argc, VALUE *argv, VALUE self)
                                        hour,
                                        minute,
                                        second);
-#endif
         } else {
             rb_raise(rb_eArgError,
                      ":timezone must be nil, :local, :utc or GLib::TimeZone: "
@@ -234,12 +230,20 @@ rg_format(VALUE self, VALUE rb_format)
     return CSTR2RVAL(g_date_time_format(_SELF(self), format));
 }
 
+#if GLIB_CHECK_VERSION(2, 62, 0)
+static VALUE
+rg_format_iso8601(VALUE self)
+{
+    return CSTR2RVAL(g_date_time_format_iso8601(_SELF(self)));
+}
+#endif
+
 void
 Init_glib_date_time(void)
 {
     VALUE RG_TARGET_NAMESPACE;
 
-    RG_TARGET_NAMESPACE = G_DEF_CLASS(G_TYPE_DATE_TIME, "DateTime", mGLib);
+    RG_TARGET_NAMESPACE = G_DEF_CLASS(G_TYPE_DATE_TIME, "DateTime", rbg_mGLib());
 
     RG_DEF_SMETHOD(now, -1);
 
@@ -251,4 +255,7 @@ Init_glib_date_time(void)
     RG_DEF_METHOD(minute, 0);
     RG_DEF_METHOD(second, 0);
     RG_DEF_METHOD(format, 1);
+#if GLIB_CHECK_VERSION(2, 62, 0)
+    RG_DEF_METHOD(format_iso8601, 0);
+#endif
 }

@@ -1,6 +1,6 @@
 # coding: ascii-8bit
 #
-# Copyright (C) 2015-2019  Ruby-GNOME2 Project Team
+# Copyright (C) 2015-2022  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -130,17 +130,19 @@ class TestGLib < Test::Unit::TestCase
   end
 
   def test_signal_handler_disconnect_and_gc
-    obj = GLib::Object.new
+    object = GLib::Object.new
     klass = Class.new
-    1000.times {
-      a = klass.new
-      id = obj.signal_connect("notify") { p a }
-      obj.signal_handler_disconnect(id)
+    n_tries = 100
+    n_tries.times {
+      garbage_collected_object = klass.new
+      id = object.signal_connect("notify") { p garbage_collected_object }
+      object.signal_handler_disconnect(id)
     }
     GC.start
-    ary = []
-    ObjectSpace.each_object(klass) { |a| ary.push(a) }
-    assert_operator(ary.size, :<, 1000)
+    n_alive_objects = ObjectSpace.each_object(klass) {}
+    assert do
+      n_alive_objects < n_tries
+    end
   end
 
   def test_gtype
@@ -149,5 +151,15 @@ class TestGLib < Test::Unit::TestCase
 
     obj = GLib::Object.new
     assert_equal(obj.gtype, GLib::Object.gtype)
+  end
+
+  def test_malloc
+    address = GLib.malloc(29)
+    GLib.free(address)
+  end
+
+  def test_malloc0
+    address = GLib.malloc0(29)
+    GLib.free(address)
   end
 end

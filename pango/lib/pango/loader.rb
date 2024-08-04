@@ -26,8 +26,10 @@ module Pango
       @pending_attribute_infos.each do |info|
         name = rubyish_class_name(info)
         klass = @base_module.const_get(name)
-        load_fields(info, klass)
-        load_methods(info, klass)
+        prepare_class(klass) do
+          load_fields(info, klass)
+          load_methods(info, klass)
+        end
       end
       require_libraries
       convert_attribute_classes

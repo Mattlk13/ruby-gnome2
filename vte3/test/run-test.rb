@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (C) 2014-2015  Ruby-GNOME2 Project Team
+# Copyright (C) 2014-2021  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -16,48 +16,20 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-ruby_gnome2_base = File.join(File.dirname(__FILE__), "..", "..")
-ruby_gnome2_base = File.expand_path(ruby_gnome2_base)
+require_relative "../../glib2/test/run-test"
 
-glib_base = File.join(ruby_gnome2_base, "glib2")
-atk_base = File.join(ruby_gnome2_base, "atk")
-pango_base = File.join(ruby_gnome2_base, "pango")
-gdk_pixbuf_base = File.join(ruby_gnome2_base, "gdk_pixbuf2")
-cairo_gobject_base = File.join(ruby_gnome2_base, "cairo-gobject")
-gobject_introspection_base = File.join(ruby_gnome2_base, "gobject-introspection")
-gio2_base = File.join(ruby_gnome2_base, "gio2")
-gdk3_base = File.join(ruby_gnome2_base, "gdk3")
-gtk3_base = File.join(ruby_gnome2_base, "gtk3")
-vte3_base = File.join(ruby_gnome2_base, "vte3")
-
-modules = [
-  [glib_base, "glib2"],
-  [atk_base, "atk"],
-  [pango_base, "pango"],
-  [cairo_gobject_base, "cairo-gobject"],
-  [gdk_pixbuf_base, "gdk_pixbuf2"],
-  [gobject_introspection_base, "gobject-introspection"],
-  [gio2_base, "gio2"],
-  [gdk3_base, "gdk3"],
-  [gtk3_base, "gtk3"],
-  [vte3_base, "vte3"],
-]
-
-modules.each do |target, module_name|
-  makefile = File.join(target, "Makefile")
-  if File.exist?(makefile) and system("which make > /dev/null")
-    `make -C #{target.dump} > /dev/null` or exit(false)
-  end
-  $LOAD_PATH.unshift(File.join(target, "ext", module_name))
-  $LOAD_PATH.unshift(File.join(target, "lib"))
+run_test(__dir__,
+         [
+           "glib2",
+           "gobject-introspection",
+           "gio2",
+           "gdk_pixbuf2",
+           "atk",
+           "cairo-gobject",
+           "pango",
+           "gdk3",
+           "gtk3",
+           "vte3",
+         ]) do
+  require_relative "vte3-test-utils"
 end
-
-$LOAD_PATH.unshift(File.join(glib_base, "test"))
-require "glib-test-init"
-
-$LOAD_PATH.unshift(File.join(vte3_base, "test"))
-require "vte3-test-utils"
-
-require "vte3"
-
-exit Test::Unit::AutoRunner.run(true, File.join(vte3_base, "test"))

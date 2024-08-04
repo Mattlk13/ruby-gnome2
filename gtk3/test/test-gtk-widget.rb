@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2016  Ruby-GNOME2 Project Team
+# Copyright (C) 2008-2022  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -130,10 +130,56 @@ class TestGtkWidget < Test::Unit::TestCase
     end
   end
 
-  test "#style_get_property" do
-    entry = Gtk::Entry.new
-    assert do
-      entry.style_get_property("focus-padding").is_a?(Integer)
+  sub_test_case "#set_size_request" do
+    test("{width:, height:}") do
+      entry = Gtk::Entry.new
+      entry.set_size_request(width: 50, height: 100)
+      assert_equal([50, 100], entry.size_request)
+    end
+
+    test("{width:}") do
+      entry = Gtk::Entry.new
+      assert_raise(ArgumentError.new(":height is missing")) do
+        entry.set_size_request(width: 50)
+      end
+    end
+
+    test("{height:}") do
+      entry = Gtk::Entry.new
+      assert_raise(ArgumentError.new(":width is missing")) do
+        entry.set_size_request(height: 100)
+      end
+    end
+
+    test("(width, height)") do
+      entry = Gtk::Entry.new
+      entry.set_size_request(50, 100)
+      assert_equal([50, 100], entry.size_request)
+    end
+
+    test("nothing") do
+      entry = Gtk::Entry.new
+      assert_raise(ArgumentError.new("wrong number of arguments " +
+                                     "(given 0, expected 1..2)")) do
+        entry.set_size_request
+      end
+    end
+  end
+
+  sub_test_case "#style_get_property" do
+    test("existent") do
+      entry = Gtk::Entry.new
+      assert do
+        entry.style_get_property("focus-padding").is_a?(Integer)
+      end
+    end
+
+    test("nonexistent") do
+      entry = Gtk::Entry.new
+      name = "nonexistent"
+      assert_raise(ArgumentError.new("unknown style: #{name.inspect}")) do
+        entry.style_get_property(name)
+      end
     end
   end
 
@@ -196,7 +242,13 @@ class TestGtkWidget < Test::Unit::TestCase
         type_register "BindTemplateChildNothing"
 
         singleton_class.send(:define_method, :init) do
+          super()
           set_template(:data => data)
+          set_connect_func do |handler_name|
+            lambda do
+              # Do nothing
+            end
+          end
         end
       end
       widget = widget_class.new
@@ -209,8 +261,14 @@ class TestGtkWidget < Test::Unit::TestCase
         type_register "BindTemplateChildBind"
 
         singleton_class.send(:define_method, :init) do
+          super()
           set_template(:data => data)
           bind_template_child(:label)
+          set_connect_func do |handler_name|
+            lambda do
+              # Do nothing
+            end
+          end
         end
       end
       widget = widget_class.new
@@ -232,6 +290,7 @@ class TestGtkWidget < Test::Unit::TestCase
         type_register "SetConnectFunc"
 
         singleton_class.send(:define_method, :init) do
+          super()
           set_template(:data => data)
           bind_template_child(:label)
           set_connect_func do |handler_name|
@@ -245,5 +304,24 @@ class TestGtkWidget < Test::Unit::TestCase
       widget_class.new
       assert_equal(["on_move_cursor"], handler_names)
     end
+  end
+
+  def test_gc_action_group
+    GC.start
+    n_alive_action_groups_before =
+      ObjectSpace.each_object(Gio::SimpleActionGroup) {}
+    n_tries = 100
+    n_tries.times do |i|
+      action_prefix = "test#{i}"
+      action_group = Gio::SimpleActionGroup.new
+      @widget.insert_action_group(action_prefix, action_group)
+    end
+    GC.start
+    n_alive_action_groups_after =
+      ObjectSpace.each_object(Gio::SimpleActionGroup) {}
+    n_alive_action_groups =
+      n_alive_action_groups_after -
+      n_alive_action_groups_before
+    assert_equal(n_tries, n_alive_action_groups)
   end
 end

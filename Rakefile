@@ -43,7 +43,8 @@ def gem_push(path, name, version)
   end
 end
 
-packages = [
+default_packages = [
+  "adwaita",
   "atk",
   "cairo-gobject",
   "clutter",
@@ -51,6 +52,7 @@ packages = [
   "clutter-gstreamer",
   "clutter-gtk",
   "gdk3",
+  "gdk4",
   "gdk_pixbuf2",
   "gegl",
   "gio2",
@@ -60,22 +62,24 @@ packages = [
   "goffice",
   "gsf",
   "gstreamer",
-  "gtk2",
   "gtk3",
-  "gtksourceview2",
+  "gtk4",
   "gtksourceview3",
   "gtksourceview4",
+  "gtksourceview5",
+  "libhandy",
   "libsecret",
   "pango",
   "poppler",
   "rsvg2",
-  "vte",
   "vte3",
+  "vte4",
   "webkit-gtk",
-  "webkit-gtk2",
   "webkit2-gtk",
   "wnck3",
 ]
+packages = (ENV["PACKAGES"] || "").split(",")
+packages = default_packages if packages.empty?
 
 desc "configure all packages"
 task :configure do
@@ -91,9 +95,10 @@ task :build => ["Makefile"] do
   sh("make")
 end
 
-desc "clean all packages"
+desc "clean all packages, docs"
 task :clean do
   sh("make", "clean") if File.exist?("Makefile")
+  rm_rf("yard_docs")
 end
 
 desc "more clean all packages"
@@ -116,6 +121,31 @@ namespace :gem do
     end
   end
 
+  desc "document all gems"
+  task docs: [:girdocs, :rubydocs]
+
+  task :girdocs do
+    packages_rb = packages.map { |pkg|
+      File.join(pkg, "lib", pkg + ".rb")
+    }
+    ygir_gem = Gem::Specification.find_by_name('yard-gobject-introspection')
+    ygir_lib = File.expand_path('lib/yard-gobject-introspection.rb',
+                                ygir_gem.full_gem_path)
+    args = [ygir_lib, * packages_rb]
+    all_args = %w(bundle exec yard doc -o ./yard_docs/gir/ --load).concat(args)
+    sh(*all_args)
+  end
+
+  task :rubydocs do
+    file_globs = packages.flat_map { |pkg|
+      [ File.join(pkg, "lib", pkg + ".rb"),
+        File.join(pkg, "lib", pkg, "**/*.rb"),
+        File.join(pkg, "ext", pkg, "**/*.h")
+      ]}
+    all_args = %w(bundle exec yard doc -o ./yard_docs/ruby/).concat(file_globs)
+    sh(*all_args)
+  end
+
   desc "push all gems"
   task :push do
     packages.each do |package|
@@ -130,7 +160,7 @@ namespace :gem do
   desc "install all gems"
   task :install do
     packages.each do |package|
-      ruby("-S", "gem", "install", "--local", "--user-install",
+      ruby("-S", "gem", "install", "--user-install",
            *Dir.glob(File.join(package, "pkg", "*-#{version}.gem")))
     end
   end

@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2002-2019  Ruby-GNOME Project Team
+ *  Copyright (C) 2002-2024  Ruby-GNOME Project Team
  *  Copyright (C) 2002,2003  Masahiro Sakai
  *
  *  This library is free software; you can redistribute it and/or
@@ -27,16 +27,13 @@
 #include "rbglibdeprecated.h"
 #include "rbglib2conversions.h"
 
-#ifndef __RBGLIB_H__
-#define __RBGLIB_H__
+#pragma once
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+G_BEGIN_DECLS
 
-#define RBGLIB_MAJOR_VERSION 3
-#define RBGLIB_MINOR_VERSION 3
-#define RBGLIB_MICRO_VERSION 9
+#define RBGLIB_MAJOR_VERSION 4
+#define RBGLIB_MINOR_VERSION 2
+#define RBGLIB_MICRO_VERSION 3
 
 #ifndef RB_ZALLOC
 #  ifdef ZALLOC
@@ -142,6 +139,17 @@ extern "C" {
 #define RVAL2GUINT32S(ary, n) rbg_rval2guint32s(&(ary), &(n))
 #define RVAL2GDOUBLES(ary, n) rbg_rval2gdoubles(&(ary), &(n))
 
+#define RVAL2POINTER(value) ((gpointer)(value))
+#define POINTER2RVAL(pointer) ((VALUE)(pointer))
+
+#if SIZEOF_VOIDP == SIZEOF_LONG
+#  define NUM2POINTER(number) ((gpointer)NUM2ULONG(number))
+#  define POINTER2NUM(pointer) ULONG2NUM((unsigned long)pointer)
+#else
+#  define NUM2POINTER(number) ((gpointer)NUM2ULL(number))
+#  define POINTER2NUM(pointer) ULL2NUM((unsigned LONG_LONG)pointer)
+#endif
+
 #define GINTS2RVAL(ary, n) rbg_gints2rval(ary, n)
 #define GINTS2RVAL_FREE(ary, n) rbg_gints2rval(ary, n)
 
@@ -157,7 +165,7 @@ extern "C" {
 
 #ifdef G_PLATFORM_WIN32
 #  ifdef RUBY_GLIB2_COMPILATION
-#    define RUBY_GLIB2_VAR __declspec(dllexport)
+#    define RUBY_GLIB2_VAR extern __declspec(dllexport)
 #  else
 #    define RUBY_GLIB2_VAR extern __declspec(dllimport)
 #  endif
@@ -165,7 +173,12 @@ extern "C" {
 #  define RUBY_GLIB2_VAR extern
 #endif
 
+/* Deprecated. Use rbg_mGLib() instead. */
+G_GNUC_DEPRECATED_FOR(rbg_mGLib())
 RUBY_GLIB2_VAR VALUE mGLib;
+
+extern VALUE rbg_mGLib(void);
+extern VALUE rbg_cGLibObject(void);
 
 extern const gchar *rbg_rval_inspect(VALUE object);
 
@@ -195,10 +208,12 @@ VALUE rbg_filename_to_ruby(const gchar *filename);
 extern VALUE rbg_filename_to_ruby_free(gchar *filename);
 extern gchar *rbg_filename_from_ruby(VALUE filename);
 
-const gchar **rbg_rval2strv(volatile VALUE *value, long *n);
-const gchar **rbg_rval2strv_accept_nil(volatile VALUE *value, long *n);
+gchar **rbg_rval2strv(volatile VALUE *value, long *n);
+gchar **rbg_rval2strv_accept_nil(volatile VALUE *value, long *n);
 gchar **rbg_rval2strv_dup(volatile VALUE *value, long *n);
 gchar **rbg_rval2strv_dup_accept_nil(volatile VALUE *value, long *n);
+gchar **rbg_rval2filenamev(volatile VALUE *value, long *n);
+gchar **rbg_rval2filenamev_accept_nil(volatile VALUE *value, long *n);
 VALUE rbg_strv2rval(const gchar **strings);
 VALUE rbg_strv2rval_free(gchar **strings);
 
@@ -220,6 +235,13 @@ extern VALUE rbg_check_hash_type(VALUE object);
 extern void rbg_scan_options(VALUE options, ...);
 
 /* rbgerror.h */
+typedef enum {
+  RBG_RUBY_ERROR_UNKNOWN,
+} RBGRubyError;
+
+#define RBG_RUBY_ERROR rbgerr_ruby_error_quark()
+extern GQuark rbgerr_ruby_error_quark(void);
+
 extern VALUE rbgerr_gerror2exception(GError *error);
 extern VALUE rbgerr_define_gerror(GQuark domain, const gchar* name, VALUE module, VALUE parent, GType gtype);
 
@@ -234,12 +256,13 @@ extern GVariant *rbg_variant_from_ruby(VALUE rb_variant);
 
 extern GVariantType *rbg_variant_type_from_ruby(VALUE rb_variant_type);
 
-
 extern void rbg_gc_guard(gpointer key, VALUE rb_object);
 extern void rbg_gc_unguard(gpointer key);
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
 
-#endif /* __RBGLIB_H__ */
+/* predicates */
+extern gboolean rbg_is_bytes(VALUE object);
+extern gboolean rbg_is_object(VALUE object);
+extern gboolean rbg_is_value(VALUE object);
+
+G_END_DECLS

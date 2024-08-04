@@ -1,6 +1,6 @@
 # -*- ruby -*-
 #
-# Copyright (C) 2018  Ruby-GNOME Project Team
+# Copyright (C) 2018-2023  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -20,11 +20,11 @@ require_relative "../glib2/version"
 
 Gem::Specification.new do |s|
   s.name          = "vte3"
-  s.summary       = "Ruby/VTE is a Ruby binding of VTE."
-  s.description   = "Ruby/VTE is a Ruby binding of VTE."
+  s.summary       = "Ruby/VTE3 is a Ruby binding of VTE for GTK 3"
+  s.description   = "Ruby/VTE3 is a Ruby binding of VTE for GTK 3"
   s.author        = "The Ruby-GNOME Project Team"
   s.email         = "ruby-gnome2-devel-en@lists.sourceforge.net"
-  s.homepage      = "https://ruby-gnome2.osdn.jp/"
+  s.homepage      = "https://ruby-gnome2.github.io/"
   s.licenses      = ["LGPL-2.1+"]
   s.version       = ruby_glib2_version
   s.extensions    = ["dependency-check/Rakefile"]

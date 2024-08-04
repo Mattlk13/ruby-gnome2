@@ -1,7 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011  Ruby-GNOME2 Project Team
- *  Copyright (C) 2007  Ruby-GNOME2 Project
+ *  Copyright (C) 2007-2022  Ruby-GNOME Project Team
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -50,8 +49,14 @@ rbgutil_protect(VALUE (*func) (VALUE), VALUE data)
     VALUE ret = rb_protect(func, data, &state);
     VALUE e = rb_errinfo();
     if (state && !NIL_P(e))
-        rb_funcall(mGLib, id_exit_application, 2, e, INT2NUM(EXIT_FAILURE));
+        rbgutil_on_callback_error(e);
     return ret;
+}
+
+void
+rbgutil_on_callback_error(VALUE error)
+{
+    rb_funcall(rbg_mGLib(), id_exit_application, 2, error, INT2NUM(EXIT_FAILURE));
 }
 
 /**********************************************************************/
@@ -62,11 +67,11 @@ typedef struct _CallbackRequest {
     VALUE (*function)(VALUE);
     VALUE argument;
     VALUE result;
-    GMutex *done_mutex;
-    GCond *done_cond;
+    GMutex done_mutex;
+    GCond done_cond;
 } CallbackRequest;
 
-static GMutex *callback_dispatch_thread_mutex = NULL;
+static GMutex callback_dispatch_thread_mutex;
 static GAsyncQueue *callback_request_queue = NULL;
 static ID id_callback_dispatch_thread;
 static gint callback_pipe_fds[2] = {-1, -1};
@@ -82,18 +87,19 @@ exec_callback(VALUE data)
 }
 
 static VALUE
-process_request(CallbackRequest *request)
+process_request(void *user_data)
 {
-    g_mutex_lock(request->done_mutex);
+    CallbackRequest *request = user_data;
+    g_mutex_lock(&(request->done_mutex));
     request->result = rbgutil_protect(exec_callback, (VALUE)request);
-    g_cond_signal(request->done_cond);
-    g_mutex_unlock(request->done_mutex);
+    g_cond_signal(&(request->done_cond));
+    g_mutex_unlock(&(request->done_mutex));
 
     return Qnil;
 }
 
 static VALUE
-mainloop(void)
+mainloop(G_GNUC_UNUSED void *user_data)
 {
     for (;;) {
         CallbackRequest *request;
@@ -146,30 +152,30 @@ invoke_callback_in_ruby_thread(VALUE (*func)(VALUE), VALUE arg)
 {
     CallbackRequest request;
 
-    g_mutex_lock(callback_dispatch_thread_mutex);
+    g_mutex_lock(&callback_dispatch_thread_mutex);
     if (callback_pipe_fds[0] == -1) {
         g_error("Please call rbgutil_start_callback_dispatch_thread() "
                 "to dispatch a callback from non-ruby thread before "
                 "callbacks are requested from non-ruby thread.");
-        g_mutex_unlock(callback_dispatch_thread_mutex);
+        g_mutex_unlock(&callback_dispatch_thread_mutex);
         return Qnil;
     }
 
     request.function = func;
     request.argument = arg;
     request.result = Qnil;
-    request.done_mutex = g_mutex_new();
-    request.done_cond = g_cond_new();
+    g_mutex_init(&(request.done_mutex));
+    g_cond_init(&(request.done_cond));
 
-    g_mutex_lock(request.done_mutex);
+    g_mutex_lock(&(request.done_mutex));
     queue_callback_request(&request);
-    g_mutex_unlock(callback_dispatch_thread_mutex);
+    g_mutex_unlock(&callback_dispatch_thread_mutex);
 
-    g_cond_wait(request.done_cond, request.done_mutex);
-    g_mutex_unlock(request.done_mutex);
+    g_cond_wait(&(request.done_cond), &(request.done_mutex));
+    g_mutex_unlock(&(request.done_mutex));
 
-    g_cond_free(request.done_cond);
-    g_mutex_free(request.done_mutex);
+    g_cond_clear(&(request.done_cond));
+    g_mutex_clear(&(request.done_mutex));
 
 
     return request.result;
@@ -195,7 +201,7 @@ rbgutil_invoke_callback(VALUE (*func)(VALUE), VALUE arg)
 {
 #ifdef HAVE_NATIVETHREAD
     if (ruby_native_thread_p()) {
-        if (!GPOINTER_TO_INT(g_static_private_get(&rg_polling_key))) {
+        if (!GPOINTER_TO_INT(g_private_get(&rg_polling_key))) {
             return rbgutil_protect(func, arg);
         }
 #  ifdef HAVE_RB_THREAD_CALL_WITH_GVL
@@ -221,17 +227,17 @@ rbgutil_start_callback_dispatch_thread(void)
 #ifdef HAVE_NATIVETHREAD
     VALUE callback_dispatch_thread;
 
-    g_mutex_lock(callback_dispatch_thread_mutex);
-    callback_dispatch_thread = rb_ivar_get(mGLib, id_callback_dispatch_thread);
+    g_mutex_lock(&callback_dispatch_thread_mutex);
+    callback_dispatch_thread = rb_ivar_get(rbg_mGLib(), id_callback_dispatch_thread);
     if (NIL_P(callback_dispatch_thread)) {
         if (pipe(callback_pipe_fds) == -1)
             rb_sys_fail("pipe()");
 
         callback_dispatch_thread = rb_thread_create(mainloop, NULL);
-        rb_ivar_set(mGLib, id_callback_dispatch_thread,
+        rb_ivar_set(rbg_mGLib(), id_callback_dispatch_thread,
                     callback_dispatch_thread);
     }
-    g_mutex_unlock(callback_dispatch_thread_mutex);
+    g_mutex_unlock(&callback_dispatch_thread_mutex);
 #endif
 }
 
@@ -241,13 +247,13 @@ rbgutil_stop_callback_dispatch_thread(void)
 #ifdef HAVE_NATIVETHREAD
     VALUE callback_dispatch_thread;
 
-    g_mutex_lock(callback_dispatch_thread_mutex);
-    callback_dispatch_thread = rb_ivar_get(mGLib, id_callback_dispatch_thread);
+    g_mutex_lock(&callback_dispatch_thread_mutex);
+    callback_dispatch_thread = rb_ivar_get(rbg_mGLib(), id_callback_dispatch_thread);
     if (!NIL_P(callback_dispatch_thread)) {
         queue_callback_request(NULL);
-        rb_ivar_set(mGLib, id_callback_dispatch_thread, Qnil);
+        rb_ivar_set(rbg_mGLib(), id_callback_dispatch_thread, Qnil);
     }
-    g_mutex_unlock(callback_dispatch_thread_mutex);
+    g_mutex_unlock(&callback_dispatch_thread_mutex);
 #endif
 }
 
@@ -256,17 +262,14 @@ Init_gutil_callback(void)
 {
     id_exit_application = rb_intern("exit_application");
     rbgutil_eGLibCallbackNotInitializedError =
-        rb_define_class_under(mGLib, "CallbackNotInitializedError",
+        rb_define_class_under(rbg_mGLib(), "CallbackNotInitializedError",
                               rb_eRuntimeError);
 
 #ifdef HAVE_NATIVETHREAD
-    if (!g_thread_supported())
-        g_thread_init(NULL);
-
     id_callback_dispatch_thread = rb_intern("callback_dispatch_thread");
-    rb_ivar_set(mGLib, id_callback_dispatch_thread, Qnil);
+    rb_ivar_set(rbg_mGLib(), id_callback_dispatch_thread, Qnil);
 
     callback_request_queue = g_async_queue_new();
-    callback_dispatch_thread_mutex = g_mutex_new();
+    g_mutex_init(&callback_dispatch_thread_mutex);
 #endif
 }

@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011-2019  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2011-2022  Ruby-GNOME Project Team
  *  Copyright (C) 2006  Sjoerd Simons
  *
  *  This library is free software; you can redistribute it and/or
@@ -19,6 +19,10 @@
  *  MA  02110-1301  USA
  */
 
+/* This is for suppressing warnings for GValueArray.
+ * We support GValueArray because GStreamer still uses it. */
+#define GLIB_VERSION_MIN_REQUIRED GLIB_VERSION_2_30
+
 #include "rbgprivate.h"
 
 static VALUE
@@ -30,7 +34,7 @@ value_array_to_ruby(const GValue *from)
     GValueArray *array = (GValueArray *)g_value_get_boxed(from);
     if (array == NULL)
         return Qnil;
-  
+
     ary = rb_ary_new();
     for (i = 0; i < array->n_values; i++)
         rb_ary_push(ary, GVAL2RVAL(g_value_array_get_nth(array, i)));
@@ -63,11 +67,11 @@ value_array_from_ruby_body(VALUE value)
 }
 
 static G_GNUC_NORETURN VALUE
-value_array_from_ruby_rescue(VALUE value)
+value_array_from_ruby_rescue(VALUE value, VALUE error)
 {
     g_value_array_free(((struct value_array_from_ruby_args *)value)->result);
 
-    rb_exc_raise(rb_errinfo());
+    rb_exc_raise(error);
 }
 
 static void

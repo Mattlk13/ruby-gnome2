@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2015-2016  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2015-2023  Ruby-GNOME Project Team
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,7 @@
 
 #define RG_TARGET_NAMESPACE cVariant
 
-#define _SELF(s) (DATA_PTR(s))
+#define _SELF(s) (RTYPEDDATA_DATA(s))
 
 static VALUE RG_TARGET_NAMESPACE;
 
@@ -69,9 +69,10 @@ rbg_variant_to_ruby(GVariant *variant)
         VALUE value = rbg_variant_to_ruby(val);
         g_variant_unref(val);
         return value;
-    } else if (g_variant_type_is_array(type)) {
+    } else if (g_variant_type_is_array(type) ||
+               g_variant_type_is_tuple(type)) {
         gsize i, len = g_variant_n_children(variant);
-        VALUE ary = rb_ary_new2(len);
+        VALUE ary = rb_ary_new_capa(len);
         for (i = 0; i < len; i++) {
             GVariant *val = g_variant_get_child_value(variant, i);
             rb_ary_store(ary, i, rbg_variant_to_ruby(val));
@@ -106,10 +107,55 @@ rg_variant_free(gpointer object)
     g_variant_unref(variant);
 }
 
+static const rb_data_type_t rbg_variant_type = {
+    "GLib::Variant",
+    {
+        NULL,
+        rg_variant_free,
+    },
+    NULL,
+    NULL,
+    RUBY_TYPED_FREE_IMMEDIATELY |
+    RUBY_TYPED_WB_PROTECTED |
+    RUBY_TYPED_FROZEN_SHAREABLE,
+};
+
 static VALUE
 rg_variant_allocate(VALUE klass)
 {
-    return Data_Wrap_Struct(klass, NULL, rg_variant_free, NULL);
+    return TypedData_Wrap_Struct(klass, &rbg_variant_type, NULL);
+}
+
+static VALUE
+rg_s_parse(int argc, VALUE *argv, VALUE klass)
+{
+    VALUE rb_text;
+    VALUE rb_variant_type;
+    rb_scan_args(argc, argv, "11", &rb_text, &rb_variant_type);
+    const gchar *text = RVAL2CSTR(rb_text);
+    const gchar *limit = text + RSTRING_LEN(rb_text);
+    const GVariantType *variant_type = NULL;
+    if (!NIL_P(rb_variant_type)) {
+        variant_type = RVAL2GVARIANTTYPE(rb_variant_type);
+    }
+    GError *error = NULL;
+    GVariant *variant = g_variant_parse(variant_type,
+                                        text,
+                                        limit,
+                                        NULL,
+                                        &error);
+    if (error) {
+        GError *detailed_error = NULL;
+        gchar *context = g_variant_parse_error_print_context(error, text);
+        g_set_error_literal(&detailed_error,
+                            error->domain,
+                            error->code,
+                            context);
+        g_free(context);
+        g_error_free(error);
+        RG_RAISE_ERROR(detailed_error);
+    }
+    return TypedData_Wrap_Struct(klass, &rbg_variant_type, variant);
 }
 
 static GVariant *
@@ -191,7 +237,6 @@ rg_ruby_to_variant(VALUE rb_value, VALUE rb_variant_type)
             }
         }
         return g_variant_new_strv(strings, length);
-#if GLIB_CHECK_VERSION(2, 30, 0)
     } else if (g_variant_type_equal(variant_type,
                                     G_VARIANT_TYPE_OBJECT_PATH_ARRAY)) {
         const gchar **paths;
@@ -210,7 +255,6 @@ rg_ruby_to_variant(VALUE rb_value, VALUE rb_variant_type)
             }
         }
         return g_variant_new_objv(paths, length);
-#endif
     } else if (g_variant_type_equal(variant_type, G_VARIANT_TYPE_ARRAY)) {
         int i;
         GVariantBuilder builder;
@@ -259,7 +303,7 @@ rg_initialize(int argc, VALUE *argv, VALUE self)
     rb_scan_args(argc, argv, "11", &rb_value, &rb_variant_type);
     variant = rg_ruby_to_variant(rb_value, rb_variant_type);
     g_variant_ref_sink(variant);
-    DATA_PTR(self) = variant;
+    RTYPEDDATA_DATA(self) = variant;
 
     return Qnil;
 }
@@ -284,14 +328,44 @@ rg_type(VALUE self)
     return GVARIANTTYPE2RVAL((GVariantType *)g_variant_get_type(variant));
 }
 
+static VALUE
+rg_to_s(int argc, VALUE *argv, VALUE self)
+{
+    VALUE options = Qnil;
+    gboolean type_annotate = FALSE;
+    rb_scan_args(argc, argv, ":", &options);
+    if (!NIL_P(options)) {
+        ID keywords[1];
+        VALUE values[1];
+        keywords[0] = rb_intern("type_annotate");
+        rb_get_kwargs(options, keywords, 0, 1, values);
+        if (values[0] != Qundef) {
+            type_annotate = CBOOL2RVAL(values[0]);
+        }
+    }
+
+    GVariant *variant = _SELF(self);
+    gchar *string = g_variant_print(variant, type_annotate);
+    return CSTR2RVAL_FREE(string);
+}
+
 void
 Init_glib_variant(void)
 {
-    RG_TARGET_NAMESPACE = G_DEF_CLASS(G_TYPE_VARIANT, "Variant", mGLib);
+    RG_TARGET_NAMESPACE = G_DEF_CLASS(G_TYPE_VARIANT, "Variant", rbg_mGLib());
 
     rb_define_alloc_func(RG_TARGET_NAMESPACE, rg_variant_allocate);
+
+    RG_DEF_SMETHOD(parse, -1);
 
     RG_DEF_METHOD(initialize, -1);
     RG_DEF_METHOD(value, 0);
     RG_DEF_METHOD(type, 0);
+    RG_DEF_METHOD(to_s, -1);
+
+    G_DEF_ERROR(G_VARIANT_PARSE_ERROR,
+                "VariantParseError",
+                rbg_mGLib(),
+                rb_eRuntimeError,
+                G_TYPE_VARIANT_PARSE_ERROR);
 }

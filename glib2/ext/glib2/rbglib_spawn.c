@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2011-2022  Ruby-GNOME Project Team
  *  Copyright (C) 2004  Masao Mutoh
  *  Copyright (C) 2004  Kazuhiro NISHIYAMA
  *
@@ -29,10 +29,11 @@ static ID id_call;
 static ID id_new;
 
 static void
-child_setup(gpointer func)
+child_setup(gpointer data)
 {
-    if (! NIL_P(func)){
-        rb_funcall((VALUE)func, id_call, 0);
+    VALUE func = POINTER2RVAL(data);
+    if (!NIL_P(func)) {
+        rb_funcall(func, id_call, 0);
     }
 }
 
@@ -204,8 +205,6 @@ rg_s_command_line_async(G_GNUC_UNUSED VALUE self, VALUE str)
     return ret;
 }
 
-#ifdef HAVE_G_SPAWN_CLOSE_PID
-
 #define RVAL2GPID(value) ((GPid)NUM2INT(pid))
 
 static VALUE
@@ -215,12 +214,10 @@ rg_s_close_pid(G_GNUC_UNUSED VALUE self, VALUE pid)
     return Qnil;
 }
 
-#endif
-
 void
 Init_glib_spawn(void)
 {
-    VALUE RG_TARGET_NAMESPACE = rb_define_module_under(mGLib, "Spawn");
+    VALUE RG_TARGET_NAMESPACE = rb_define_module_under(rbg_mGLib(), "Spawn");
 
     id_call = rb_intern("call");
     id_new = rb_intern("new");
@@ -231,15 +228,47 @@ Init_glib_spawn(void)
     RG_DEF_SMETHOD(sync, 4);
     RG_DEF_SMETHOD(command_line_sync, 1);
     RG_DEF_SMETHOD(command_line_async, 1);
-#ifdef HAVE_G_SPAWN_CLOSE_PID
     RG_DEF_SMETHOD(close_pid, 1);
-#endif
 
-    rb_define_const(RG_TARGET_NAMESPACE, "LEAVE_DESCRIPTORS_OPEN", INT2NUM(G_SPAWN_LEAVE_DESCRIPTORS_OPEN));
-    rb_define_const(RG_TARGET_NAMESPACE, "DO_NOT_REAP_CHILD", INT2NUM(G_SPAWN_DO_NOT_REAP_CHILD));
-    rb_define_const(RG_TARGET_NAMESPACE, "SEARCH_PATH", INT2NUM(G_SPAWN_SEARCH_PATH));
-    rb_define_const(RG_TARGET_NAMESPACE, "STDOUT_TO_DEV_NULL", INT2NUM(G_SPAWN_STDOUT_TO_DEV_NULL));
-    rb_define_const(RG_TARGET_NAMESPACE, "STDERR_TO_DEV_NULL", INT2NUM(G_SPAWN_STDERR_TO_DEV_NULL));
-    rb_define_const(RG_TARGET_NAMESPACE, "CHILD_INHERITS_STDIN", INT2NUM(G_SPAWN_CHILD_INHERITS_STDIN));
-    rb_define_const(RG_TARGET_NAMESPACE, "FILE_AND_ARGV_ZERO", INT2NUM(G_SPAWN_FILE_AND_ARGV_ZERO));
+    rb_define_const(RG_TARGET_NAMESPACE,
+                    "DEFAULT",
+                    INT2NUM(G_SPAWN_DEFAULT));
+    rb_define_const(RG_TARGET_NAMESPACE,
+                    "LEAVE_DESCRIPTORS_OPEN",
+                    INT2NUM(G_SPAWN_LEAVE_DESCRIPTORS_OPEN));
+    rb_define_const(RG_TARGET_NAMESPACE,
+                    "DO_NOT_REAP_CHILD",
+                    INT2NUM(G_SPAWN_DO_NOT_REAP_CHILD));
+    rb_define_const(RG_TARGET_NAMESPACE,
+                    "SEARCH_PATH",
+                    INT2NUM(G_SPAWN_SEARCH_PATH));
+    rb_define_const(RG_TARGET_NAMESPACE,
+                    "STDOUT_TO_DEV_NULL",
+                    INT2NUM(G_SPAWN_STDOUT_TO_DEV_NULL));
+    rb_define_const(RG_TARGET_NAMESPACE,
+                    "STDERR_TO_DEV_NULL",
+                    INT2NUM(G_SPAWN_STDERR_TO_DEV_NULL));
+    rb_define_const(RG_TARGET_NAMESPACE,
+                    "CHILD_INHERITS_STDIN",
+                    INT2NUM(G_SPAWN_CHILD_INHERITS_STDIN));
+    rb_define_const(RG_TARGET_NAMESPACE,
+                    "FILE_AND_ARGV_ZERO",
+                    INT2NUM(G_SPAWN_FILE_AND_ARGV_ZERO));
+    rb_define_const(RG_TARGET_NAMESPACE,
+                    "SEARCH_PATH_FROM_ENVP",
+                    INT2NUM(G_SPAWN_SEARCH_PATH_FROM_ENVP));
+    rb_define_const(RG_TARGET_NAMESPACE,
+                    "CLOEXEC_PIPES",
+                    INT2NUM(G_SPAWN_CLOEXEC_PIPES));
+#if GLIB_CHECK_VERSION(2, 74, 0)
+    rb_define_const(RG_TARGET_NAMESPACE,
+                    "CHILD_INHERITS_STDOUT",
+                    INT2NUM(G_SPAWN_CHILD_INHERITS_STDOUT));
+    rb_define_const(RG_TARGET_NAMESPACE,
+                    "CHILD_INHERITS_STDERR",
+                    INT2NUM(G_SPAWN_CHILD_INHERITS_STDERR));
+    rb_define_const(RG_TARGET_NAMESPACE,
+                    "STDIN_FROM_DEV_NULL",
+                    INT2NUM(G_SPAWN_STDIN_FROM_DEV_NULL));
+#endif
 }

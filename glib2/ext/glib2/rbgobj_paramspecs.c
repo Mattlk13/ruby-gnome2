@@ -1,7 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011  Ruby-GNOME2 Project Team
- *  Copyright (C) 2004  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2004-2022  Ruby-GNOME Project Team
  *  Copyright (C) 2002,2003  Masahiro Sakai
  *
  *  This library is free software; you can redistribute it and/or
@@ -19,6 +18,10 @@
  *  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
  *  MA  02110-1301  USA
  */
+
+/* This is for suppressing warnings for GValueArray.
+ * We support GValueArray because GStreamer still uses it. */
+#define GLIB_VERSION_MIN_REQUIRED GLIB_VERSION_2_30
 
 #include "rbgprivate.h"
 
@@ -116,7 +119,7 @@ enum_initialize(VALUE self, VALUE name, VALUE nick, VALUE blurb,
                 VALUE enum_type, VALUE default_value, VALUE flags)
 {
     GParamSpec* pspec;
-    GType gtype = rbgobj_gtype_get(enum_type);
+    GType gtype = rbgobj_gtype_from_ruby(enum_type);
 
     pspec = g_param_spec_enum(StringValuePtr(name),
                               StringValuePtr(nick),
@@ -133,7 +136,7 @@ flags_initialize(VALUE self, VALUE name, VALUE nick, VALUE blurb,
                  VALUE flags_type, VALUE default_value, VALUE flags)
 {
     GParamSpec* pspec;
-    GType gtype = rbgobj_gtype_get(flags_type);
+    GType gtype = rbgobj_gtype_from_ruby(flags_type);
 
     pspec = g_param_spec_flags(StringValuePtr(name),
                               StringValuePtr(nick),
@@ -167,7 +170,7 @@ param_initialize(VALUE self, VALUE name, VALUE nick, VALUE blurb,
     pspec = g_param_spec_param(StringValuePtr(name),
                                StringValuePtr(nick),
                                StringValuePtr(blurb),
-                               rbgobj_gtype_get(param_type),
+                               rbgobj_gtype_from_ruby(param_type),
                                NUM2UINT(flags));
     rbgobj_param_spec_initialize(self, pspec);
     return Qnil;
@@ -181,7 +184,7 @@ boxed_initialize(VALUE self, VALUE name, VALUE nick, VALUE blurb,
     pspec = g_param_spec_boxed(StringValuePtr(name),
                                StringValuePtr(nick),
                                StringValuePtr(blurb),
-                               rbgobj_gtype_get(boxed_type),
+                               rbgobj_gtype_from_ruby(boxed_type),
                                NUM2UINT(flags));
     rbgobj_param_spec_initialize(self, pspec);
     return Qnil;
@@ -203,7 +206,7 @@ static VALUE
 value_array_initialize(VALUE self, VALUE name, VALUE nick, VALUE blurb,
                        VALUE element_spec, VALUE flags)
 {
-    GParamSpec* pspec;
+    GParamSpec *pspec;
     pspec = g_param_spec_value_array(StringValuePtr(name),
                                      StringValuePtr(nick),
                                      StringValuePtr(blurb),
@@ -221,7 +224,7 @@ object_initialize(VALUE self, VALUE name, VALUE nick, VALUE blurb,
     pspec = g_param_spec_object(StringValuePtr(name),
                                 StringValuePtr(nick),
                                 StringValuePtr(blurb),
-                                rbgobj_gtype_get(object_type),
+                                rbgobj_gtype_from_ruby(object_type),
                                 NUM2UINT(flags));
     rbgobj_param_spec_initialize(self, pspec);
     return Qnil;

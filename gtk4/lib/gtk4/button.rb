@@ -1,4 +1,4 @@
-# Copyright (C) 2014-2018  Ruby-GNOME2 Project Team
+# Copyright (C) 2014-2022  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,6 @@ module Gtk
         end
       end
       icon_name = options[:icon_name]
-      icon_size = options[:icon_size] || :button
 
       if label
         if use_underline

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (C) 2014  Ruby-GNOME2 Project Team
+# Copyright (C) 2014-2023  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -23,36 +23,25 @@ top_dir = base_dir.parent
 top_build_dir = Pathname(".").parent.parent.parent.expand_path
 
 mkmf_gnome2_dir = top_dir + "glib2" + "lib"
-version_suffix = ""
-unless mkmf_gnome2_dir.exist?
-  if /(-\d+\.\d+\.\d+)\z/ =~ base_dir.basename.to_s
-    version_suffix = $1
-    mkmf_gnome2_dir = top_dir + "glib2#{version_suffix}" + "lib"
-  end
-end
+$LOAD_PATH.unshift(mkmf_gnome2_dir.to_s) if mkmf_gnome2_dir.exist?
 
-$LOAD_PATH.unshift(mkmf_gnome2_dir.to_s)
 
 module_name = "gio2"
 package_id = "gio-2.0"
 
-require "mkmf-gnome2"
+require "mkmf-gnome"
 
-["glib2", "gobject-introspection"].each do |package|
-  directory = "#{package}#{version_suffix}"
-  build_base_path = "#{directory}/tmp/#{RUBY_PLATFORM}"
-  package_library_name = package.gsub(/-/, "_")
-  build_dir = "#{build_base_path}/#{package_library_name}/#{RUBY_VERSION}"
-  add_depend_package(package, "#{directory}/ext/#{package}",
+["glib2"].each do |package|
+  add_depend_package(package,
+                     "#{package}/ext/#{package}",
                      top_dir.to_s,
-                     :top_build_dir => top_build_dir.to_s,
-                     :target_build_dir => build_dir)
+                     top_build_dir: top_build_dir.to_s)
 end
 
 unless required_pkg_config_package(package_id,
                                    :alt_linux => "libgio-devel",
                                    :debian => "libglib2.0-dev",
-                                   :redhat => "glib2-devel",
+                                   :redhat => "pkgconfig(#{package_id})",
                                    :arch_linux => "glib2",
                                    :homebrew => "glib",
                                    :macports => "glib2")
@@ -66,6 +55,20 @@ end
 create_pkg_config_file("Ruby/GIO2", package_id)
 
 $defs << "-DRUBY_GIO2_COMPILATION"
+case RUBY_PLATFORM
+when /darwin/
+  symbols_in_external_bundles = [
+    "_rbg_define_method",
+    "_rbgobj_add_relative",
+    "_rbgobj_boxed_get",
+    "_rbgobj_gvalue_to_rvalue",
+    "_rbgobj_ruby_object_from_instance",
+    "_rbgobj_set_signal_func",
+  ]
+  symbols_in_external_bundles.each do |symbol|
+    $DLDFLAGS << " -Wl,-U,#{symbol}"
+  end
+end
 create_makefile(module_name)
 
 pkg_config_dir = with_config("pkg-config-dir")

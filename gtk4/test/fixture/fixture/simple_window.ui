@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkWindow" id="window">
+    <child>
+      <object class="GtkLabel" id="label">
+        <signal name="move-cursor" handler="on_move_cursor" swapped="no"/>
+      </object>
+    </child>
+  </object>
+</interface>

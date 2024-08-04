@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (C) 2013-2019  Ruby-GNOME2 Project Team
+# Copyright (C) 2013-2023  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -24,34 +24,26 @@ top_dir = base_dir.parent.expand_path
 top_build_dir = Pathname(".").parent.parent.parent.expand_path
 
 mkmf_gnome2_dir = top_dir + "glib2" + "lib"
-version_suffix = ""
-unless mkmf_gnome2_dir.exist?
-  if /(-\d+\.\d+\.\d+)(?:\.\d+)?\z/ =~ base_dir.basename.to_s
-    version_suffix = $1
-    mkmf_gnome2_dir = top_dir + "glib2#{version_suffix}" + "lib"
-  end
-end
+$LOAD_PATH.unshift(mkmf_gnome2_dir.to_s) if mkmf_gnome2_dir.exist?
 
-$LOAD_PATH.unshift(mkmf_gnome2_dir.to_s)
 
 module_name = "cairo_gobject"
 package_id = "cairo-gobject"
 
-require "mkmf-gnome2"
+require "mkmf-gnome"
 
 ["glib2"].each do |package|
-  directory = "#{package}#{version_suffix}"
-  build_dir = "#{directory}/tmp/#{RUBY_PLATFORM}/#{package}/#{RUBY_VERSION}"
-  add_depend_package(package, "#{directory}/ext/#{package}",
+  add_depend_package(package,
+                     "#{package}/ext/#{package}",
                      top_dir.to_s,
-                     :top_build_dir => top_build_dir.to_s,
-                     :target_build_dir => build_dir)
+                     top_build_dir: top_build_dir.to_s)
 end
 
 unless required_pkg_config_package(package_id,
                                    :alt_linux => "libcairo-devel",
+                                   :conda => "cairo",
                                    :debian => "libcairo2-dev",
-                                   :redhat => "cairo-gobject-devel",
+                                   :redhat => "pkgconfig(#{package_id})",
                                    :arch_linux => "cairo",
                                    :homebrew => "cairo")
   exit(false)
@@ -62,12 +54,48 @@ unless check_cairo(:top_dir => top_dir)
 end
 
 create_pkg_config_file("Ruby/CairoGObject",
-                       package_id, ruby_gnome2_version,
+                       package_id, ruby_gnome_version,
                        "ruby-cairo-gobject.pc")
 
 ensure_objs
 
 $defs << "-DRUBY_CAIRO_GOBJECT_COMPILATION"
+case RUBY_PLATFORM
+when /darwin/
+  symbols_in_external_bundles = [
+    "_rb_cCairo_Context",
+    "_rb_cCairo_Device",
+    "_rb_cCairo_FontFace",
+    "_rb_cCairo_FontOptions",
+    "_rb_cCairo_Pattern",
+    "_rb_cCairo_Region",
+    "_rb_cCairo_ScaledFont",
+    "_rb_cCairo_Surface",
+    "_rb_cairo_context_from_ruby_object",
+    "_rb_cairo_context_to_ruby_object",
+    "_rb_cairo_device_from_ruby_object",
+    "_rb_cairo_device_to_ruby_object",
+    "_rb_cairo_font_face_from_ruby_object",
+    "_rb_cairo_font_face_to_ruby_object",
+    "_rb_cairo_font_options_from_ruby_object",
+    "_rb_cairo_font_options_to_ruby_object",
+    "_rb_cairo_pattern_from_ruby_object",
+    "_rb_cairo_pattern_to_ruby_object",
+    "_rb_cairo_region_from_ruby_object",
+    "_rb_cairo_region_to_ruby_object",
+    "_rb_cairo_scaled_font_from_ruby_object",
+    "_rb_cairo_scaled_font_to_ruby_object",
+    "_rb_cairo_surface_from_ruby_object",
+    "_rb_cairo_surface_to_ruby_object",
+    "_rbgobj_convert_define",
+    "_rbgobj_define_class",
+    "_rbgobj_gtype_new",
+    "_rbgobj_make_boxed",
+  ]
+  symbols_in_external_bundles.each do |symbol|
+    $DLDFLAGS << " -Wl,-U,#{symbol}"
+  end
+end
 create_makefile(module_name)
 
 pkg_config_dir = with_config("pkg-config-dir")

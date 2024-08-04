@@ -1,4 +1,4 @@
-# Copyright (C) 2013-2018  Ruby-GNOME2 Project Team
+# Copyright (C) 2013-2022  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -14,11 +14,9 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-require "gobject-introspection"
 require "cairo-gobject"
-require "atk"
-require "pango"
 require "gdk_pixbuf2"
+require "pango"
 
 require "gdk4/loader"
 require "gdk4/x11-loader"
@@ -32,12 +30,6 @@ module Gdk
 
   loader = Loader.new(self)
   loader.load
-  x11_loader = X11Loader.new(self)
+  x11_loader = GdkX11::Loader.new(GdkX11)
   x11_loader.load
-
-  class << self
-    def cairo_available?
-      true
-    end
-  end
 end

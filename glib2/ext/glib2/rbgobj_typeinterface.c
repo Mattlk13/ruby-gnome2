@@ -1,7 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011,2017  Ruby-GNOME2 Project Team
- *  Copyright (C) 2002-2006  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2002-2023  Ruby-GNOME Project Team
  *  Copyright (C) 2002,2003  Masahiro Sakai
  *
  *  This library is free software; you can redistribute it and/or
@@ -33,6 +32,41 @@ rg_append_features(G_GNUC_UNUSED VALUE self, VALUE klass)
     if (!RVAL2CBOOL(rb_class_inherited_p(klass, cInstantiatable)))
         rb_raise(rb_eTypeError, "Not a subclass of GLib::Instantiatable");
     return rb_call_super(1, &klass);
+}
+
+static void
+interface_init(G_GNUC_UNUSED gpointer g_iface,
+               G_GNUC_UNUSED gpointer iface_data)
+{
+}
+
+static VALUE
+rg_included(VALUE self, VALUE class_or_module)
+{
+    const GInterfaceInfo interface_info = {
+        interface_init, NULL, NULL
+    };
+    const RGObjClassInfo *interface_cinfo;
+    const RGObjClassInfo *class_cinfo;
+    if (RVAL2CBOOL(rb_obj_is_instance_of(class_or_module, rb_cModule))) {
+        rb_raise(rb_eTypeError,
+                 "GLib::Interface based module (%" PRIsVALUE ") "
+                 "must be included into a class directly: %" PRIsVALUE,
+                 self,
+                 class_or_module);
+    }
+    interface_cinfo = rbgobj_lookup_class(self);
+    class_cinfo = rbgobj_lookup_class(class_or_module);
+    if (class_cinfo->klass != class_or_module) {
+        return Qnil;
+    }
+    if (g_type_is_a(class_cinfo->gtype, interface_cinfo->gtype)) {
+        return Qnil;
+    }
+    g_type_add_interface_static(class_cinfo->gtype,
+                                interface_cinfo->gtype,
+                                &interface_info);
+    return Qnil;
 }
 
 static VALUE
@@ -72,7 +106,7 @@ rg_property(VALUE self, VALUE property_name)
         rb_raise(rb_eTypeError, "%s isn't interface module", rb_class2name(self));
     /* XXX: g_type_default_interface_ref(G_TYPE_INTERFACE) causes SEGV. */
     if (gtype == G_TYPE_INTERFACE) {
-        rb_raise(rb_const_get(mGLib, rb_intern("NoPropertyError")),
+        rb_raise(rb_const_get(rbg_mGLib(), rb_intern("NoPropertyError")),
                  "No such property: %s", name);
     }
 
@@ -80,7 +114,7 @@ rg_property(VALUE self, VALUE property_name)
     prop = g_object_interface_find_property(ginterface, name);
     if (!prop){
         g_type_default_interface_unref(ginterface);
-        rb_raise(rb_const_get(mGLib, rb_intern("NoPropertyError")),
+        rb_raise(rb_const_get(rbg_mGLib(), rb_intern("NoPropertyError")),
                  "No such property: %s", name);
     }
     result = GOBJ2RVAL(prop);
@@ -138,12 +172,18 @@ rbgobj_init_interface(VALUE interf)
 void
 Init_gobject_typeinterface(void)
 {
-    RG_TARGET_NAMESPACE = rb_define_module_under(mGLib, "MetaInterface");
+    RG_TARGET_NAMESPACE = rb_define_module_under(rbg_mGLib(), "MetaInterface");
     rbg_define_method(RG_TARGET_NAMESPACE, "gtype", generic_s_gtype, 0);
+    rbg_define_method(RG_TARGET_NAMESPACE,
+                      "to_s",
+                      rbgutil_generic_s_to_s_gtype_name_fallback,
+                      0);
+    RG_DEF_ALIAS("inspect", "to_s");
     RG_DEF_METHOD(append_features, 1);
+    RG_DEF_METHOD(included, 1);
     RG_DEF_METHOD(install_property, 1);
     RG_DEF_METHOD(property, 1);
     RG_DEF_METHOD(properties, -1);
 
-    rbgobj_mInterface = G_DEF_INTERFACE(G_TYPE_INTERFACE, "Interface", mGLib);
+    rbgobj_mInterface = G_DEF_INTERFACE(G_TYPE_INTERFACE, "Interface", rbg_mGLib());
 }

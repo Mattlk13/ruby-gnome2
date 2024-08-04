@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2012-2019  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2012-2022  Ruby-GNOME Project Team
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -22,6 +22,15 @@
 
 #define RG_TARGET_NAMESPACE rb_mGObjectIntrospection
 
+typedef struct {
+    ID name;
+    GICallableInfo *callable_info;
+
+    ffi_cif cif;
+    ffi_closure *closure;
+} RBGIVFuncCallbackData;
+
+static ID id_send;
 static gboolean is_debug_mode = FALSE;
 
 gboolean
@@ -33,7 +42,11 @@ rb_gi_is_debug_mode(void)
 void
 Init_gobject_introspection(void)
 {
-    VALUE RG_TARGET_NAMESPACE;
+#ifdef HAVE_RB_EXT_RACTOR_SAFE
+    rb_ext_ractor_safe(true);
+#endif
+
+    id_send = rb_intern("__send__");
 
     {
         const char *rb_gi_debug_env = getenv("RB_GI_DEBUG");
@@ -42,7 +55,7 @@ Init_gobject_introspection(void)
         }
     }
 
-    RG_TARGET_NAMESPACE = rb_define_module("GObjectIntrospection");
+    VALUE RG_TARGET_NAMESPACE = rb_define_module("GObjectIntrospection");
 
     rb_define_const(RG_TARGET_NAMESPACE, "BUILD_VERSION",
                     rb_ary_new3(3,
@@ -50,10 +63,11 @@ Init_gobject_introspection(void)
                                 INT2FIX(GI_MINOR_VERSION),
                                 INT2FIX(GI_MICRO_VERSION)));
 
-    rb_gi_argument_init();
-
+    rb_gi_array_type_init(RG_TARGET_NAMESPACE);
     rb_gi_type_tag_init(RG_TARGET_NAMESPACE);
     rb_gi_base_info_init(RG_TARGET_NAMESPACE);
     rb_gi_repository_init(RG_TARGET_NAMESPACE);
     rb_gi_loader_init(RG_TARGET_NAMESPACE);
+
+    rb_gi_callback_init(RG_TARGET_NAMESPACE);
 }

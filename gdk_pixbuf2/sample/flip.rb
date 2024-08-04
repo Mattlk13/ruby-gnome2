@@ -2,14 +2,13 @@
 =begin
   flip.rb - Ruby/GdkPixbuf sample script.
 
-  Copyright (c) 2005-2016 Ruby-GNOME2 Project Team
-  This program is licenced under the same licence as Ruby-GNOME2.
+  Copyright (c) 2005-2020 Ruby-GNOME Project Team
+  This program is licenced under the same licence as Ruby-GNOME.
 
   $Id: flip.rb,v 1.3 2006/06/17 14:38:08 mutoh Exp $
 =end
 
-require 'gtk2'
-
+require 'gtk3'
 
 filename = ARGV[0]
 unless filename
@@ -17,24 +16,18 @@ unless filename
   exit(1)
 end
 
-if str = Gtk.check_version(2, 6, 0)
-  puts "This sample requires GTK+ 2.6.0 or later"
-  puts str
-  exit
-end
+vbox = Gtk::Box.new(:vertical)
 
-vbox = Gtk::VBox.new
-
-src =  GdkPixbuf::Pixbuf.new(:file => filename)
-vbox.add(Gtk::Image.new(src))
+src =  GdkPixbuf::Pixbuf.new(file: filename)
+vbox.add(Gtk::Image.new(pixbuf: src))
 
 # Horizontal
 dst = src.flip(true)
-vbox.add(Gtk::Image.new(dst))
+vbox.add(Gtk::Image.new(pixbuf: dst))
 
 # Vertical
 dst2 = src.flip(false)
-vbox.add(Gtk::Image.new(dst2))
+vbox.add(Gtk::Image.new(pixbuf: dst2))
 
 window = Gtk::Window.new
 window.signal_connect('delete-event') do
@@ -44,4 +37,3 @@ end
 window.add(vbox).show_all
 
 Gtk.main
-

@@ -1,7 +1,7 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011-2015  Ruby-GNOME2 Project Team
- *  Copyright (C) 2002-2004 Masao Mutoh
+ *  Copyright (C) 2011-2023  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2002-2004  Masao Mutoh
  *
  *  This library is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU Lesser General Public
@@ -47,6 +47,25 @@ rbg_define_method(VALUE klass, const char *name, VALUE (*func)(ANYARGS), int arg
 }
 
 void
+rbg_define_private_method(VALUE klass,
+                          const char *name,
+                          VALUE (*func)(ANYARGS),
+                          int argc)
+{
+    rb_define_private_method(klass, name, func, argc);
+    if ((argc != 1) || strncmp(name, "set_", 4))
+        return;
+
+    name += 4;
+    rb_funcall(klass, rbgutil_id_module_eval, 3,
+               CSTR2RVAL_FREE(g_strdup_printf("def %s=(val); set_%s(val); val; end\n"
+                                              "private :%s=\n",
+                                              name, name, name)),
+               rb_str_new2(__FILE__),
+               INT2NUM(__LINE__));
+}
+
+void
 rbg_define_singleton_method(VALUE obj, const char *name, VALUE (*func)(ANYARGS), int argc)
 {
     rb_define_singleton_method(obj, name, func, argc);
@@ -84,7 +103,7 @@ rbgutil_set_properties(VALUE self, VALUE hash)
 VALUE
 rbgutil_def_setters(VALUE klass)
 {
-    return rb_funcall(mGLib, id_add_one_arg_setter, 1, klass);
+    return rb_funcall(rbg_mGLib(), id_add_one_arg_setter, 1, klass);
 }
 
 void
@@ -111,6 +130,17 @@ VALUE
 rbgutil_generic_gtype(VALUE self)
 {
     return generic_s_gtype(CLASS_OF(self));
+}
+
+VALUE
+rbgutil_generic_s_to_s_gtype_name_fallback(VALUE klass)
+{
+    VALUE rb_name = rb_funcall(klass, rb_intern("name"), 0);
+    if (NIL_P(rb_name)) {
+        return rb_str_new_cstr(g_type_name(CLASS2GTYPE(klass)));
+    } else {
+        return rb_call_super(0, NULL);
+    }
 }
 
 VALUE

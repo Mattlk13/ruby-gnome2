@@ -1,4 +1,4 @@
-# Copyright (C) 2012-2019  Ruby-GNOME Project Team
+# Copyright (C) 2012-2023  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -24,6 +24,9 @@ module GObjectIntrospection
         loader.version = options[:version]
         loader.load(namespace)
       end
+
+      def initialize_instance_post(object)
+      end
     end
 
     attr_accessor :version
@@ -35,14 +38,16 @@ module GObjectIntrospection
     def load(namespace)
       repository = Repository.default
       repository.require(namespace, @version)
-      pre_load(repository, namespace)
-      repository.each(namespace) do |info|
-        load_info(info) if info.is_a?(InterfaceInfo)
+      prepare_class(@base_module) do
+        pre_load(repository, namespace)
+        repository.each(namespace) do |info|
+          load_info(info) if info.is_a?(InterfaceInfo)
+        end
+        repository.each(namespace) do |info|
+          load_info(info) unless info.is_a?(InterfaceInfo)
+        end
+        post_load(repository, namespace)
       end
-      repository.each(namespace) do |info|
-        load_info(info) unless info.is_a?(InterfaceInfo)
-      end
-      post_load(repository, namespace)
     end
 
     private
@@ -77,31 +82,42 @@ module GObjectIntrospection
 
     def load_function_info(info)
       name = rubyish_method_name(info)
-      define_singleton_method(@base_module, name, info)
+      define_singleton_method(info, @base_module, name)
     end
 
     def load_function_info_singleton_method(info, klass, method_name)
-      define_singleton_method(klass, method_name, info)
+      define_singleton_method(info, klass, method_name)
     end
 
-    def define_module_function(target_module, name, function_info)
-      function_info.unlock_gvl = should_unlock_gvl?(function_info, target_module)
+    def define_module_function(function_info, target_module, name)
+      prepare_function_info_lock_gvl(function_info, target_module)
       full_method_name = "#{target_module}\#.#{name}"
       invoker = Invoker.new(function_info, name, full_method_name)
-      target_module.module_eval do
-        define_method(name) do |*arguments, &block|
-          invoker.invoke(nil, arguments, block)
+      target_module::INVOKERS[name] = invoker
+      target_module.module_eval(<<-DEFINE_METHOD, __FILE__, __LINE__ + 1)
+        def #{name}(*arguments, &block)
+          INVOKERS["#{name}"].invoke(nil, arguments, block)
         end
-        module_function(name)
-      end
+        module_function(:#{name})
+      DEFINE_METHOD
     end
 
-    def define_singleton_method(klass, name, info)
-      info.unlock_gvl = should_unlock_gvl?(info, klass)
-      invoker = Invoker.new(info, name, "#{klass}.#{name}")
-      klass.singleton_class.__send__(:define_method, name) do |*arguments, &block|
-        invoker.invoke(nil, arguments, block)
+    def define_singleton_method(info, klass, name)
+      case name
+      when "hash"
+        # Ignore methods that require 1+ arguments and use well-known
+        # name. It may break something.
+        return unless info.n_required_in_args.zero?
       end
+      prepare_function_info_lock_gvl(info, klass)
+      invoker = Invoker.new(info, name, "#{klass}.#{name}")
+      singleton_class = klass.singleton_class
+      singleton_class::INVOKERS[name] = invoker
+      singleton_class.class_eval(<<-DEFINE_METHOD, __FILE__, __LINE__ + 1)
+        def #{name}(*arguments, &block)
+          INVOKERS["#{name}"].invoke(nil, arguments, block)
+        end
+      DEFINE_METHOD
     end
 
     def define_struct(info, options={})
@@ -116,8 +132,10 @@ module GObjectIntrospection
                                         :parent => options[:parent],
                                         :size   => size)
       end
-      load_fields(info, klass)
-      load_methods(info, klass)
+      prepare_class(klass) do
+        load_fields(info, klass)
+        load_methods(info, klass)
+      end
     end
 
     def load_struct_info(info)
@@ -129,7 +147,13 @@ module GObjectIntrospection
         end
         unless method_infos.empty?
           base_class = @base_module.const_get(base_class_name)
-          load_methods_method(method_infos, base_class.singleton_class)
+          singleton_class = base_class.singleton_class
+          invokers = singleton_class.const_get(:INVOKERS).dup
+          singleton_class.__send__(:remove_const, :INVOKERS)
+          singleton_class.const_set(:INVOKERS, invokers)
+          load_methods_method(method_infos, singleton_class)
+          Ractor.make_shareable(singleton_class::INVOKERS) if defined?(Ractor)
+          singleton_class.private_constant(:INVOKERS)
         end
       else
         return if info.gtype_struct?
@@ -152,15 +176,20 @@ module GObjectIntrospection
     end
 
     def load_enum_value(value_info, enum_module)
-      enum_module.const_set(value_info.name.upcase, value_info.value)
+      value = value_info.value
+      Ractor.make_shareable(value) if defined?(Ractor)
+      enum_module.const_set(value_info.name.upcase, value)
     end
 
     def define_enum(info)
       # TODO: Can we do the same things for flags on NONE GType?
       return if info.gtype == GLib::Type::NONE
-      self.class.define_class(info.gtype,
-                              rubyish_class_name(info),
-                              @base_module)
+      klass = self.class.define_class(info.gtype,
+                                      rubyish_class_name(info),
+                                      @base_module)
+      prepare_class(klass) do
+        load_methods(info, klass)
+      end
     end
 
     def define_error(info)
@@ -203,7 +232,12 @@ module GObjectIntrospection
         end
         @base_module.const_set(rubyish_class_name(info), flags_module)
       else
-        self.class.define_class(info.gtype, flags_class_name(info), @base_module)
+        klass = self.class.define_class(info.gtype,
+                                        flags_class_name(info),
+                                        @base_module)
+        prepare_class(klass) do
+          load_methods(info, klass)
+        end
       end
     end
 
@@ -213,11 +247,16 @@ module GObjectIntrospection
 
     def load_object_info(info)
       return if info.gtype == GLib::Type::NONE
+      # e.g.: GstBitmask
+      return if info.fundamental? and !info.gtype.instantiatable?
       klass = self.class.define_class(info.gtype,
                                       rubyish_class_name(info),
                                       @base_module)
-      load_fields(info, klass)
-      load_methods(info, klass)
+      prepare_class(klass) do
+        load_virtual_functions(info, klass)
+        load_fields(info, klass)
+        load_methods(info, klass)
+      end
     end
 
     def load_fields(info, klass)
@@ -299,46 +338,61 @@ module GObjectIntrospection
     def load_methods_constructor(infos, klass)
       return if infos.empty?
 
-      call_initialize_post = lambda do |object|
-        initialize_post(object)
-      end
-      invokers = []
+      klass.const_set(:LOADER_CLASS, self.class)
+      invokers = {}
+      klass.const_set(:INITIALIZE_INVOKERS, invokers)
       infos.each do |info|
         name = "initialize_#{info.name}"
-        info.unlock_gvl = should_unlock_gvl?(info, klass)
+        prepare_function_info_lock_gvl(info, klass)
         invoker = Invoker.new(info, name, "#{klass}\##{name}")
-        invokers << invoker
-        klass.__send__(:define_method, name) do |*arguments, &block|
-          invoker.invoke(self, arguments, block)
-          call_initialize_post.call(self)
-        end
-        klass.__send__(:private, name)
+        invokers[name] = invoker
+        klass.class_eval(<<-DEFINE_METHOD, __FILE__, __LINE__ + 1)
+          def #{name}(*arguments, &block)
+            invoker = INITIALIZE_INVOKERS["#{name}"]
+            invoker.invoke(self, arguments, block)
+            LOADER_CLASS.initialize_instance_post(self)
+          end
+          private :#{name}
+        DEFINE_METHOD
       end
 
-      initialize = lambda do |receiver, arguments, block|
-        invokers.each do |invoker|
-          catch do |tag|
-            invoker.invoke(receiver, arguments.dup, block, tag)
-            call_initialize_post.call(receiver)
-            return
+      klass.class_eval(<<-DEFINE_METHOD, __FILE__, __LINE__ + 1)
+        def initialize(*arguments, &block)
+          invokers = INITIALIZE_INVOKERS
+          invokers.values.each do |invoker|
+            catch do |tag|
+              invoker.invoke(self, arguments.dup, block, tag)
+              LOADER_CLASS.initialize_instance_post(self)
+              return
+            end
           end
+          full_method_name = "\#{self.class.name}\#\#{__method__}"
+          message = "wrong arguments: "
+          message << "\#{full_method_name}("
+          message << arguments.collect(&:inspect).join(", ")
+          message << "):\\n"
+          message << "available signatures:"
+          invokers.each_value do |invoker|
+            message << "\\n\#{full_method_name}\#{invoker.signature}"
+          end
+          raise ArgumentError, message
         end
-        message = "wrong arguments: "
-        message << "#{klass.name}#initialize("
-        message << arguments.collect(&:inspect).join(", ")
-        message << "): "
-        message << "available signatures"
-        invokers.each do |invoker|
-          message << ": #{invoker.signature}"
-        end
-        raise ArgumentError, message
-      end
-      klass.__send__(:define_method, "initialize") do |*arguments, &block|
-        initialize.call(self, arguments, block)
-      end
+      DEFINE_METHOD
+      Ractor.make_shareable(klass::INITIALIZE_INVOKERS) if defined?(Ractor)
     end
 
-    def initialize_post(object)
+    def load_virtual_functions(info, klass)
+      klass.extend(VirtualFunctionImplementable)
+      gtype_prefix = rubyish_gtype_name(klass.gtype.name)
+      implementor = VirtualFunctionImplementor.new(self.class,
+                                                   gtype_prefix,
+                                                   info.vfuncs)
+      klass.__send__(:initialize_virtual_function_implementable,
+                     implementor)
+    end
+
+    def rubyish_gtype_name(name)
+      name.scan(/[A-Z]+[a-z\d]+/).collect(&:downcase).join("_")
     end
 
     def rubyish_method_name(function_info, options={})
@@ -442,7 +496,11 @@ module GObjectIntrospection
             name
           end
         when "to_string"
-          "to_s"
+          if n_in_args.zero?
+            "to_s"
+          else
+            name
+          end
         when "to_integer"
           "to_i"
         when "foreach"
@@ -483,8 +541,12 @@ module GObjectIntrospection
       end
     end
 
-    def should_unlock_gvl?(function_info, klass)
-      false
+    def prepare_function_info_lock_gvl(function_info, target_module)
+      # For backward compatibility
+      if respond_to?(:should_unlock_gvl?)
+        function_info.lock_gvl_default =
+          !should_unlock_gvl?(function_info, target_module)
+      end
     end
 
     def load_methods_method(infos, klass)
@@ -507,12 +569,18 @@ module GObjectIntrospection
     end
 
     def define_method(info, klass, method_name)
-      info.unlock_gvl = should_unlock_gvl?(info, klass)
+      return if method_name.empty?
+      prepare_function_info_lock_gvl(info, klass)
       remove_existing_method(klass, method_name)
       invoker = Invoker.new(info, method_name, "#{klass}\##{method_name}")
-      klass.__send__(:define_method, method_name) do |*arguments, &block|
-        invoker.invoke(self, arguments, block)
-      end
+      invokers = klass::INVOKERS
+      invokers[method_name] = invoker
+      klass.class_eval(<<-DEFINE_METHOD, __FILE__, __LINE__ + 1)
+        def #{method_name}(*arguments, &block)
+          invoker = INVOKERS["#{method_name}"]
+          invoker.invoke(self, arguments, block)
+        end
+      DEFINE_METHOD
     end
 
     def define_equal_style_setter(info, klass, method_name)
@@ -525,9 +593,11 @@ module GObjectIntrospection
 
     def define_inspect(info, klass, method_name)
       if method_name == "to_s" and info.n_args.zero?
-        klass.__send__(:define_method, "inspect") do ||
-          super().gsub(/\>\z/) {" #{to_s}>"}
-        end
+        klass.class_eval(<<-DEFINE_METHOD, __FILE__, __LINE__ + 1)
+          def inspect
+            super.gsub(/>\\z/) {" \#{to_s}>"}
+          end
+        DEFINE_METHOD
       end
     end
 
@@ -546,7 +616,10 @@ module GObjectIntrospection
         self.class.define_interface(info.gtype,
                                     rubyish_class_name(info),
                                     @base_module)
-      load_methods(info, interface_module)
+      prepare_class(interface_module) do
+        load_virtual_functions(info, interface_module)
+        load_methods(info, interface_module)
+      end
     end
 
     def load_constant_info(info)
@@ -560,8 +633,47 @@ module GObjectIntrospection
     def load_union_info(info)
       return if info.gtype == GLib::Type::NONE
       klass = self.class.define_class(info.gtype, info.name, @base_module)
-      load_fields(info, klass)
-      load_methods(info, klass)
+      prepare_class(klass) do
+        load_fields(info, klass)
+        load_methods(info, klass)
+      end
+    end
+
+    def prepare_class(klass)
+      pre_prepare_class(klass)
+      yield
+      post_prepare_class(klass)
+    end
+
+    def pre_prepare_class(klass)
+      klass.const_set(:INVOKERS, {})
+      klass.singleton_class.const_set(:INVOKERS, {})
+    end
+
+    def post_prepare_class(klass)
+      return unless defined?(Ractor)
+      Ractor.make_shareable(klass::INVOKERS)
+      Ractor.make_shareable(klass.singleton_class::INVOKERS)
+      klass.private_constant(:INVOKERS)
+      klass.singleton_class.private_constant(:INVOKERS)
+    end
+
+    def define_methods_module(name)
+      mod = Module.new
+      @base_module.const_set(name, mod)
+      mod.const_set(:INVOKERS, {})
+      mod
+    end
+
+    def apply_methods_module(mod, target)
+      target.include(mod)
+      post_methods_module(mod)
+    end
+
+    def post_methods_module(mod)
+      return unless defined?(Ractor)
+      Ractor.make_shareable(mod::INVOKERS)
+      mod.private_constant(:INVOKERS)
     end
 
     class Invoker
@@ -570,6 +682,7 @@ module GObjectIntrospection
         @method_name = method_name
         @full_method_name = full_method_name
         @prepared = false
+        ensure_prepared if defined?(Ractor)
       end
 
       def invoke(receiver, arguments, block, abort_tag=nil)
@@ -629,10 +742,13 @@ module GObjectIntrospection
         @valid_n_args_range = (@n_required_in_args..@n_in_args)
 
         @in_arg_types = []
+        @in_arg_nils = []
         @in_arg_nil_indexes = []
         @in_args.each_with_index do |arg, i|
           @in_arg_types << arg.type
-          @in_arg_nil_indexes << i if arg.may_be_null?
+          may_be_null = arg.may_be_null?
+          @in_arg_nils << may_be_null
+          @in_arg_nil_indexes << i if may_be_null
         end
 
         @function_info_p = (@info.class == FunctionInfo)
@@ -664,9 +780,9 @@ module GObjectIntrospection
         end
 
         n_missing_arguments = @n_in_args - arguments.size
-        if 0 < n_missing_arguments
-          @in_arg_nil_indexes.each_with_index do |nil_index, i|
-            next if i <= n_missing_arguments
+        n_in_arg_nil_indexes = @in_arg_nil_indexes.size
+        if 0 < n_missing_arguments and n_missing_arguments < n_in_arg_nil_indexes
+          @in_arg_nil_indexes[-n_missing_arguments..-1].each do |nil_index|
             arguments.insert(nil_index, nil)
           end
         end
@@ -681,10 +797,10 @@ module GObjectIntrospection
       def normalize_arguments!(arguments, abort_tag)
         arguments.size.times do |i|
           argument = arguments[i]
-          next if argument.nil?
           type = @in_arg_types[i]
           converted_argument = type.try_convert(argument)
           if converted_argument.nil?
+            next if argument.nil? and @in_arg_nils[i]
             if abort_tag
               throw(abort_tag)
             elsif @on_invalid == :fallback
@@ -706,6 +822,53 @@ module GObjectIntrospection
           detail << "#{@n_required_in_args}..#{@n_in_args}"
         end
         "#{@full_method_name}: wrong number of arguments (#{detail})"
+      end
+    end
+
+    class VirtualFunctionImplementor
+      def initialize(loader_class, gtype_prefix, infos)
+        @loader_class = loader_class
+        @gtype_prefix = gtype_prefix
+        @infos = {}
+        prefix = GLib::VIRTUAL_FUNCTION_IMPLEMENTATION_PREFIX
+        infos.each do |info|
+          name = info.name
+          @infos[:"#{prefix}#{name}"] = info
+          @infos[:"#{prefix}#{gtype_prefix}_#{name}"] = info
+        end
+      end
+
+      def implement(implementor_gtype, name)
+        info = @infos[name]
+        return false if info.nil?
+        container = info.container
+        vtable_gtype = container.gtype
+        if container.respond_to?(:class_struct)
+          struct = container.class_struct
+        else
+          return false unless implementor_gtype.type_is_a?(vtable_gtype)
+          struct = container.iface_struct
+        end
+        field = struct.find_field(info.name)
+        @loader_class.implement_virtual_function(field,
+                                                 implementor_gtype,
+                                                 vtable_gtype,
+                                                 name.to_s)
+        true
+      end
+    end
+
+    module VirtualFunctionImplementable
+      def initialize_virtual_function_implementable(implementor)
+        @virtual_function_implementor = implementor
+      end
+
+      def implement_virtual_function(implementor_class, name)
+        unless instance_variable_defined?(:@virtual_function_implementor)
+          return false
+        end
+        @virtual_function_implementor.implement(implementor_class.gtype,
+                                                name)
       end
     end
   end

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 Ruby-GNOME2 Project Team
+# Copyright (C) 2016-2021  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -27,24 +27,38 @@ module Gnm
     def require_libraries
     end
 
+    def load_enum_info(info)
+      case info.name
+      when "signtest_type", "ttest_type", /_t\z/
+        # Ignore enum that don't support introspection
+        return
+      end
+      super
+    end
+
     def load_enum_value(value_info, enum_module)
-      name = case value_info.name.upcase
-      when /\A3D_NAME\z/
-        "NAME_3D"
-      else
-        value_info.name.upcase
+      name = value_info.name.upcase
+      case name
+      when "3D_NAME"
+        name = "NAME_3D"
       end
       enum_module.const_set(name, value_info.value)
     end
 
-    def rubyish_class_name(info)
-      name = info.name.gsub(/Class\z/, "")
+    def load_flags_info(info)
+      case info.name
+      when /_t\z/
+        # Ignore flags that don't support introspection
+        return
+      end
+      super
+    end
+
+    def rubyish_method_name(function_info, options={})
+      name = super
       case name
-      when /\A.*_t\z/
-        name.gsub(/_t\z/, "").split("_").map do |component|
-          component[0] = component[0].upcase
-          component
-        end.join
+      when /\A\d/
+        "_#{$POSTMATCH}"
       else
         name
       end

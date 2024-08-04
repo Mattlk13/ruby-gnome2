@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (C) 2017-2018  Ruby-GNOME2 Project Team
+# Copyright (C) 2017-2023  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -23,40 +23,30 @@ top_dir = base_dir.parent
 top_build_dir = Pathname(".").parent.parent.parent.expand_path
 
 mkmf_gnome2_dir = top_dir + "glib2" + "lib"
-version_suffix = ""
-unless mkmf_gnome2_dir.exist?
-  if /(-\d+\.\d+\.\d+)\z/ =~ base_dir.basename.to_s
-    version_suffix = $1
-    mkmf_gnome2_dir = top_dir + "glib2#{version_suffix}" + "lib"
-  end
-end
+$LOAD_PATH.unshift(mkmf_gnome2_dir.to_s) if mkmf_gnome2_dir.exist?
 
-$LOAD_PATH.unshift(mkmf_gnome2_dir.to_s)
 
 module_name = "pango"
 package_id = "pango"
 
-require "mkmf-gnome2"
+require "mkmf-gnome"
 
 depended_packages = [
   "glib2",
   "gobject-introspection",
 ]
 depended_packages.each do |package|
-  directory = "#{package}#{version_suffix}"
-  build_base_path = "#{directory}/tmp/#{RUBY_PLATFORM}"
-  package_library_name = package.gsub(/-/, "_")
-  build_dir = "#{build_base_path}/#{package_library_name}/#{RUBY_VERSION}"
-  add_depend_package(package, "#{directory}/ext/#{package}",
+  add_depend_package(package,
+                     "#{package}/ext/#{package}",
                      top_dir.to_s,
-                     :top_build_dir => top_build_dir.to_s,
-                     :target_build_dir => build_dir)
+                     top_build_dir: top_build_dir.to_s)
 end
 
 unless required_pkg_config_package([package_id, 1, 14, 0],
                                    :alt_linux => "libpango-devel",
+                                   :conda => "pango",
                                    :debian => "libpango1.0-dev",
-                                   :redhat => "pango-devel",
+                                   :redhat => "pkgconfig(#{package_id})",
                                    :arch_linux => "pango",
                                    :homebrew => "pango",
                                    :macports => "pango",
@@ -86,6 +76,26 @@ have_func("pango_attr_iterator_get_attrs", pango_header)
 
 create_pkg_config_file("Ruby/Pango", package_id)
 $defs << " -DRUBY_PANGO_COMPILATION"
+case RUBY_PLATFORM
+when /darwin/
+  symbols_in_external_bundles = [
+    "_rb_gi_struct_get_raw",
+    "_rbg_define_method",
+    "_rbg_define_singleton_method",
+    "_rbg_rval2cstr",
+    "_rbgobj_add_relative",
+    "_rbgobj_boxed_get",
+    "_rbgobj_define_class",
+    "_rbgobj_get_enum",
+    "_rbgobj_initialize_object",
+    "_rbgobj_make_boxed",
+    "_rbgobj_make_boxed_raw",
+    "_rbgobj_make_enum",
+  ]
+  symbols_in_external_bundles.each do |symbol|
+    $DLDFLAGS << " -Wl,-U,#{symbol}"
+  end
+end
 create_makefile(module_name)
 
 pkg_config_dir = with_config("pkg-config-dir")

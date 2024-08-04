@@ -1,6 +1,6 @@
 # -*- ruby -*-
 #
-# Copyright (C) 2019  Ruby-GNOME Project Team
+# Copyright (C) 2019-2022  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   s.description   = "Ruby/libsecret is a Ruby binding of libsecret."
   s.author        = "The Ruby-GNOME Project Team"
   s.email         = "ruby-gnome2-devel-en@lists.sourceforge.net"
-  s.homepage      = "https://ruby-gnome2.osdn.jp/"
+  s.homepage      = "https://ruby-gnome.github.io/"
   s.licenses      = ["LGPL-2.1+"]
   s.version       = ruby_glib2_version
   s.extensions    = ["dependency-check/Rakefile"]
@@ -37,9 +37,8 @@ Gem::Specification.new do |s|
     "dependency-check/Rakefile",
   ]
   s.files += Dir.glob("lib/**/*.rb")
-  s.files += Dir.glob("test/**/*")
 
   s.add_runtime_dependency("gobject-introspection", "= #{s.version}")
 
-  s.metadata["msys2_mingw_dependencies"] = "gegl"
+  s.metadata["msys2_mingw_dependencies"] = "libsecret"
 end

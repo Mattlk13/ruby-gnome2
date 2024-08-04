@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011-2019  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2011-2023  Ruby-GNOME Project Team
  *  Copyright (C) 2002,2003  Masahiro Sakai
  *
  *  This library is free software; you can redistribute it and/or
@@ -57,12 +57,10 @@ static const rb_data_type_t rg_glib_boxed_type = {
     {
         boxed_mark,
         boxed_free,
-        NULL,
-        {0},
     },
     NULL,
     NULL,
-    RUBY_TYPED_FREE_IMMEDIATELY,
+    RUBY_TYPED_FREE_IMMEDIATELY | RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
 static boxed_holder *
@@ -182,15 +180,26 @@ rbgobj_boxed_initialize(VALUE obj, gpointer boxed)
 gpointer
 rbgobj_boxed_get_default(VALUE obj, GType gtype)
 {
-    boxed_holder *holder;
+    VALUE klass = GTYPE2CLASS(gtype);
 
-    if (!RVAL2CBOOL(rb_obj_is_kind_of(obj, GTYPE2CLASS(gtype))))
+    if (!RVAL2CBOOL(rb_obj_is_kind_of(obj, klass))) {
+        ID id_try_convert;
+        CONST_ID(id_try_convert, "try_convert");
+        if (rb_respond_to(klass, id_try_convert)) {
+            VALUE converted_obj = rb_funcall(klass, id_try_convert, 1, obj);
+            if (!NIL_P(converted_obj)) {
+                obj = converted_obj;
+            }
+        }
+    }
+    if (!RVAL2CBOOL(rb_obj_is_kind_of(obj, klass))) {
         rb_raise(rb_eArgError,
                  "invalid argument %" PRIsVALUE " (expect %" PRIsVALUE ")",
                  CLASS_OF(obj),
                  GTYPE2CLASS(gtype));
+    }
 
-    holder = rbgobj_boxed_get_raw(obj);
+    boxed_holder *holder = rbgobj_boxed_get_raw(obj);
     if (!holder->boxed)
         rb_raise(rb_eArgError, "uninitialize %" PRIsVALUE,
                  CLASS_OF(obj));
@@ -304,13 +313,18 @@ boxed_from_ruby(VALUE from, GValue *to)
 void
 Init_gobject_gboxed(void)
 {
-    RG_TARGET_NAMESPACE = G_DEF_CLASS(G_TYPE_BOXED, "Boxed", mGLib);
+    RG_TARGET_NAMESPACE = G_DEF_CLASS(G_TYPE_BOXED, "Boxed", rbg_mGLib());
 
     rbgobj_register_g2r_func(G_TYPE_BOXED, boxed_to_ruby);
     rbgobj_register_r2g_func(G_TYPE_BOXED, boxed_from_ruby);
 
     rb_define_alloc_func(RG_TARGET_NAMESPACE, rbgobj_boxed_alloc_func);
     rbg_define_singleton_method(RG_TARGET_NAMESPACE, "gtype", generic_s_gtype, 0);
+    rbg_define_singleton_method(RG_TARGET_NAMESPACE,
+                                "to_s",
+                                rbgutil_generic_s_to_s_gtype_name_fallback,
+                                0);
+    RG_DEF_SALIAS("inspect", "to_s");
     rbg_define_method(RG_TARGET_NAMESPACE, "gtype", generic_gtype, 0);
     RG_DEF_METHOD(initialize, 0);
     RG_DEF_METHOD(inspect, 0);

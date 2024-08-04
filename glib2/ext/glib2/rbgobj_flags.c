@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2004-2019  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2004-2023  Ruby-GNOME Project Team
  *  Copyright (C) 2002,2003  Masahiro Sakai
  *
  *  This library is free software; you can redistribute it and/or
@@ -80,12 +80,12 @@ static const rb_data_type_t rg_glib_flags_type = {
     {
         NULL,
         flags_free,
-        NULL,
-        {0},
     },
     NULL,
     NULL,
-    RUBY_TYPED_FREE_IMMEDIATELY,
+    RUBY_TYPED_FREE_IMMEDIATELY |
+    RUBY_TYPED_WB_PROTECTED |
+    RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
 static flags_holder*
@@ -371,7 +371,8 @@ flags_compare_get_flags_body(VALUE user_data)
 }
 
 static VALUE
-flags_compare_get_flags_rescue(VALUE user_data)
+flags_compare_get_flags_rescue(VALUE user_data,
+                               G_GNUC_UNUSED VALUE error)
 {
     compare_data *data = (compare_data *)user_data;
 
@@ -467,7 +468,7 @@ rg_operator_flags_lt(VALUE self, VALUE rhs)
 }
 
 static VALUE
-rg_operator_flags_not(VALUE self, G_GNUC_UNUSED VALUE rhs)
+rg_operator_flags_not(VALUE self)
 {
     flags_holder* p = flags_get_holder(self);
     return rbgobj_make_flags((~ p->value) & p->gclass->mask,
@@ -543,9 +544,14 @@ Init_gobject_gflags(void)
     id_or = rb_intern("|");
     id_to_i = rb_intern("to_i");
 
-    RG_TARGET_NAMESPACE = G_DEF_CLASS(G_TYPE_FLAGS, "Flags", mGLib);
+    RG_TARGET_NAMESPACE = G_DEF_CLASS(G_TYPE_FLAGS, "Flags", rbg_mGLib());
 
     rbg_define_singleton_method(RG_TARGET_NAMESPACE, "gtype", generic_s_gtype, 0);
+    rbg_define_singleton_method(RG_TARGET_NAMESPACE,
+                                "to_s",
+                                rbgutil_generic_s_to_s_gtype_name_fallback,
+                                0);
+    RG_DEF_SALIAS("inspect", "to_s");
     rbg_define_method(RG_TARGET_NAMESPACE, "gtype", generic_gtype, 0);
 
     RG_DEF_SMETHOD(mask, 0);

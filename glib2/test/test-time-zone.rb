@@ -1,4 +1,4 @@
-# Copyright (C) 2016-2017  Ruby-GNOME2 Project Team
+# Copyright (C) 2016-2024  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -17,10 +17,6 @@
 class TestTimeZone < Test::Unit::TestCase
   include GLibTestUtils
 
-  setup do
-    only_glib_version(2, 34, 0)
-  end
-
   sub_test_case "new" do
     test "local" do
       local_1 = GLib::TimeZone.local
@@ -33,5 +29,11 @@ class TestTimeZone < Test::Unit::TestCase
       utc_2 = GLib::TimeZone.new("UTC")
       assert_equal(utc_1.offset(0), utc_2.offset(0))
     end
+  end
+
+  def test_identifier
+    only_glib_version(2, 58, 0)
+    utc = GLib::TimeZone.new("UTC")
+    assert_equal("UTC", utc.identifier)
   end
 end

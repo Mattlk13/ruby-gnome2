@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 #
-# Copyright (C) 2017  Ruby-GNOME2 Project Team
+# Copyright (C) 2017-2021  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -16,39 +16,14 @@
 # License along with this library; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
-$VERBOSE = true
+require_relative "../../glib2/test/run-test"
 
-ruby_gnome2_base = File.join(File.dirname(__FILE__), "..", "..")
-ruby_gnome2_base = File.expand_path(ruby_gnome2_base)
-
-glib_base = File.join(ruby_gnome2_base, "glib2")
-gobject_introspection_base = File.join(ruby_gnome2_base, "gobject-introspection")
-cairo_gobject_base = File.join(ruby_gnome2_base, "cairo-gobject")
-pango_base = File.join(ruby_gnome2_base, "pango")
-
-$LOAD_PATH.unshift(File.join(glib_base, "test"))
-
-modules = [
-  [glib_base, "glib2"],
-  [gobject_introspection_base, "gobject-introspection"],
-  [cairo_gobject_base, "cairo-gobject"],
-  [pango_base, "pango"],
-]
-modules.each do |target, module_name|
-  makefile = File.join(target, "Makefile")
-  if File.exist?(makefile) and system("which make > /dev/null")
-    `make -C #{target.dump} > /dev/null` or exit(false)
-     $LOAD_PATH.unshift(File.join(target, "ext", module_name))
-  end
-  $LOAD_PATH.unshift(File.join(target, "lib"))
+run_test(__dir__,
+         [
+           "glib2",
+           "gobject-introspection",
+           "cairo-gobject",
+           "pango",
+         ]) do
+  require_relative "pango-test-utils"
 end
-
-$LOAD_PATH.unshift(File.join(glib_base, "test"))
-require "glib-test-init"
-
-$LOAD_PATH.unshift(File.join(pango_base, "test"))
-require "pango-test-utils"
-
-require "pango"
-
-exit Test::Unit::AutoRunner.run(true, File.join(pango_base, "test"))

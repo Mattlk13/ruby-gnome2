@@ -1,4 +1,4 @@
-# Copyright (C) 2015-2018  Ruby-GNOME2 Project Team
+# Copyright (C) 2015-2022  Ruby-GNOME Project Team
 #
 # This library is free software; you can redistribute it and/or
 # modify it under the terms of the GNU Lesser General Public
@@ -40,7 +40,7 @@ class TestGtkButton < Test::Unit::TestCase
     test ":icon_name" do
       icon_name = "document-open"
       button = Gtk::Button.new(:icon_name => icon_name)
-      assert_not_nil(button.image)
+      assert_equal(icon_name, button.icon_name)
     end
   end
 end

@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2011-2021  Ruby-GNOME Project Team
  *  Copyright (C) 2002,2003  Masahiro Sakai
  *
  *  This library is free software; you can redistribute it and/or
@@ -22,12 +22,20 @@
 #include "rbgprivate.h"
 
 /**********************************************************************/
-#define RG_TARGET_NAMESPACE rbgobj_cValue
+static VALUE rb_cGLibValue;
+
+#define RG_TARGET_NAMESPACE rb_cGLibValue
 #define _SELF(self) RVAL2GVALUE(self)
 
 static ID id_to_s;
 static GQuark qRValueToGValueFunc;
 static GQuark qGValueToRValueFunc;
+
+gboolean
+rbg_is_value(VALUE object)
+{
+    return RVAL2CBOOL(rb_obj_is_kind_of(object, RG_TARGET_NAMESPACE));
+}
 
 void
 rbgobj_register_r2g_func(GType gtype, RValueToGValueFunc func)
@@ -61,7 +69,7 @@ rbgobj_gvalue_to_rvalue(const GValue* value)
       case G_TYPE_NONE:
         return Qnil;
       case G_TYPE_CHAR:
-        return CHR2FIX(g_value_get_char(value));
+        return CHR2FIX(g_value_get_schar(value));
       case G_TYPE_UCHAR:
         return INT2FIX(g_value_get_uchar(value));
       case G_TYPE_BOOLEAN:
@@ -121,15 +129,14 @@ rbgobj_gvalue_to_rvalue(const GValue* value)
                     continue;
                 return func(value);
             }
+            return BOXED2RVAL(g_value_get_boxed(value), type);
         }
-#if GLIB_CHECK_VERSION(2, 26, 0)
       case G_TYPE_VARIANT:
         {
             GVariant *variant = g_value_peek_pointer(value);
             rvalue = rbg_variant_to_ruby(variant);
             return rvalue;
         }
-#endif
       default:
         if (!rbgobj_convert_gvalue2rvalue(fundamental_type, value, &rvalue)) {
             GValueToRValueFunc func;
@@ -240,7 +247,7 @@ rbgobj_rvalue_to_gvalue(VALUE val, GValue* result)
       case G_TYPE_NONE:
         return;
       case G_TYPE_CHAR:
-        g_value_set_char(result, NUM2INT(val));
+        g_value_set_schar(result, NUM2INT(val));
         return;
       case G_TYPE_UCHAR:
         g_value_set_uchar(result, NUM2UINT(val));
@@ -287,7 +294,24 @@ rbgobj_rvalue_to_gvalue(VALUE val, GValue* result)
         }
       case G_TYPE_OBJECT:
       case G_TYPE_INTERFACE:
-        g_value_set_object(result, NIL_P(val) ? NULL : RVAL2GOBJ(val));
+        if (NIL_P(val)) {
+            g_value_set_object(result, NULL);
+        } else {
+            VALUE value_class = GTYPE2CLASS(type);
+            ID id_try_convert;
+            CONST_ID(id_try_convert, "try_convert");
+            if (!NIL_P(value_class) &&
+                rb_respond_to(value_class, id_try_convert)) {
+                VALUE converted_value = rb_funcall(value_class,
+                                                   id_try_convert,
+                                                   1,
+                                                   val);
+                if (!NIL_P(converted_value)) {
+                    val = converted_value;
+                }
+            }
+            g_value_set_object(result, RVAL2GOBJ(val));
+        }
         return;
       case G_TYPE_PARAM:
         g_value_set_param(result, NIL_P(val) ? NULL : RVAL2GOBJ(val));
@@ -310,11 +334,9 @@ rbgobj_rvalue_to_gvalue(VALUE val, GValue* result)
                 return;
             }
         }
-#if GLIB_CHECK_VERSION(2, 26, 0)
       case G_TYPE_VARIANT:
         g_value_set_variant(result, rbg_variant_from_ruby(val));
         break;
-#endif
       default:
         if (!rbgobj_convert_rvalue2gvalue(fundamental_type, val, result)) {
             RValueToGValueFunc func =
@@ -326,6 +348,7 @@ rbgobj_rvalue_to_gvalue(VALUE val, GValue* result)
                 func(val, result);
             }
         }
+        break;
     }
 }
 
@@ -395,13 +418,11 @@ rg_to_s(VALUE self)
 void
 Init_gobject_gvalue(void)
 {
-    VALUE RG_TARGET_NAMESPACE;
-
     id_to_s = rb_intern("to_s");
     qRValueToGValueFunc = g_quark_from_static_string("__ruby_r2g_func__");
     qGValueToRValueFunc = g_quark_from_static_string("__ruby_g2r_func__");
 
-    RG_TARGET_NAMESPACE = G_DEF_CLASS(G_TYPE_VALUE, "Value", mGLib);
+    RG_TARGET_NAMESPACE = G_DEF_CLASS(G_TYPE_VALUE, "Value", rbg_mGLib());
     RG_DEF_METHOD(initialize, -1);
     RG_DEF_METHOD(type, 0);
     RG_DEF_METHOD(value, 0);

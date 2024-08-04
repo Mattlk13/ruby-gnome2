@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011  Ruby-GNOME2 Project Team
+ *  Copyright (C) 2011-2020  Ruby-GNOME Project Team
  *  Copyright (C) 2006  Masao Mutoh
  *
  *  This library is free software; you can redistribute it and/or
@@ -21,6 +21,7 @@
 
 #include "rbgprivate.h"
 
+#ifndef G_TYPE_BOOKMARK_FILE
 /************************************************/
 static GBookmarkFile*
 bookmarkfile_copy(const GBookmarkFile* file)
@@ -48,6 +49,7 @@ g_bookmark_file_get_type(void)
 /************************************************/
 
 #define G_TYPE_BOOKMARK_FILE (g_bookmark_file_get_type())
+#endif
 
 #define RG_TARGET_NAMESPACE cBookmarkFile
 #define _SELF(self) ((GBookmarkFile*)(RVAL2BOXED(self, G_TYPE_BOOKMARK_FILE)))
@@ -383,9 +385,9 @@ rg_set_groups(VALUE self, VALUE rburi, VALUE rbgroups)
     GBookmarkFile *bookmark = _SELF(self);
     const gchar *uri = RVAL2CSTR(rburi);
     long n;
-    const gchar **groups = RVAL2STRS(rbgroups, n);
+    gchar **groups = RVAL2STRS(rbgroups, n);
 
-    g_bookmark_file_set_groups(bookmark, uri, groups, n);
+    g_bookmark_file_set_groups(bookmark, uri, (const gchar **)groups, n);
 
     g_free(groups);
 
@@ -500,9 +502,10 @@ rg_move_item(VALUE self, VALUE old_uri, VALUE new_uri)
 void
 Init_glib_bookmark_file(void)
 {
-    VALUE RG_TARGET_NAMESPACE = G_DEF_CLASS(G_TYPE_BOOKMARK_FILE, "BookmarkFile", mGLib);
+    VALUE RG_TARGET_NAMESPACE =
+        G_DEF_CLASS(G_TYPE_BOOKMARK_FILE, "BookmarkFile", rbg_mGLib());
 
-    G_DEF_ERROR(G_BOOKMARK_FILE_ERROR, "BookmarkFileError", mGLib, 
+    G_DEF_ERROR(G_BOOKMARK_FILE_ERROR, "BookmarkFileError", rbg_mGLib(),
                 rb_eRuntimeError, G_TYPE_BOOKMARK_FILE_ERROR);
 
     RG_DEF_METHOD(initialize, 0);

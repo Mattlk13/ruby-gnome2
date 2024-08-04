@@ -1,6 +1,6 @@
 /* -*- c-file-style: "ruby"; indent-tabs-mode: nil -*- */
 /*
- *  Copyright (C) 2011-2019  Ruby-GNOME Project Team
+ *  Copyright (C) 2011-2021  Ruby-GNOME Project Team
  *  Copyright (C) 2004-2006  Ruby-GNOME Project Team
  *  Copyright (C) 2002,2003  Masahiro Sakai
  *
@@ -111,12 +111,12 @@ static const rb_data_type_t rg_glib_enum_type = {
     {
         NULL,
         enum_free,
-        NULL,
-        {0},
     },
     NULL,
     NULL,
-    RUBY_TYPED_FREE_IMMEDIATELY,
+    RUBY_TYPED_FREE_IMMEDIATELY |
+    RUBY_TYPED_WB_PROTECTED |
+    RUBY_TYPED_FROZEN_SHAREABLE,
 };
 
 static enum_holder *
@@ -193,6 +193,7 @@ rbgobj_init_enum_class(VALUE klass)
 
         rb_raw_enum_value = INT2NUM(entry->value);
         value = rb_funcall(klass, id_new, 1, rb_raw_enum_value);
+        rb_obj_freeze(value);
         rb_hash_aset(values, rb_raw_enum_value, value);
         const_nick_name = nick_to_const_name(entry->value_nick);
         if (const_nick_name) {
@@ -414,7 +415,7 @@ Init_gobject_genums(void)
     id_to_s = rb_intern("to_s");
     id_values = rb_intern("values");
 
-    RG_TARGET_NAMESPACE = G_DEF_CLASS(G_TYPE_ENUM, "Enum", mGLib);
+    RG_TARGET_NAMESPACE = G_DEF_CLASS(G_TYPE_ENUM, "Enum", rbg_mGLib());
 
     rbg_define_singleton_method(RG_TARGET_NAMESPACE, "gtype", generic_s_gtype, 0);
     rbg_define_method(RG_TARGET_NAMESPACE, "gtype", generic_gtype, 0);

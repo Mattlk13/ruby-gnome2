@@ -45,6 +45,7 @@ EXPORTS
 	rbgobj_lookup_class
 	rbgobj_lookup_class_by_gtype
 	rbgobj_gtype_to_ruby_class
+	rbgobj_gtype_from_ruby
 	rbgobj_ptr2cptr
 	rbgobj_ptr_new
 	rbgobj_make_enum
@@ -62,6 +63,7 @@ EXPORTS
 	rbgobj_register_type
 	rbgobj_object_alloc_func
 	rbgobj_object_add_relative
+	rbgobj_gobject_remove_relative
 	rbgobj_object_remove_relative
 	rbgobj_object_remove_relatives
 	rbgobj_set_signal_func
@@ -75,11 +77,16 @@ EXPORTS
 	g_rclosure_new
 	g_rclosure_new_call
 	g_rclosure_attach
+	g_rclosure_attach_gobject
+	g_rclosure_detach
+	g_rclosure_detach_gobject
 	g_rclosure_set_tag
 	rbgobj_ruby_value_get_type
 	g_value_get_ruby_value
 	g_value_set_ruby_value
 	g_key_file_get_type
+	rbg_mGLib
+	rbg_cGLibObject
 	rbg_rval_inspect
 	rbg_string_value_ptr
 	rbg_rval2cstr
@@ -106,6 +113,8 @@ EXPORTS
         rbg_rval2strv_accept_nil
         rbg_rval2strv_dup
         rbg_rval2strv_dup_accept_nil
+        rbg_rval2filenamev
+        rbg_rval2filenamev_accept_nil
         rbg_strv2rval
         rbg_strv2rval_free
         rbg_rval2gbooleans
@@ -124,6 +133,7 @@ EXPORTS
 	rbg_rval2glist
 	rbg_rval2gslist
 	rbg_define_method
+	rbg_define_private_method
 	rbg_define_singleton_method
 	rbg_to_array
 	rbg_to_hash
@@ -150,11 +160,13 @@ EXPORTS
 	rbgutil_glibid_r2g_func
 	rbgutil_sym_g2r_func
 	rbgutil_protect
+	rbgutil_on_callback_error
 	rbgutil_invoke_callback
 	rbgutil_start_callback_dispatch_thread
 	rbgutil_stop_callback_dispatch_thread
 	rbgutil_string_set_utf8_encoding
 	rbgutil_key_equal
+	rbgerr_ruby_error_quark
 	rbgerr_define_gerror
 	rbgerr_gerror2exception
 	rbgobj_convert_define
@@ -171,7 +183,9 @@ EXPORTS
 	rbg_gc_guard
 	rbg_gc_unguard
 
-	g_source_get_type
+	rbg_is_bytes
+	rbg_is_object
+	rbg_is_value
+
 	g_connect_flags_get_type
-	g_poll_fd_get_type
 	g_signal_flags_get_type
